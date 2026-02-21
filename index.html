@@ -3,341 +3,1639 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nitish Apps</title>
+<title>nitish mg — App Developer & AI Builder</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #faf9f6;
-    --surface: #ffffff;
-    --border: #e8e5df;
-    --text: #1a1a2e;
-    --text-dim: #6b6980;
-    --radius: 18px;
+    --bg: #0a0a0c;
+    --bg-card: #111114;
+    --bg-card-hover: #18181c;
+    --surface: #1a1a1f;
+    --border: #2a2a30;
+    --text: #e8e6e3;
+    --text-muted: #8a8a95;
+    --accent: #1a8c4e;
+    --accent-dim: rgba(26, 140, 78, 0.08);
+    --accent-mid: rgba(26, 140, 78, 0.15);
+    --accent-glow: rgba(26, 140, 78, 0.25);
+    --warm: #f0c04d;
+    --serif: 'Instrument Serif', Georgia, serif;
+    --sans: 'DM Sans', -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
   }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  [data-theme="light"] {
+    --bg: #f5f3ef;
+    --bg-card: #ffffff;
+    --bg-card-hover: #fafaf8;
+    --surface: #edeae5;
+    --border: #d8d4cd;
+    --text: #1a1a1c;
+    --text-muted: #6b6b75;
+    --accent: #117a43;
+    --accent-dim: rgba(17, 122, 67, 0.07);
+    --accent-mid: rgba(17, 122, 67, 0.12);
+    --accent-glow: rgba(17, 122, 67, 0.2);
+  }
+
+  [data-theme="light"] body::after { opacity: 0.35; mix-blend-mode: overlay; }
+
+  [data-theme="light"] .hero-glow {
+    background: radial-gradient(circle, rgba(17, 122, 67, 0.06) 0%, transparent 70%);
+  }
+
+  [data-theme="light"] .app-preview-bg::after {
+    background: linear-gradient(to top, var(--bg-card), transparent);
+  }
+
+  [data-theme="light"] .stat-card,
+  [data-theme="light"] .app-card {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  [data-theme="light"] .ai-section::before {
+    background: radial-gradient(circle, rgba(17, 122, 67, 0.05) 0%, transparent 70%);
+  }
+
+  [data-theme="light"] .nav-cta {
+    color: #fff !important;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
 
   body {
-    font-family: 'DM Sans', sans-serif;
+    font-family: var(--sans);
     background: var(--bg);
     color: var(--text);
-    min-height: 100vh;
+    line-height: 1.6;
     overflow-x: hidden;
+    transition: background 0.4s ease, color 0.4s ease;
   }
 
-  /* ── Background blobs ── */
-  .bg-shapes { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
-  .bg-shapes div { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.22; }
-  .bg-shapes .s1 { width: 500px; height: 500px; top: -120px; left: -80px; background: #ffdb4d; }
-  .bg-shapes .s2 { width: 400px; height: 400px; top: 30%; right: -100px; background: #ff8a65; }
-  .bg-shapes .s3 { width: 450px; height: 450px; bottom: -100px; left: 30%; background: #b388ff; }
-
-  /* ── Confetti dots ── */
-  .dots {
-    position: fixed; inset: 0; pointer-events: none; z-index: 0;
-    background-image:
-      radial-gradient(circle, #ff572233 1.5px, transparent 1.5px),
-      radial-gradient(circle, #6c3fff22 1.5px, transparent 1.5px),
-      radial-gradient(circle, #ffdb4d33 1.5px, transparent 1.5px);
-    background-size: 90px 90px, 120px 120px, 70px 70px;
-    background-position: 0 0, 40px 60px, 20px 30px;
+  ::selection {
+    background: var(--accent);
+    color: var(--bg);
   }
 
-  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
-
-  /* ── Header ── */
-  header { padding: 80px 0 24px; text-align: center; }
-
-  .badge {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: linear-gradient(135deg, #ff5722, #ff8a50);
-    color: #fff; font-size: 0.72rem; font-weight: 700;
-    letter-spacing: 0.1em; text-transform: uppercase;
-    padding: 7px 16px; border-radius: 100px; margin-bottom: 28px;
-    box-shadow: 0 4px 16px rgba(255, 87, 34, 0.3);
-    animation: fadeDown 0.5s ease both;
-  }
-  .badge::before {
-    content: ''; width: 7px; height: 7px;
-    background: #fff; border-radius: 50%;
-    animation: pulse 2s ease infinite;
+  /* ── Grain Overlay ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
   }
 
-  h1 {
-    font-family: 'Outfit', sans-serif; font-weight: 900;
-    font-size: clamp(2.8rem, 6vw, 5.2rem);
-    line-height: 1.05; letter-spacing: -0.03em;
-    margin-bottom: 16px; animation: fadeDown 0.5s 0.08s ease both;
-  }
-  h1 span {
-    background: linear-gradient(135deg, #ff5722, #ff9100, #6c3fff);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-  }
-
-  header p {
-    color: var(--text-dim); font-size: 1.1rem;
-    max-width: 460px; margin: 0 auto; line-height: 1.6;
-    animation: fadeDown 0.5s 0.16s ease both;
-  }
-
-  /* ── Category ── */
-  .category { margin-bottom: 56px; animation: fadeUp 0.6s ease both; }
-
-  .category-header {
-    display: flex; align-items: center; gap: 14px;
-    margin-bottom: 20px; padding-bottom: 14px;
-    border-bottom: 2px dashed var(--border);
+  /* ── Navigation ── */
+  nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    padding: 1.25rem 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(20px);
+    background: color-mix(in srgb, var(--bg) 70%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+    transition: all 0.3s ease;
   }
 
-  .category-icon {
-    width: 42px; height: 42px; border-radius: 12px;
-    display: grid; place-items: center; font-size: 1.15rem; flex-shrink: 0;
+  .nav-logo {
+    font-family: var(--serif);
+    font-size: 1.5rem;
+    color: var(--text);
+    text-decoration: none;
+    letter-spacing: -0.02em;
   }
 
-  .category-name {
-    font-family: 'Outfit', sans-serif; font-size: 0.78rem;
-    font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase;
+  .nav-logo span { color: var(--accent); }
+
+  .nav-links { display: flex; gap: 2rem; align-items: center; }
+
+  .nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: color 0.3s;
+    position: relative;
   }
 
-  .category-count {
-    margin-left: auto; font-size: 0.72rem; font-weight: 600;
-    color: var(--text-dim); background: var(--bg);
-    padding: 4px 14px; border-radius: 100px; border: 1.5px solid var(--border);
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 1.5px;
+    background: var(--accent);
+    transition: width 0.3s;
   }
 
-  /* ── Grid ── */
-  .app-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-links a:hover::after { width: 100%; }
 
-  /* ── Card ── */
+  .nav-cta {
+    background: var(--accent) !important;
+    color: var(--bg) !important;
+    padding: 0.5rem 1.25rem;
+    border-radius: 100px;
+    font-weight: 600 !important;
+    letter-spacing: 0.02em !important;
+    text-transform: none !important;
+    transition: transform 0.2s, box-shadow 0.2s !important;
+  }
+
+  .nav-cta::after { display: none !important; }
+  .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 4px 20px var(--accent-glow); }
+
+  /* ── Hero ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 8rem 2.5rem 4rem;
+    max-width: 1300px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--accent-dim);
+    border: 1px solid var(--accent-mid);
+    padding: 0.4rem 1rem;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--accent);
+    margin-bottom: 2rem;
+    width: fit-content;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .hero-badge .dot {
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    line-height: 1.05;
+    font-weight: 400;
+    letter-spacing: -0.03em;
+    margin-bottom: 2rem;
+    animation: fadeUp 0.8s 0.1s ease both;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero-sub {
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    max-width: 580px;
+    line-height: 1.7;
+    margin-bottom: 3rem;
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    animation: fadeUp 0.8s 0.3s ease both;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+    padding: 0.85rem 2rem;
+    border-radius: 100px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.25s;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px var(--accent-glow);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text);
+    padding: 0.85rem 2rem;
+    border-radius: 100px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    border: 1px solid var(--border);
+    transition: all 0.25s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--text-muted);
+    background: var(--surface);
+  }
+
+  .hero-glow {
+    position: absolute;
+    top: 20%;
+    right: -10%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, var(--accent-dim) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* ── Scrolling ticker ── */
+  .ticker-wrap {
+    overflow: hidden;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 1.25rem 0;
+    white-space: nowrap;
+  }
+
+  .ticker {
+    display: inline-flex;
+    animation: scroll 30s linear infinite;
+  }
+
+  .ticker span {
+    font-family: var(--serif);
+    font-size: 1.3rem;
+    color: var(--text-muted);
+    margin-right: 3rem;
+    font-style: italic;
+  }
+
+  .ticker span::before {
+    content: '◆';
+    color: var(--accent);
+    margin-right: 1.5rem;
+    font-size: 0.5rem;
+    vertical-align: middle;
+  }
+
+  /* ── Section styling ── */
+  section {
+    padding: 6rem 2.5rem;
+    max-width: 1300px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .section-label::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .section-title {
+    font-family: var(--serif);
+    font-size: clamp(2.2rem, 4vw, 3.5rem);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-desc {
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    max-width: 600px;
+    line-height: 1.7;
+    margin-bottom: 3.5rem;
+  }
+
+  /* ── About / Bio ── */
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: start;
+  }
+
+  .about-text p {
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+  }
+
+  .about-text p strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .about-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 2.5rem;
+  }
+
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    transition: all 0.3s;
+  }
+
+  .stat-card:hover {
+    border-color: var(--accent-glow);
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+  }
+
+  .stat-number {
+    font-family: var(--serif);
+    font-size: 2.5rem;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 0.4rem;
+  }
+
+  .stat-label {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  .about-details {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.5rem;
+  }
+
+  .detail-group { margin-bottom: 2rem; }
+  .detail-group:last-child { margin-bottom: 0; }
+
+  .detail-group h4 {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+  }
+
+  .detail-group p, .detail-group li {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+
+  .detail-group ul {
+    list-style: none;
+  }
+
+  .detail-group ul li {
+    padding: 0.3rem 0;
+    padding-left: 1.25rem;
+    position: relative;
+  }
+
+  .detail-group ul li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-size: 0.8rem;
+  }
+
+  /* ── Certifications ── */
+  .certs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .cert-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.75rem;
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+    transition: all 0.35s ease;
+    text-decoration: none;
+    color: var(--text);
+    position: relative;
+  }
+
+  .cert-card:hover {
+    border-color: var(--accent);
+    background: var(--bg-card-hover);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+  }
+
+  .cert-logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .cert-info { flex: 1; }
+
+  .cert-info h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+    letter-spacing: -0.01em;
+    line-height: 1.35;
+  }
+
+  .cert-info .cert-issuer {
+    font-size: 0.82rem;
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 0.4rem;
+  }
+
+  .cert-info p {
+    color: var(--text-muted);
+    font-size: 0.84rem;
+    line-height: 1.55;
+  }
+
+  .cert-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.6rem;
+    border-radius: 100px;
+    background: var(--accent-dim);
+    color: var(--accent);
+    border: 1px solid var(--accent-dim);
+  }
+
+  /* ── Category Tabs ── */
+  .category-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+  }
+
+  .cat-tab {
+    font-family: var(--sans);
+    font-size: 0.88rem;
+    font-weight: 500;
+    padding: 0.55rem 1.25rem;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .cat-tab:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  .cat-tab.active {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+
+  .app-card.hidden {
+    display: none;
+  }
+
+  /* ── App Portfolio ── */
+  .apps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.25rem;
+  }
+
   .app-card {
-    background: var(--surface); border: 1.5px solid var(--border);
-    border-radius: var(--radius); padding: 28px;
-    text-decoration: none; color: var(--text);
-    display: flex; flex-direction: column; gap: 14px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative; overflow: hidden;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.4s ease;
+    position: relative;
   }
-  .app-card::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0;
-    height: 3px; border-radius: var(--radius) var(--radius) 0 0;
-    opacity: 0; transition: opacity 0.3s ease;
-  }
+
   .app-card:hover {
-    border-color: #d0cdc7; transform: translateY(-6px);
-    box-shadow: 0 16px 48px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
-  }
-  .app-card:hover::before { opacity: 1; }
-
-  .app-card__top { display: flex; align-items: flex-start; justify-content: space-between; }
-
-  .app-card__icon {
-    width: 50px; height: 50px; border-radius: 14px;
-    display: grid; place-items: center; font-size: 1.4rem;
+    border-color: var(--accent-glow);
+    transform: translateY(-6px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
   }
 
-  .app-card__arrow {
-    width: 34px; height: 34px; border-radius: 50%;
-    background: var(--bg); border: 1.5px solid var(--border);
-    display: grid; place-items: center;
-    transition: all 0.3s ease; color: var(--text-dim); font-size: 0.85rem;
+  .app-preview {
+    height: 120px;
+    position: relative;
+    overflow: hidden;
   }
-  .app-card:hover .app-card__arrow { transform: translate(2px, -2px); }
 
-  .app-card__title { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.2rem; letter-spacing: -0.01em; }
-  .app-card__desc { color: var(--text-dim); font-size: 0.88rem; line-height: 1.6; flex-grow: 1; }
+  .app-preview-bg {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    position: relative;
+  }
 
-  .app-card__tags { display: flex; gap: 8px; flex-wrap: wrap; }
-  .tag { font-size: 0.7rem; font-weight: 600; padding: 4px 12px; border-radius: 8px; }
+  .app-preview-bg::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 50%;
+    background: linear-gradient(to top, var(--bg-card), transparent);
+  }
+
+  .app-body { padding: 1.25rem; }
+
+  .app-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .app-tag {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.7rem;
+    border-radius: 100px;
+    background: var(--accent-dim);
+    color: var(--accent);
+    border: 1px solid var(--accent-dim);
+  }
+
+  .app-card h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    letter-spacing: -0.01em;
+  }
+
+  .app-card p {
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    line-height: 1.55;
+  }
+
+  .app-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 1rem;
+    color: var(--accent);
+    font-weight: 500;
+    font-size: 0.82rem;
+    text-decoration: none;
+    transition: gap 0.2s;
+  }
+
+  .app-link:hover { gap: 0.7rem; }
+
+  /* ── AI Philosophy ── */
+  .ai-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 4rem;
+    margin: 2rem auto;
+    max-width: 1300px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ai-section::before {
+    content: '';
+    position: absolute;
+    top: -200px;
+    right: -200px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, var(--accent-dim) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .ai-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+
+  .ai-text h2 {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    line-height: 1.15;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .ai-text h2 em {
+    color: var(--accent);
+    font-style: italic;
+  }
+
+  .ai-text p {
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    line-height: 1.8;
+    margin-bottom: 1.25rem;
+  }
+
+  .ai-tools {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .ai-tool {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s;
+  }
+
+  .ai-tool:hover {
+    border-color: var(--accent-glow);
+    transform: translateX(4px);
+  }
+
+  .ai-tool-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--accent-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .ai-tool-text h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 0.15rem;
+  }
+
+  .ai-tool-text p {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  /* ── Experience Timeline ── */
+  .timeline {
+    position: relative;
+    padding-left: 2.5rem;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--accent), var(--border), transparent);
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 3rem;
+    padding-left: 1rem;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -2.85rem;
+    top: 0.5rem;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 4px var(--bg), 0 0 0 5px var(--accent);
+  }
+
+  .timeline-date {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    margin-bottom: 0.4rem;
+  }
+
+  .timeline-item h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+  }
+
+  .timeline-item h4 {
+    color: var(--text-muted);
+    font-weight: 400;
+    font-size: 0.95rem;
+    font-style: italic;
+    margin-bottom: 0.6rem;
+  }
+
+  .timeline-item p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.7;
+  }
+
+  /* ── Contact ── */
+  .contact-section {
+    text-align: center;
+    padding: 8rem 2.5rem;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .contact-section h2 {
+    font-family: var(--serif);
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    margin-bottom: 1.25rem;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+
+  .contact-section h2 em {
+    color: var(--accent);
+    font-style: italic;
+  }
+
+  .contact-section p {
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    margin-bottom: 2.5rem;
+  }
+
+  .contact-links {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .contact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+  }
+
+  .contact-link:hover {
+    border-color: var(--accent);
+    background: var(--accent-dim);
+    color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  /* ── Support / Donate ── */
+  .support-section {
+    padding: 5rem 2.5rem;
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .support-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .support-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+
+  .support-emoji {
+    font-size: 2.5rem;
+    margin-bottom: 1.25rem;
+    display: block;
+  }
+
+  .support-card h2 {
+    font-family: var(--serif);
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.02em;
+  }
+
+  .support-card h2 em {
+    color: var(--accent);
+    font-style: italic;
+  }
+
+  .support-card > p {
+    color: var(--text-muted);
+    font-size: 1rem;
+    line-height: 1.7;
+    max-width: 520px;
+    margin: 0 auto 2rem;
+  }
+
+  .support-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .support-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 1.5rem 1rem;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    text-decoration: none;
+    color: var(--text);
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .support-option:hover {
+    border-color: var(--accent);
+    background: var(--accent-dim);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  }
+
+  .support-option-icon {
+    font-size: 1.75rem;
+  }
+
+  .support-option-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .support-option-desc {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  .support-note {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-style: italic;
+    margin: 0;
+  }
+
+  .support-note span { color: var(--accent); }
+
+  /* UPI Modal */
+  .upi-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+
+  .upi-modal-overlay.active { display: flex; }
+
+  .upi-modal {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.5rem;
+    max-width: 380px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    animation: fadeUp 0.3s ease;
+  }
+
+  .upi-modal h3 {
+    font-family: var(--serif);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .upi-modal p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .upi-id-box {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    margin-bottom: 1.5rem;
+    justify-content: center;
+  }
+
+  .upi-id-box code {
+    font-family: var(--mono);
+    font-size: 0.95rem;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+  }
+
+  .upi-copy-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.35rem 0.65rem;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: var(--sans);
+  }
+
+  .upi-copy-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .upi-qr-placeholder {
+    width: 180px;
+    height: 180px;
+    margin: 0 auto 1.25rem;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    color: #999;
+  }
+
+  .upi-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    line-height: 1;
+    transition: color 0.2s;
+  }
+
+  .upi-close:hover { color: var(--text); }
+
+  [data-theme="light"] .support-card { box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
 
   /* ── Footer ── */
   footer {
-    text-align: center; padding: 48px 0 64px;
-    color: var(--text-dim); font-size: 0.82rem;
-    border-top: 2px dashed var(--border);
-    animation: fadeUp 0.6s 0.55s ease both;
+    border-top: 1px solid var(--border);
+    padding: 2rem 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1300px;
+    margin: 0 auto;
+    color: var(--text-muted);
+    font-size: 0.85rem;
   }
-  footer a { color: #ff5722; text-decoration: none; font-weight: 600; }
-  footer a:hover { text-decoration: underline; }
 
-  @keyframes fadeDown { from { opacity: 0; transform: translateY(-18px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } }
+  footer a {
+    color: var(--accent);
+    text-decoration: none;
+  }
 
-  @media (max-width: 640px) {
-    header { padding: 48px 0 16px; }
-    .app-grid { grid-template-columns: 1fr; }
-    .app-card { padding: 22px; }
+  /* ── Animations ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  @keyframes scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .about-grid, .ai-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+    .apps-grid { grid-template-columns: 1fr; }
+    .ai-section { padding: 2.5rem 1.5rem; }
+    nav { padding: 1rem 1.25rem; }
+    .nav-links { display: none; }
+    section { padding: 4rem 1.25rem; }
+    .hero { padding: 7rem 1.25rem 3rem; }
+    footer { flex-direction: column; gap: 0.75rem; text-align: center; }
+  }
+
+  /* ── Hamburger for mobile ── */
+  .menu-toggle { display: none; background: none; border: none; cursor: pointer; padding: 0.5rem; }
+  .menu-toggle span { display: block; width: 22px; height: 2px; background: var(--text); margin: 5px 0; transition: 0.3s; }
+  @media (max-width: 900px) { .menu-toggle { display: block; } }
+
+  /* ── Theme Toggle ── */
+  .theme-toggle {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    width: 52px;
+    height: 28px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.35s ease;
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+    justify-content: space-between;
+  }
+
+  .theme-toggle:hover { border-color: var(--accent); }
+
+  .theme-toggle .toggle-icon {
+    font-size: 0.7rem;
+    line-height: 1;
+    z-index: 1;
+    transition: opacity 0.3s;
+  }
+
+  .theme-toggle .toggle-knob {
+    position: absolute;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+
+  [data-theme="light"] .theme-toggle .toggle-knob {
+    transform: translateX(24px);
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
   }
 </style>
 </head>
 <body>
 
-<div class="bg-shapes"><div class="s1"></div><div class="s2"></div><div class="s3"></div></div>
-<div class="dots"></div>
+<!-- ─── Navigation ─── -->
+<nav>
+  <a href="#" class="nav-logo">nitish<span>.</span></a>
+  <div class="nav-links">
+    <a href="#about">About</a>
+    <a href="#apps">Apps</a>
+    <a href="#experience">Experience</a>
+    <a href="#support">Support</a>
+    <a href="#contact" class="nav-cta">Get in Touch</a>
+  </div>
+  <div class="nav-right">
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+      <span class="toggle-icon">🌙</span>
+      <span class="toggle-icon">☀️</span>
+      <span class="toggle-knob"></span>
+    </button>
+    <button class="menu-toggle" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
 
-<div class="container">
-  <header>
-    <div class="badge">Live on Netlify</div>
-    <h1>Nitish <span>Apps</span></h1>
-    <p>A curated collection of apps and tools I've built, deployed on Netlify.</p>
-  </header>
-  <main id="app-list"></main>
-  <footer>Built with ♥ · Deployed on <a href="https://netlify.com" target="_blank">Netlify</a></footer>
+<!-- ─── Hero ─── -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-badge">
+    <span class="dot"></span>
+    Available for projects · Final year B.Com student
+  </div>
+  <h1>I build apps<br>with <em>AI superpowers</em></h1>
+  <p class="hero-sub">
+    Final-year B.Com (Hons) student at VIT, building AI-powered apps across 
+    finance, games, and sports. 10 apps shipped in my first month — 
+    and I'm just getting warmed up.
+  </p>
+  <div class="hero-actions">
+    <a href="#apps" class="btn-primary">View My Work →</a>
+    <a href="https://github.com/mgnitish" target="_blank" class="btn-secondary">🐙 GitHub Profile</a>
+  </div>
+</section>
+
+<!-- ─── Scrolling Ticker ─── -->
+<div class="ticker-wrap">
+  <div class="ticker">
+    <span>Finance Apps</span><span>Claude AI</span><span>Game Dev</span>
+    <span>TypeScript</span><span>Full-Stack</span><span>AI-Powered Apps</span>
+    <span>Sports Analytics</span><span>Prompt Engineering</span><span>Rapid Prototyping</span>
+    <span>Finance Apps</span><span>Claude AI</span><span>Game Dev</span>
+    <span>TypeScript</span><span>Full-Stack</span><span>AI-Powered Apps</span>
+    <span>Sports Analytics</span><span>Prompt Engineering</span><span>Rapid Prototyping</span>
+  </div>
 </div>
 
+<!-- ─── About ─── -->
+<section id="about">
+  <div class="reveal">
+    <div class="section-label">About Me</div>
+    <div class="about-grid">
+      <div class="about-text">
+        <div class="section-title">Commerce student,<br>app builder.</div>
+        <p>
+          I'm <strong>M G Nitish</strong>, a final-semester <strong>B.Com (Hons) student at VIT</strong> who 
+          discovered a passion for building software at the intersection of 
+          <strong>finance, design, and artificial intelligence</strong>. My commerce background 
+          isn't a detour — it's my edge. I understand the money side <em>and</em> the tech side.
+        </p>
+        <p>
+          While my peers went into accounting and audit, I taught myself to code and started 
+          building <strong>applications</strong> — financial tools, games, sports apps, and more. 
+          In just one month, I've shipped 10 apps and I'm only getting started.
+        </p>
+        <p>
+          I don't just use AI as a feature — I build <em>with</em> AI as a core development partner, 
+          using tools like <strong>Claude</strong> and other LLMs to accelerate every stage of the 
+          development lifecycle, from ideation to deployment. My B.Com (Hons) training at VIT gives me 
+          the domain expertise to build apps that actually make sense.
+        </p>
+        <div class="about-stats">
+          <div class="stat-card">
+            <div class="stat-number">10</div>
+            <div class="stat-label">Apps Built</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">1</div>
+            <div class="stat-label">Month & Counting</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">3</div>
+            <div class="stat-label">Categories</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">∞</div>
+            <div class="stat-label">Curiosity</div>
+          </div>
+        </div>
+      </div>
+      <div class="about-details">
+        <div class="detail-group">
+          <h4>Education</h4>
+          <ul>
+            <li>B.Com (Hons) — VIT (Final Semester, Graduating Summer 2026)</li>
+            <li>Schooling — Zion Matriculation Higher Secondary School</li>
+            <li>Self-taught AI App Developer</li>
+          </ul>
+        </div>
+        <div class="detail-group">
+          <h4>Languages</h4>
+          <p>English (Fluent) · Tamil (Native) · Telugu (Conversational)</p>
+        </div>
+        <div class="detail-group">
+          <h4>Location</h4>
+          <p>Chennai, India — Open to remote work worldwide</p>
+        </div>
+        <div class="detail-group">
+          <h4>Certifications</h4>
+          <ul>
+            <li>Google Digital Marketing & E-Commerce</li>
+            <li>Generative AI & Prompt Engineering — Google</li>
+          </ul>
+        </div>
+        <div class="detail-group">
+          <h4>Interests</h4>
+          <ul>
+            <li>Finance, games & sports apps</li>
+            <li>AI-augmented development workflows</li>
+            <li>Generative AI & prompt engineering</li>
+            <li>Rapid prototyping & product design</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Certifications ─── -->
+<section id="certifications">
+  <div class="reveal">
+    <div class="section-label">Certifications</div>
+    <div class="section-title">Credentials I've earned.</div>
+    <div class="section-desc">Industry-recognized certifications from Google that back up what I build every day.</div>
+    <div class="certs-grid">
+
+      <a href="https://coursera.org/share/0a86791a4b6141b5d69ed21550017e58" target="_blank" class="cert-card">
+        <div class="cert-logo" style="background: linear-gradient(135deg, #4285F4, #34A853);">🎓</div>
+        <div class="cert-info">
+          <h3>Google Digital Marketing & E-Commerce</h3>
+          <div class="cert-issuer">Google · Coursera</div>
+          <p>Professional certificate covering digital marketing strategy, e-commerce analytics, customer engagement, and data-driven marketing across Google platforms.</p>
+        </div>
+        <span class="cert-badge">Verified</span>
+      </a>
+
+      <div class="cert-card">
+        <div class="cert-logo" style="background: linear-gradient(135deg, #FBBC04, #EA4335);">🤖</div>
+        <div class="cert-info">
+          <h3>Generative AI & Prompt Engineering</h3>
+          <div class="cert-issuer">Google Skills</div>
+          <p>Certification in generative AI fundamentals, prompt design, and practical applications of large language models for productivity and development.</p>
+        </div>
+        <span class="cert-badge">Verified</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ─── AI Philosophy ─── -->
+<div class="ai-section reveal" style="margin: 0 2.5rem;">
+  <div class="ai-grid">
+    <div class="ai-text">
+      <div class="section-label">My AI Approach</div>
+      <h2>AI isn't a feature.<br>It's <em>how I build.</em></h2>
+      <p>
+        I've embraced AI as a fundamental development partner. From brainstorming 
+        architecture to writing tests, from debugging complex issues to generating 
+        documentation — AI accelerates every step of my development workflow.
+      </p>
+      <p>
+        My commerce studies give me the <em>why</em> behind financial software, 
+        while my curiosity drives me to build across every domain I'm passionate about. 
+        AI helps me execute the <em>how</em> — faster, with fewer bugs, and with more polish 
+        than traditional development alone could achieve.
+      </p>
+    </div>
+    <div class="ai-tools">
+      <div class="ai-tool">
+        <div class="ai-tool-icon">🤖</div>
+        <div class="ai-tool-text">
+          <h4>Claude & LLMs</h4>
+          <p>Pair programming, code review, architecture decisions</p>
+        </div>
+      </div>
+      <div class="ai-tool">
+        <div class="ai-tool-icon">⚡</div>
+        <div class="ai-tool-text">
+          <h4>AI-Powered Prototyping</h4>
+          <p>From concept to working prototype in hours, not weeks</p>
+        </div>
+      </div>
+      <div class="ai-tool">
+        <div class="ai-tool-icon">🔗</div>
+        <div class="ai-tool-text">
+          <h4>Intelligent Integrations</h4>
+          <p>RAG, embeddings, agents — production-ready AI features</p>
+        </div>
+      </div>
+      <div class="ai-tool">
+        <div class="ai-tool-icon">📐</div>
+        <div class="ai-tool-text">
+          <h4>Prompt Engineering</h4>
+          <p>Crafting precise prompts for reliable, high-quality outputs</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── App Portfolio ─── -->
+<section id="apps">
+  <div class="reveal">
+    <div class="section-label">App Portfolio</div>
+    <div class="section-title">Things I've built.</div>
+    <div class="section-desc">AI-powered apps across finance, games, and sports — all built with Claude and hosted on GitHub.</div>
+
+    <!-- Category Filter Tabs -->
+    <div class="category-tabs">
+      <button class="cat-tab active" data-cat="all">All</button>
+      <button class="cat-tab" data-cat="finance">💰 Finance</button>
+      <button class="cat-tab" data-cat="games">🎮 Games</button>
+      <button class="cat-tab" data-cat="sports">🏏 Sports</button>
+    </div>
+
+    <div class="apps-grid">
+
+      <!-- ╔═══════════════════════════════════════╗ -->
+      <!-- ║        FINANCE APPS                   ║ -->
+      <!-- ╚═══════════════════════════════════════╝ -->
+
+      <!--
+        HOW TO ADD AN APP:
+        1. Copy one <div class="app-card" data-category="finance"> block below
+        2. Change the <h3> to your app name
+        3. Change the <p> to your app description
+        4. Update the <a href="..."> to your live app URL
+           e.g. https://mgnitish.github.io/REPO-NAME
+        5. Change data-category to "finance", "games", or "sports"
+      -->
+
+      <div class="app-card" data-category="finance">
+        <div class="app-preview">
+          <div class="app-preview-bg" style="background: linear-gradient(135deg, #0d1a0d, #1a2e1a, #0f3a1f);">💰</div>
+        </div>
+        <div class="app-body">
+          <h3>PPF calculator</h3>
+          <p>"A simple PPF returns calculator to plan your long-term savings. Customize your yearly investment, interest rate, and tenure to instantly estimate your maturity value, interest earned, and year-by-year growth."</p>
+          <a href="https://mgnitish.github.io/apps/finance/ppf calculator/" target="_blank" class="app-link">Open App →</a>
+        </div>
+      </div>
+
+      <!-- Add more finance apps by copying the block above -->
+
+
+      <!-- ╔═══════════════════════════════════════╗ -->
+      <!-- ║        GAMES                          ║ -->
+      <!-- ╚═══════════════════════════════════════╝ -->
+
+      <div class="app-card" data-category="games">
+        <div class="app-preview">
+          <div class="app-preview-bg" style="background: linear-gradient(135deg, #1a0d2e, #2e1a3e, #3a0f4f);">🎮</div>
+        </div>
+        <div class="app-body">
+          <h3>Tic Tac Toe</h3>
+          <p>Short description of what this game does.</p>
+          <a href="https://mgnitish.github.io/apps/games/tic-tac-toe/" target="_blank" class="app-link">Open App →</a>
+        </div>
+      </div>
+
+      <!-- Add more game apps by copying the block above -->
+
+
+      <!-- ╔═══════════════════════════════════════╗ -->
+      <!-- ║        SPORTS                         ║ -->
+      <!-- ╚═══════════════════════════════════════╝ -->
+
+      <div class="app-card" data-category="sports">
+        <div class="app-preview">
+          <div class="app-preview-bg" style="background: linear-gradient(135deg, #1a2a0d, #2e3a1a, #3a4f0f);">🏏</div>
+        </div>
+        <div class="app-body">
+          <h3>Cricket Scorer</h3>
+          <p>Short description of what this sports app does.</p>
+          <a href="https://mgnitish.github.io/apps/sports/cricket scorer" target="_blank" class="app-link">Open App →</a>
+        </div>
+      </div>
+
+      <!-- Add more sports apps by copying the block above -->
+
+    </div>
+  </div>
+</section>
+
+<!-- ─── Experience ─── -->
+<section id="experience">
+  <div class="reveal">
+    <div class="section-label">Experience</div>
+    <div class="section-title" style="margin-bottom: 3rem;">Where I've been.</div>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-date">Jan 2026 — Present</div>
+        <h3>AI App Developer</h3>
+        <h4>Self-Taught · Building in Public</h4>
+        <p>Started building AI-powered apps with Claude just a month ago — and already shipped 10 projects across finance, games, and sports. Learning by building, shipping fast, and improving with every app.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">2023 — 2026</div>
+        <h3>B.Com (Honours)</h3>
+        <h4>Vellore Institute of Technology (VIT)</h4>
+        <p>Final semester, graduating summer 2026. Studied accounting, finance, taxation, economics, and business law. Picked up coding and AI development alongside the degree — merging commerce knowledge with tech.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">2021 — 2023</div>
+        <h3>Higher Secondary Education</h3>
+        <h4>Zion Matriculation Higher Secondary School</h4>
+        <p>Completed schooling with a strong academic foundation. Developed early interests in technology, finance, and sports that would later converge into building AI-powered applications.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Support My Work ─── -->
+<section class="support-section" id="support">
+  <div class="reveal">
+    <div class="support-card">
+      <span class="support-emoji">☕</span>
+      <h2>Like what I build? <em>Support my work.</em></h2>
+      <p>Every app in my portfolio is built with passion and late nights. If my work has helped or inspired you, a small contribution keeps the code flowing and the coffee brewing.</p>
+
+      <div class="support-options" style="grid-template-columns: 1fr; max-width: 300px; margin: 0 auto 2rem;">
+        <a href="#" class="support-option" id="upiTrigger" onclick="document.getElementById('upiModal').classList.add('active'); return false;">
+          <span class="support-option-icon">🇮🇳</span>
+          <span class="support-option-name">Pay via UPI</span>
+          <span class="support-option-desc">Google Pay, PhonePe, Paytm & more</span>
+        </a>
+      </div>
+
+      <p class="support-note"><span>✦</span> No pressure at all — starring my <a href="https://github.com/mgnitish" target="_blank" style="color:var(--accent);text-decoration:none;">repos on GitHub</a> or sharing my work helps just as much!</p>
+    </div>
+  </div>
+</section>
+
+<!-- UPI Modal -->
+<div class="upi-modal-overlay" id="upiModal" onclick="if(event.target===this)this.classList.remove('active')">
+  <div class="upi-modal">
+    <button class="upi-close" onclick="document.getElementById('upiModal').classList.remove('active')">&times;</button>
+    <h3>Pay via UPI</h3>
+    <p>Scan the QR code or copy my UPI ID below</p>
+    <div class="upi-qr-placeholder">
+      <!-- Replace with your QR code image: <img src="upi-qr.png" width="180" height="180" alt="UPI QR"> -->
+      QR Code
+    </div>
+    <div class="upi-id-box">
+      <code id="upiId">nitishmg7@okhdfcbank</code>
+      <button class="upi-copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('upiId').textContent).then(()=>this.textContent='Copied!')">Copy</button>
+    </div>
+    <a href="upi://pay?pa=nitishmg7@okhdfcbank&pn=M%20G%20Nitish&cu=INR" class="btn-primary" style="font-size:0.88rem; padding:0.7rem 1.75rem;">Open UPI App</a>
+  </div>
+</div>
+
+<!-- ─── Contact ─── -->
+<section id="contact" class="contact-section">
+  <div class="reveal">
+    <h2>Let's build<br>something <em>great.</em></h2>
+    <p>Whether you have an app idea, want to collaborate on an AI-powered project, or just want to chat about building with AI — I'd love to hear from you.</p>
+    <div class="contact-links">
+      <a href="https://github.com/mgnitish" class="contact-link" target="_blank">🐙 GitHub</a>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Footer ─── -->
+<footer>
+  <span>© 2026 M G Nitish — Designed & built with AI</span>
+  <span>Made with <a href="https://claude.ai">Claude</a> ✦</span>
+</footer>
+
+<!-- ─── Scroll Reveal ─── -->
 <script>
-// ┌─────────────────────────────────────────────────────────────────┐
-// │  CONFIGURE YOUR APPS & CATEGORIES HERE                         │
-// │                                                                 │
-// │  Each category needs:                                           │
-// │    name   - display name                                        │
-// │    icon   - emoji for the header                                │
-// │    color  - main accent color (hex)                             │
-// │    apps   - array of app objects                                │
-// │                                                                 │
-// │  Each app needs:                                                │
-// │    name   - app title                                           │
-// │    desc   - short description                                   │
-// │    url    - full Netlify URL                                    │
-// │    icon   - emoji for the card                                  │
-// │    tags   - array of tag strings (optional)                     │
-// │                                                                 │
-// │  To add a category: copy a { name, icon, color, apps } block   │
-// │  To add an app: copy an { name, desc, url, icon, tags } block  │
-// └─────────────────────────────────────────────────────────────────┘
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
-const categories = [
-  {
-    name: "Finance",
-    icon: "💰",
-    color: "#ff5722",
-    apps: [
-      {
-        name: "Indian Financial Dashboard",
-        desc: "Track India's financial pulse in real time — Nifty, Sensex, gold, forex, Bitcoin, and more — all on one page. Compare bank FD rates, government savings schemes, and RBI policy rates alongside live market data, no login or API keys required.",
-        url: "https://ifd-mgn.netlify.app",
-        icon: "📊",
-      },
-      {
-        name: "PPF Calculator",
-        desc: "A simple PPF returns calculator to plan your long-term savings. Customize your yearly investment, interest rate, and tenure to instantly estimate your maturity value, interest earned, and year-by-year growth.",
-        url: "./apps/finance/ppf calculator/index.html",
-        icon: "🪙",
-      },
- 	{
-        name: "FD/RD Calculator",
-        desc: "Effortlessly project your savings growth with precision tools designed for calculating Fixed and Recurring Deposit returns. Gain instant clarity on your wealth with real-time interest breakdowns and interactive visualization of your compounding journey.",
-        url: "https://fdrd-mgn.netlify.app",
-        icon: "💵",
-      },
- 	{
-        name: "EMI Calculator",
-        desc: "A comprehensive EMI Calculator that computes monthly loan payments using the standard amortization formula, featuring interactive charts (doughnut and stacked bar) to visualize principal vs. interest breakdown. Includes optional pre-payment analysis showing time and interest savings, plus a detailed month-by-month amortization schedule in a modern, responsive interface.",
-        url: "https://emi-mgn.netlify.app",
-        icon: "🏦",
-	},
- 	{
-        name: "Credit Score & Loan Eligibility Calculator",
-        desc: "A comprehensive financial tool that estimates your credit score (300-850) based on payment history, credit utilization, and other factors, then calculates your eligibility for personal loans, home loans, and auto loans based on realistic income multiples and DTI ratios. Features real-time calculations, interactive charts and a pleasing dark mode",
-        url: "https://csc-mgn.netlify.app",
-        icon: "💳",
-	},
- 	{
-        name: "Wealth Path Calculator",
-        desc: "WealthPath is an interactive financial dashboard that visualizes how your investments grow over time while revealing the hidden cost of inflation on your wealth. Input your SIP details, growth rate, and inflation rate to see a side-by-side projection of nominal returns vs. real purchasing power — complete with everyday examples showing how the cost of milk, petrol, and movie tickets will rise over your investment horizon.",
-        url: "https://wp-mgn.netlify.app",
-        icon: "📉",
-       },
+  reveals.forEach(el => observer.observe(el));
 
-    ]
-  },
- {
-     name: "Sports",
-     icon: "🏅",
-     color: "#3B82F6",
-     apps: [
-     	{
-     	name : "Cricket Scorer",
-     	desc: "Score any cricket match live — from gully cricket to proper tournaments. Track every ball, wicket, extra, and free hit with a full batting and bowling scorecard built in. Includes a DLS calculator for the second innings to keep things fair when rain or interruptions cut play short.",
-     	url: "./apps/sports/circket scorer/index.html",
-     	icon: "🏏", 
-     	}
-     ]
-   },
-  {
-    name: "Games",
-    icon: "🧩",
-    color: "#6c3fff",
-    apps: [
-	{
-        name: "Tic Tac Toe",
-        desc: "A beautifully designed, fully functional Tic-Tac-Toe game featuring a modern glassmorphism interface with a warm pale gold background. Players X (blue) and O (pink) compete in this timeless two-player game, with automatic win/draw detection, persistent score tracking, and smooth animations. Perfect for quick matches with friends or family.",
-        url: "./apps/games/tic-tac-toe/index.html",
-        icon: "🎯",
-	}
-      ]
-   },
-  
-];
+  // Category filter tabs
+  const tabs = document.querySelectorAll('.cat-tab');
+  const cards = document.querySelectorAll('.app-card');
 
-// ── Color helpers ──
-function hexToRgb(hex) {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `${r}, ${g}, ${b}`;
-}
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const cat = tab.dataset.cat;
 
-function lightBg(hex) { return `rgba(${hexToRgb(hex)}, 0.08)`; }
-function lightBorder(hex) { return `rgba(${hexToRgb(hex)}, 0.2)`; }
-
-// ── Render ──
-function render() {
-  const main = document.getElementById("app-list");
-  main.innerHTML = "";
-
-  categories.forEach((cat, ci) => {
-    const rgb = hexToRgb(cat.color);
-    const section = document.createElement("section");
-    section.className = "category";
-    section.style.animationDelay = `${0.25 + ci * 0.15}s`;
-
-    section.innerHTML = `
-      <div class="category-header">
-        <div class="category-icon" style="background:rgba(${rgb},0.1); border:1.5px solid rgba(${rgb},0.2)">${cat.icon}</div>
-        <div class="category-name" style="color:${cat.color}">${cat.name}</div>
-        <div class="category-count">${cat.apps.length} app${cat.apps.length !== 1 ? 's' : ''}</div>
-      </div>
-      <div class="app-grid">
-        ${cat.apps.map(app => `
-          <a href="${app.url}" target="_blank" class="app-card"
-             style="--cat-color:${cat.color}; --cat-rgb:${rgb}"
-             onmouseenter="this.querySelector('.app-card__arrow').style.background='rgba(${rgb},0.1)'; this.querySelector('.app-card__arrow').style.borderColor='rgba(${rgb},0.25)'; this.querySelector('.app-card__arrow').style.color='${cat.color}'"
-             onmouseleave="this.querySelector('.app-card__arrow').style.background=''; this.querySelector('.app-card__arrow').style.borderColor=''; this.querySelector('.app-card__arrow').style.color=''">
-            <style>
-              .app-card[style*="${cat.color}"]::before {
-                background: linear-gradient(90deg, ${cat.color}, rgba(${rgb}, 0.3)) !important;
-              }
-            </style>
-            <div class="app-card__top">
-              <div class="app-card__icon" style="background:rgba(${rgb},0.1); border:1.5px solid rgba(${rgb},0.15)">${app.icon}</div>
-              <div class="app-card__arrow">↗</div>
-            </div>
-            <div class="app-card__title">${app.name}</div>
-            <div class="app-card__desc">${app.desc}</div>
-            <div class="app-card__tags">
-              ${(app.tags || []).map(t => `<span class="tag" style="background:rgba(${rgb},0.08); color:${cat.color}; border:1px solid rgba(${rgb},0.18)">${t}</span>`).join('')}
-            </div>
-          </a>
-        `).join('')}
-      </div>
-    `;
-    main.appendChild(section);
+      cards.forEach(card => {
+        if (cat === 'all' || card.dataset.category === cat) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    });
   });
-}
 
-render();
+  // Theme toggle
+  const toggle = document.getElementById('themeToggle');
+  const html = document.documentElement;
+
+  // Check saved preference or system preference
+  const saved = localStorage.getItem('theme');
+  if (saved) {
+    html.setAttribute('data-theme', saved);
+  } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+    html.setAttribute('data-theme', 'light');
+  }
+
+  toggle.addEventListener('click', () => {
+    const current = html.getAttribute('data-theme');
+    const next = current === 'light' ? 'dark' : 'light';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+  });
+
+  // Smooth nav background on scroll
+  window.addEventListener('scroll', () => {
+    const nav = document.querySelector('nav');
+    nav.style.borderBottomColor = window.scrollY > 50
+      ? 'var(--border)'
+      : 'color-mix(in srgb, var(--border) 50%, transparent)';
+  });
 </script>
 
 </body>
