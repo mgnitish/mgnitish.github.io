@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe Game</title>
+    <style>
+        /* Reset default styles and set up base styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* Pale gold background */
+            background: #f5deb3;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* Main game container with glassmorphism effect */
+        .game-container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        /* Game title styling */
+        h1 {
+            text-align: center;
+            color: #800020;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Turn indicator shows whose turn it is */
+        .turn-indicator {
+            text-align: center;
+            color: #1a1a1a;
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        /* Score tracker container */
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+
+        /* Individual score display for each player */
+        .score {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 15px 25px;
+            border-radius: 15px;
+            text-align: center;
+            flex: 1;
+        }
+
+        .score-label {
+            color: #800020;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .score-value {
+            color: #1a1a1a;
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        /* 3x3 game board grid */
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 30px;
+            aspect-ratio: 1;
+        }
+
+        /* Individual cell styling */
+        .cell {
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid rgba(128, 0, 32, 0.3);
+            border-radius: 15px;
+            font-size: 3em;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Different colors for X and O */
+        .cell.player-x {
+            color: #3b82f6; /* Blue for X */
+        }
+
+        .cell.player-o {
+            color: #ec4899; /* Pink for O */
+        }
+
+        /* Cell hover effect - only when cell is empty */
+        .cell:hover:not(.taken) {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(128, 0, 32, 0.5);
+            transform: scale(1.05);
+        }
+
+        /* Cell active/click effect */
+        .cell:active:not(.taken) {
+            transform: scale(0.95);
+        }
+
+        /* Prevent clicking on already filled cells */
+        .cell.taken {
+            cursor: not-allowed;
+        }
+
+        /* Winning cells highlight effect */
+        .cell.winner {
+            background: rgba(255, 215, 0, 0.4);
+            animation: pulse 0.5s ease-in-out;
+        }
+
+        /* Pulse animation for winning cells */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Reset button styling */
+        .reset-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #800020;
+            background: rgba(255, 255, 255, 0.5);
+            border: 2px solid rgba(128, 0, 32, 0.3);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .reset-btn:hover {
+            background: rgba(255, 255, 255, 0.7);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .reset-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Responsive design for smaller screens */
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .cell {
+                font-size: 2em;
+            }
+
+            .turn-indicator {
+                font-size: 1.1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Tic-Tac-Toe</h1>
+        
+        <!-- Shows whose turn it is -->
+        <div class="turn-indicator" id="turnIndicator">Player X's Turn</div>
+        
+        <!-- Score tracker for both players -->
+        <div class="score-board">
+            <div class="score">
+                <div class="score-label">Player X</div>
+                <div class="score-value" id="scoreX">0</div>
+            </div>
+            <div class="score">
+                <div class="score-label">Player O</div>
+                <div class="score-value" id="scoreO">0</div>
+            </div>
+        </div>
+        
+        <!-- 3x3 game board -->
+        <div class="board" id="board">
+            <!-- Cells are created with data-index for easy reference -->
+            <button class="cell" data-index="0"></button>
+            <button class="cell" data-index="1"></button>
+            <button class="cell" data-index="2"></button>
+            <button class="cell" data-index="3"></button>
+            <button class="cell" data-index="4"></button>
+            <button class="cell" data-index="5"></button>
+            <button class="cell" data-index="6"></button>
+            <button class="cell" data-index="7"></button>
+            <button class="cell" data-index="8"></button>
+        </div>
+        
+        <!-- Reset button to start a new game -->
+        <button class="reset-btn" id="resetBtn">Reset Game</button>
+    </div>
+
+    <script>
+        // ===== GAME STATE VARIABLES =====
+        
+        // Array to track the board state (9 cells, initially empty)
+        let boardState = ['', '', '', '', '', '', '', '', ''];
+        
+        // Current player (X starts first)
+        let currentPlayer = 'X';
+        
+        // Flag to track if game is over
+        let gameActive = true;
+        
+        // Score tracking for both players
+        let scores = {
+            X: 0,
+            O: 0
+        };
+        
+        // All possible winning combinations (rows, columns, diagonals)
+        const winningConditions = [
+            [0, 1, 2], // Top row
+            [3, 4, 5], // Middle row
+            [6, 7, 8], // Bottom row
+            [0, 3, 6], // Left column
+            [1, 4, 7], // Middle column
+            [2, 5, 8], // Right column
+            [0, 4, 8], // Diagonal top-left to bottom-right
+            [2, 4, 6]  // Diagonal top-right to bottom-left
+        ];
+        
+        // ===== DOM ELEMENTS =====
+        
+        // Get references to all cells on the board
+        const cells = document.querySelectorAll('.cell');
+        
+        // Get reference to the turn indicator text
+        const turnIndicator = document.getElementById('turnIndicator');
+        
+        // Get reference to reset button
+        const resetBtn = document.getElementById('resetBtn');
+        
+        // Get references to score displays
+        const scoreXDisplay = document.getElementById('scoreX');
+        const scoreODisplay = document.getElementById('scoreO');
+        
+        // ===== EVENT LISTENERS =====
+        
+        // Add click event to each cell
+        cells.forEach(cell => {
+            cell.addEventListener('click', handleCellClick);
+        });
+        
+        // Add click event to reset button
+        resetBtn.addEventListener('click', resetGame);
+        
+        // ===== GAME FUNCTIONS =====
+        
+        /**
+         * Handles when a player clicks on a cell
+         * @param {Event} event - The click event
+         */
+        function handleCellClick(event) {
+            const clickedCell = event.target;
+            const clickedCellIndex = parseInt(clickedCell.getAttribute('data-index'));
+            
+            // Check if cell is already taken or game is over
+            if (boardState[clickedCellIndex] !== '' || !gameActive) {
+                return; // Don't do anything if cell is taken or game ended
+            }
+            
+            // Update the cell with current player's mark
+            updateCell(clickedCell, clickedCellIndex);
+            
+            // Check if this move resulted in a win or draw
+            checkResult();
+        }
+        
+        /**
+         * Updates a cell with the current player's mark
+         * @param {HTMLElement} cell - The cell element to update
+         * @param {number} index - The index of the cell in boardState array
+         */
+        function updateCell(cell, index) {
+            // Update the board state array
+            boardState[index] = currentPlayer;
+            
+            // Display the player's mark in the cell
+            cell.textContent = currentPlayer;
+            
+            // Add color class based on player
+            if (currentPlayer === 'X') {
+                cell.classList.add('player-x');
+            } else {
+                cell.classList.add('player-o');
+            }
+            
+            // Mark cell as taken so it can't be clicked again
+            cell.classList.add('taken');
+        }
+        
+        /**
+         * Checks if the game has been won or is a draw
+         */
+        function checkResult() {
+            let roundWon = false;
+            let winningCells = [];
+            
+            // Check all winning conditions
+            for (let i = 0; i < winningConditions.length; i++) {
+                const condition = winningConditions[i];
+                
+                // Get the values at the three positions
+                const a = boardState[condition[0]];
+                const b = boardState[condition[1]];
+                const c = boardState[condition[2]];
+                
+                // Skip if any cell is empty
+                if (a === '' || b === '' || c === '') {
+                    continue;
+                }
+                
+                // Check if all three cells have the same mark
+                if (a === b && b === c) {
+                    roundWon = true;
+                    winningCells = condition; // Store which cells won
+                    break;
+                }
+            }
+            
+            // If someone won
+            if (roundWon) {
+                announceWinner(currentPlayer, winningCells);
+                gameActive = false; // Stop the game
+                updateScore(currentPlayer); // Update the winner's score
+                return;
+            }
+            
+            // Check for draw (all cells filled, no winner)
+            const isDraw = !boardState.includes('');
+            if (isDraw) {
+                announceDraw();
+                gameActive = false; // Stop the game
+                return;
+            }
+            
+            // If game continues, switch to the other player
+            switchPlayer();
+        }
+        
+        /**
+         * Announces the winner and highlights winning cells
+         * @param {string} winner - The winning player ('X' or 'O')
+         * @param {Array} winningCells - Array of indices for winning cells
+         */
+        function announceWinner(winner, winningCells) {
+            turnIndicator.textContent = `Player ${winner} Wins! 🎉`;
+            
+            // Highlight the winning cells
+            winningCells.forEach(index => {
+                cells[index].classList.add('winner');
+            });
+        }
+        
+        /**
+         * Announces a draw game
+         */
+        function announceDraw() {
+            turnIndicator.textContent = "It's a Draw! 🤝";
+        }
+        
+        /**
+         * Switches to the other player's turn
+         */
+        function switchPlayer() {
+            // Toggle between X and O
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            
+            // Update the turn indicator
+            turnIndicator.textContent = `Player ${currentPlayer}'s Turn`;
+        }
+        
+        /**
+         * Updates the score for the winning player
+         * @param {string} winner - The winning player ('X' or 'O')
+         */
+        function updateScore(winner) {
+            // Increment the winner's score
+            scores[winner]++;
+            
+            // Update the display
+            if (winner === 'X') {
+                scoreXDisplay.textContent = scores.X;
+            } else {
+                scoreODisplay.textContent = scores.O;
+            }
+        }
+        
+        /**
+         * Resets the game board for a new round
+         * Keeps the scores intact
+         */
+        function resetGame() {
+            // Reset the game state
+            boardState = ['', '', '', '', '', '', '', '', ''];
+            gameActive = true;
+            currentPlayer = 'X';
+            
+            // Update turn indicator
+            turnIndicator.textContent = "Player X's Turn";
+            
+            // Clear all cells
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('taken', 'winner', 'player-x', 'player-o');
+            });
+        }
+    </script>
+</body>
+</html>
