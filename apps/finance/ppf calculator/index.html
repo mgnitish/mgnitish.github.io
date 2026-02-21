@@ -1,1 +1,487 @@
-test
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PPF Returns Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    background: linear-gradient(175deg, #fdf6ec 0%, #f3ece1 50%, #e8ddd0 100%);
+    font-family: 'DM Sans', sans-serif;
+    padding: 24px 16px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .container { width: 100%; max-width: 520px; }
+
+  /* Header */
+  .header { text-align: center; margin-bottom: 28px; }
+  .badge {
+    display: inline-block;
+    background: #1e3a5f;
+    color: #f0c040;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    padding: 5px 14px;
+    border-radius: 3px;
+    margin-bottom: 14px;
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+  }
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 800;
+    color: #1e3a5f;
+    margin: 0 0 6px;
+    line-height: 1.15;
+  }
+  .header p { font-size: 13px; color: #7c6f60; font-weight: 500; }
+
+  /* Cards */
+  .card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 2px 20px rgba(30,58,95,0.07);
+    margin-bottom: 16px;
+    border: 1px solid rgba(30,58,95,0.06);
+  }
+  .card-dark {
+    background: #1e3a5f;
+    border-radius: 14px;
+    padding: 24px;
+    color: #fff;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 24px rgba(30,58,95,0.2);
+  }
+
+  /* Slider Groups */
+  .slider-group { margin-bottom: 22px; }
+  .slider-group:last-child { margin-bottom: 0; }
+  .slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+  }
+  .slider-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #4a4a4a;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .slider-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 18px;
+    font-weight: 500;
+  }
+  .slider-value.navy { color: #1e3a5f; }
+  .slider-value.amber { color: #b45309; }
+  .slider-value.gray { color: #4a4a4a; }
+
+  input[type="range"] {
+    width: 100%;
+    height: 6px;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    background: #e8ddd0;
+    border-radius: 3px;
+    outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    cursor: pointer;
+  }
+  .slider-invest::-webkit-slider-thumb { background: #1e3a5f; }
+  .slider-rate::-webkit-slider-thumb { background: #b45309; }
+  .slider-tenure::-webkit-slider-thumb { background: #4a4a4a; }
+
+  .slider-range {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: #999;
+    margin-top: 4px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* Results */
+  .results-flex { display: flex; align-items: center; gap: 20px; }
+  .maturity-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 2px;
+    font-weight: 600;
+  }
+  .maturity-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: #f0c040;
+  }
+  .split-row { display: flex; gap: 16px; margin-top: 14px; }
+  .split-dot {
+    width: 8px; height: 8px; border-radius: 2px; display: inline-block;
+  }
+  .split-dot.navy { background: #1e3a5f; border: 1.5px solid rgba(255,255,255,0.5); }
+  .split-dot.amber { background: #b45309; }
+  .split-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.5);
+    font-weight: 600;
+  }
+  .split-amount {
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .split-amount.amber { color: #e5a04a; }
+
+  /* Bar Chart */
+  .chart-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #4a4a4a;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .bars-container {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 200px;
+    padding: 0 4px;
+  }
+  .bar-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+  }
+  .bar-interest {
+    width: 100%;
+    border-radius: 3px 3px 0 0;
+    background: #b45309;
+    transition: height 0.5s cubic-bezier(.4,0,.2,1);
+  }
+  .bar-invested {
+    width: 100%;
+    background: #1e3a5f;
+    border-radius: 0 0 2px 2px;
+    transition: height 0.5s cubic-bezier(.4,0,.2,1);
+    min-height: 2px;
+  }
+  .bar-labels {
+    display: flex;
+    gap: 3px;
+    padding: 6px 4px 0;
+  }
+  .bar-label {
+    flex: 1;
+    text-align: center;
+    font-size: 9px;
+    color: #6b7280;
+    font-family: 'DM Mono', monospace;
+  }
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 8px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-box { width: 10px; height: 10px; border-radius: 2px; }
+  .legend-text { font-size: 11px; color: #6b7280; }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+  }
+  thead tr { border-bottom: 2px solid #1e3a5f; }
+  th {
+    padding: 8px 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #1e3a5f;
+  }
+  th:first-child { text-align: center; }
+  th:not(:first-child) { text-align: right; }
+  td { padding: 8px 6px; }
+  td:first-child { text-align: center; font-weight: 500; color: #4a4a4a; }
+  td:not(:first-child) { text-align: right; }
+  .col-invested { color: #1e3a5f; }
+  .col-interest { color: #b45309; }
+  .col-balance { color: #333; }
+  tbody tr { border-bottom: 1px solid #f0ebe3; }
+  tbody tr:nth-child(even) { background: #faf8f5; }
+  tbody tr.highlight-row { background: rgba(240,192,64,0.08); }
+  tbody tr.highlight-row .col-balance { font-weight: 700; color: #1e3a5f; }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    font-size: 11px;
+    color: #9a8e7f;
+    line-height: 1.5;
+    padding: 0 8px 16px;
+  }
+
+  /* Donut */
+  .donut-text-label { font-size: 10px; fill: #6b7280; font-family: 'DM Sans', sans-serif; }
+  .donut-text-value { font-size: 13px; font-weight: 700; fill: #1e3a5f; font-family: 'DM Mono', monospace; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <div class="badge">Public Provident Fund</div>
+    <h1>PPF Returns<br>Calculator</h1>
+    <p>Plan your long-term tax-saving investment</p>
+  </div>
+
+  <!-- Input Card -->
+  <div class="card">
+    <!-- Yearly Investment -->
+    <div class="slider-group">
+      <div class="slider-header">
+        <label class="slider-label">Yearly Investment</label>
+        <span class="slider-value navy" id="investDisplay">₹1,50,000</span>
+      </div>
+      <input type="range" class="slider-invest" id="investSlider" min="500" max="150000" step="500" value="150000">
+      <div class="slider-range"><span>₹500</span><span>₹1,50,000</span></div>
+    </div>
+
+    <!-- Rate of Interest -->
+    <div class="slider-group">
+      <div class="slider-header">
+        <label class="slider-label">Interest Rate (p.a.)</label>
+        <span class="slider-value amber" id="rateDisplay">7.1%</span>
+      </div>
+      <input type="range" class="slider-rate" id="rateSlider" min="1" max="15" step="0.1" value="7.1">
+      <div class="slider-range"><span>1.0%</span><span>Current: 7.1%</span><span>15.0%</span></div>
+    </div>
+
+    <!-- Tenure -->
+    <div class="slider-group">
+      <div class="slider-header">
+        <label class="slider-label">Tenure</label>
+        <span class="slider-value gray" id="tenureDisplay">15 yrs</span>
+      </div>
+      <input type="range" class="slider-tenure" id="tenureSlider" min="15" max="50" step="5" value="15">
+      <div class="slider-range"><span>15 yrs</span><span>Extendable in 5-yr blocks</span><span>50 yrs</span></div>
+    </div>
+  </div>
+
+  <!-- Results Card -->
+  <div class="card-dark">
+    <div class="results-flex">
+      <svg id="donutChart" viewBox="0 0 140 140" width="140" height="140"></svg>
+      <div style="flex:1">
+        <div>
+          <div class="maturity-label">Maturity Value</div>
+          <div class="maturity-value" id="maturityValue">—</div>
+        </div>
+        <div class="split-row">
+          <div>
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:2px">
+              <span class="split-dot navy"></span>
+              <span class="split-label">Invested</span>
+            </div>
+            <div class="split-amount" id="totalInvested">—</div>
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:2px">
+              <span class="split-dot amber"></span>
+              <span class="split-label">Interest</span>
+            </div>
+            <div class="split-amount amber" id="totalInterest">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bar Chart Card -->
+  <div class="card" style="padding:20px 16px">
+    <div class="chart-title" id="chartTitle">Growth Over 15 Years</div>
+    <div id="barChart" style="padding:16px 0"></div>
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-box" style="background:#1e3a5f"></div>
+        <span class="legend-text">Invested</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-box" style="background:#b45309"></div>
+        <span class="legend-text">Interest Earned</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Card -->
+  <div class="card" style="padding:20px">
+    <div class="chart-title" style="margin-bottom:14px">Year-by-Year Breakdown</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Year</th><th>Invested</th><th>Interest</th><th>Balance</th></tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    PPF interest is compounded annually. Current GOI rate: 7.1% p.a. (Q4 FY25).
+    Tax-free returns under Section 80C. Minimum tenure 15 years, extendable in 5-year blocks.
+  </div>
+</div>
+
+<script>
+  const investSlider = document.getElementById('investSlider');
+  const rateSlider = document.getElementById('rateSlider');
+  const tenureSlider = document.getElementById('tenureSlider');
+  const investDisplay = document.getElementById('investDisplay');
+  const rateDisplay = document.getElementById('rateDisplay');
+  const tenureDisplay = document.getElementById('tenureDisplay');
+
+  function fmt(amount) {
+    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
+  }
+
+  function calculate(yearly, rate, years) {
+    const r = rate / 100;
+    let balance = 0;
+    const data = [];
+    for (let i = 1; i <= years; i++) {
+      balance = (balance + yearly) * (1 + r);
+      const inv = yearly * i;
+      data.push({ year: i, invested: inv, interest: Math.round(balance - inv), balance: Math.round(balance) });
+    }
+    return data;
+  }
+
+  function drawDonut(invested, interest) {
+    const svg = document.getElementById('donutChart');
+    const total = invested + interest;
+    if (total === 0) { svg.innerHTML = ''; return; }
+    const pct = invested / total;
+    const r = 54, circ = 2 * Math.PI * r;
+    const investedArc = pct * circ;
+    const interestArc = (1 - pct) * circ;
+    const returnPct = ((interest / invested) * 100).toFixed(1) + '%';
+
+    svg.innerHTML = `
+      <circle cx="70" cy="70" r="${r}" fill="none" stroke="#1e3a5f" stroke-width="16"
+        stroke-dasharray="${investedArc} ${circ - investedArc}" stroke-dashoffset="${circ * 0.25}"
+        style="transition:all 0.6s ease"/>
+      <circle cx="70" cy="70" r="${r}" fill="none" stroke="#b45309" stroke-width="16"
+        stroke-dasharray="${interestArc} ${circ - interestArc}" stroke-dashoffset="${circ * 0.25 - investedArc}"
+        style="transition:all 0.6s ease"/>
+      <text x="70" y="64" text-anchor="middle" class="donut-text-label">Returns</text>
+      <text x="70" y="80" text-anchor="middle" class="donut-text-value">${returnPct}</text>
+    `;
+  }
+
+  function drawBars(data) {
+    const container = document.getElementById('barChart');
+    const maxVal = data[data.length - 1].balance || 1;
+
+    let barsHTML = '<div class="bars-container">';
+    for (const d of data) {
+      const investedH = (d.invested / maxVal) * 180;
+      const interestH = (d.interest / maxVal) * 180;
+      barsHTML += `<div class="bar-col" title="Year ${d.year}: ${fmt(d.balance)}">
+        <div class="bar-interest" style="height:${interestH}px;${interestH > 0 ? 'min-height:2px' : ''}"></div>
+        <div class="bar-invested" style="height:${investedH}px"></div>
+      </div>`;
+    }
+    barsHTML += '</div>';
+
+    barsHTML += '<div class="bar-labels">';
+    for (const d of data) {
+      const show = d.year % 3 === 0 || d.year === 1 || d.year === data.length;
+      barsHTML += `<div class="bar-label">${show ? d.year : ''}</div>`;
+    }
+    barsHTML += '</div>';
+
+    container.innerHTML = barsHTML;
+  }
+
+  function drawTable(data) {
+    const tbody = document.getElementById('tableBody');
+    let html = '';
+    for (let i = 0; i < data.length; i++) {
+      const d = data[i];
+      const isLast = i === data.length - 1;
+      html += `<tr class="${isLast ? 'highlight-row' : ''}">
+        <td>${d.year}</td>
+        <td class="col-invested">${fmt(d.invested)}</td>
+        <td class="col-interest">${fmt(d.interest)}</td>
+        <td class="col-balance">${fmt(d.balance)}</td>
+      </tr>`;
+    }
+    tbody.innerHTML = html;
+  }
+
+  function update() {
+    const yearly = Number(investSlider.value);
+    const rate = Number(rateSlider.value);
+    const tenure = Number(tenureSlider.value);
+
+    investDisplay.textContent = fmt(yearly);
+    rateDisplay.textContent = rate.toFixed(1) + '%';
+    tenureDisplay.textContent = tenure + ' yrs';
+
+    const data = calculate(yearly, rate, tenure);
+    const last = data[data.length - 1];
+
+    document.getElementById('maturityValue').textContent = fmt(last.balance);
+    document.getElementById('totalInvested').textContent = fmt(last.invested);
+    document.getElementById('totalInterest').textContent = fmt(last.interest);
+    document.getElementById('chartTitle').textContent = 'Growth Over ' + tenure + ' Years';
+
+    drawDonut(last.invested, last.interest);
+    drawBars(data);
+    drawTable(data);
+  }
+
+  investSlider.addEventListener('input', update);
+  rateSlider.addEventListener('input', update);
+  tenureSlider.addEventListener('input', update);
+
+  update();
+</script>
+
+</body>
+</html>
