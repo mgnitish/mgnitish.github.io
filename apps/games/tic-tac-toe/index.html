@@ -23,6 +23,117 @@
             padding: 20px;
         }
 
+        /* ===== HOME PAGE STYLES ===== */
+        
+        .home-container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 50px 40px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            max-width: 700px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .home-title {
+            color: #800020;
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .home-subtitle {
+            color: #1a1a1a;
+            font-size: 1.3em;
+            margin-bottom: 40px;
+            font-weight: 500;
+        }
+
+        .home-options {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .home-card {
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 20px;
+            padding: 40px 30px;
+            flex: 1;
+            min-width: 250px;
+            max-width: 300px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid rgba(128, 0, 32, 0.2);
+        }
+
+        .home-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(128, 0, 32, 0.3);
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .card-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .home-card h2 {
+            color: #800020;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+
+        .home-card p {
+            color: #1a1a1a;
+            font-size: 1.1em;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .start-btn {
+            background: #800020;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .start-btn:hover {
+            background: #a00028;
+            transform: scale(1.05);
+        }
+
+        .start-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Back button */
+        .back-button {
+            color: #800020;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 20px;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            color: #a00028;
+            transform: translateX(-5px);
+        }
+
+        /* ===== GAME CONTAINER STYLES ===== */
+
         /* Main game container with glassmorphism effect */
         .game-container {
             background: rgba(255, 255, 255, 0.15);
@@ -42,6 +153,37 @@
             margin-bottom: 30px;
             font-size: 2.5em;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Mode selection buttons */
+        .mode-selection {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            color: #800020;
+            background: rgba(255, 255, 255, 0.5);
+            border: 2px solid rgba(128, 0, 32, 0.3);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mode-btn:hover {
+            background: rgba(255, 255, 255, 0.7);
+            transform: translateY(-2px);
+        }
+
+        .mode-btn.active {
+            background: #800020;
+            color: white;
+            border-color: #800020;
         }
 
         /* Turn indicator shows whose turn it is */
@@ -190,11 +332,55 @@
             .turn-indicator {
                 font-size: 1.1em;
             }
+
+            .home-title {
+                font-size: 2.2em;
+            }
+
+            .home-subtitle {
+                font-size: 1.1em;
+            }
+
+            .home-container {
+                padding: 30px 20px;
+            }
+
+            .home-options {
+                flex-direction: column;
+            }
+
+            .home-card {
+                min-width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
+    <!-- Home Page / Mode Selection Screen -->
+    <div class="home-container" id="homeContainer">
+        <h1 class="home-title">Tic-Tac-Toe</h1>
+        <p class="home-subtitle">Choose Your Game Mode</p>
+        
+        <div class="home-options">
+            <div class="home-card" id="vsComputerCard">
+                <div class="card-icon">🤖</div>
+                <h2>Single Player</h2>
+                <p>Challenge the AI opponent</p>
+                <button class="start-btn">Start Game</button>
+            </div>
+            
+            <div class="home-card" id="twoPlayerCard">
+                <div class="card-icon">👥</div>
+                <h2>Two Players</h2>
+                <p>Play with a friend on the same device</p>
+                <button class="start-btn">Start Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Container (hidden initially) -->
+    <div class="game-container" id="gameContainer" style="display: none;">
+        <div class="back-button" id="backButton">← Back to Menu</div>
         <h1>Tic-Tac-Toe</h1>
         
         <!-- Shows whose turn it is -->
@@ -242,6 +428,9 @@
         // Flag to track if game is over
         let gameActive = true;
         
+        // Game mode: 'two-player' or 'single-player'
+        let gameMode = 'two-player';
+        
         // Score tracking for both players
         let scores = {
             X: 0,
@@ -275,6 +464,13 @@
         const scoreXDisplay = document.getElementById('scoreX');
         const scoreODisplay = document.getElementById('scoreO');
         
+        // Get references to home page elements
+        const homeContainer = document.getElementById('homeContainer');
+        const gameContainer = document.getElementById('gameContainer');
+        const twoPlayerCard = document.getElementById('twoPlayerCard');
+        const vsComputerCard = document.getElementById('vsComputerCard');
+        const backButton = document.getElementById('backButton');
+        
         // ===== EVENT LISTENERS =====
         
         // Add click event to each cell
@@ -285,7 +481,47 @@
         // Add click event to reset button
         resetBtn.addEventListener('click', resetGame);
         
+        // Add click events to home page cards
+        twoPlayerCard.addEventListener('click', () => startGame('two-player'));
+        vsComputerCard.addEventListener('click', () => startGame('single-player'));
+        
+        // Add click event to back button
+        backButton.addEventListener('click', backToHome);
+        
         // ===== GAME FUNCTIONS =====
+        
+        /**
+         * Starts the game with selected mode
+         * @param {string} mode - 'two-player' or 'single-player'
+         */
+        function startGame(mode) {
+            gameMode = mode;
+            
+            // Hide home page and show game
+            homeContainer.style.display = 'none';
+            gameContainer.style.display = 'block';
+            
+            // Initialize game
+            resetGame();
+        }
+        
+        /**
+         * Returns to home page
+         */
+        function backToHome() {
+            // Show home page and hide game
+            homeContainer.style.display = 'block';
+            gameContainer.style.display = 'none';
+            
+            // Reset scores
+            scores.X = 0;
+            scores.O = 0;
+            scoreXDisplay.textContent = 0;
+            scoreODisplay.textContent = 0;
+            
+            // Reset game state
+            resetGame();
+        }
         
         /**
          * Handles when a player clicks on a cell
@@ -300,11 +536,21 @@
                 return; // Don't do anything if cell is taken or game ended
             }
             
+            // In single-player mode, only allow human (X) to click
+            if (gameMode === 'single-player' && currentPlayer === 'O') {
+                return;
+            }
+            
             // Update the cell with current player's mark
             updateCell(clickedCell, clickedCellIndex);
             
             // Check if this move resulted in a win or draw
             checkResult();
+            
+            // In single-player mode, trigger AI move after a short delay
+            if (gameMode === 'single-player' && gameActive && currentPlayer === 'O') {
+                setTimeout(makeAIMove, 500);
+            }
         }
         
         /**
@@ -364,6 +610,8 @@
                 announceWinner(currentPlayer, winningCells);
                 gameActive = false; // Stop the game
                 updateScore(currentPlayer); // Update the winner's score
+                // Auto-restart after 2 seconds
+                setTimeout(resetGame, 2000);
                 return;
             }
             
@@ -372,6 +620,8 @@
             if (isDraw) {
                 announceDraw();
                 gameActive = false; // Stop the game
+                // Auto-restart after 2 seconds
+                setTimeout(resetGame, 2000);
                 return;
             }
             
@@ -385,7 +635,11 @@
          * @param {Array} winningCells - Array of indices for winning cells
          */
         function announceWinner(winner, winningCells) {
-            turnIndicator.textContent = `Player ${winner} Wins! 🎉`;
+            if (gameMode === 'single-player') {
+                turnIndicator.textContent = winner === 'X' ? "You Win! 🎉" : "Computer Wins! 🤖";
+            } else {
+                turnIndicator.textContent = `Player ${winner} Wins! 🎉`;
+            }
             
             // Highlight the winning cells
             winningCells.forEach(index => {
@@ -408,7 +662,11 @@
             currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
             
             // Update the turn indicator
-            turnIndicator.textContent = `Player ${currentPlayer}'s Turn`;
+            if (gameMode === 'single-player') {
+                turnIndicator.textContent = currentPlayer === 'X' ? "Your Turn" : "Computer's Turn";
+            } else {
+                turnIndicator.textContent = `Player ${currentPlayer}'s Turn`;
+            }
         }
         
         /**
@@ -437,14 +695,134 @@
             gameActive = true;
             currentPlayer = 'X';
             
-            // Update turn indicator
-            turnIndicator.textContent = "Player X's Turn";
+            // Update turn indicator based on game mode
+            if (gameMode === 'single-player') {
+                turnIndicator.textContent = "Your Turn";
+            } else {
+                turnIndicator.textContent = "Player X's Turn";
+            }
             
             // Clear all cells
             cells.forEach(cell => {
                 cell.textContent = '';
                 cell.classList.remove('taken', 'winner', 'player-x', 'player-o');
             });
+        }
+        
+        // ===== AI FUNCTIONS FOR SINGLE PLAYER MODE =====
+        
+        /**
+         * Makes the AI (computer) move
+         * Uses minimax algorithm to find the best move
+         */
+        function makeAIMove() {
+            if (!gameActive || currentPlayer !== 'O') return;
+            
+            // Find the best move using minimax algorithm
+            const bestMove = findBestMove();
+            
+            if (bestMove !== -1) {
+                const cell = cells[bestMove];
+                updateCell(cell, bestMove);
+                checkResult();
+            }
+        }
+        
+        /**
+         * Finds the best move for the AI using minimax algorithm
+         * @returns {number} - Index of the best cell to play
+         */
+        function findBestMove() {
+            let bestScore = -Infinity;
+            let bestMove = -1;
+            
+            // Try all empty cells
+            for (let i = 0; i < 9; i++) {
+                if (boardState[i] === '') {
+                    // Try this move
+                    boardState[i] = 'O';
+                    let score = minimax(boardState, 0, false);
+                    // Undo the move
+                    boardState[i] = '';
+                    
+                    // Update best move if this is better
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMove = i;
+                    }
+                }
+            }
+            
+            return bestMove;
+        }
+        
+        /**
+         * Minimax algorithm to evaluate best moves
+         * @param {Array} board - Current board state
+         * @param {number} depth - Current depth in game tree
+         * @param {boolean} isMaximizing - Whether maximizing or minimizing
+         * @returns {number} - Score of the position
+         */
+        function minimax(board, depth, isMaximizing) {
+            // Check if game is over
+            const result = checkWinnerForMinimax(board);
+            
+            // Return score based on result
+            if (result === 'O') return 10 - depth;  // AI wins
+            if (result === 'X') return depth - 10;  // Human wins
+            if (result === 'draw') return 0;        // Draw
+            
+            if (isMaximizing) {
+                // AI's turn - maximize score
+                let bestScore = -Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === '') {
+                        board[i] = 'O';
+                        let score = minimax(board, depth + 1, false);
+                        board[i] = '';
+                        bestScore = Math.max(score, bestScore);
+                    }
+                }
+                return bestScore;
+            } else {
+                // Human's turn - minimize score
+                let bestScore = Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === '') {
+                        board[i] = 'X';
+                        let score = minimax(board, depth + 1, true);
+                        board[i] = '';
+                        bestScore = Math.min(score, bestScore);
+                    }
+                }
+                return bestScore;
+            }
+        }
+        
+        /**
+         * Checks for winner without updating UI (for minimax)
+         * @param {Array} board - Board state to check
+         * @returns {string|null} - 'X', 'O', 'draw', or null
+         */
+        function checkWinnerForMinimax(board) {
+            // Check all winning conditions
+            for (let condition of winningConditions) {
+                const a = board[condition[0]];
+                const b = board[condition[1]];
+                const c = board[condition[2]];
+                
+                if (a !== '' && a === b && b === c) {
+                    return a; // Return the winner ('X' or 'O')
+                }
+            }
+            
+            // Check for draw
+            if (!board.includes('')) {
+                return 'draw';
+            }
+            
+            // Game still ongoing
+            return null;
         }
     </script>
 </body>
