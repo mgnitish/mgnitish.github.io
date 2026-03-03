@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FD & RD Calculator</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.95em;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f7f7f7;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab:hover {
+            background: #ececec;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            background: white;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .calculator {
+            display: none;
+        }
+
+        .calculator.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        /* Remove number input arrows/spinners */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        .input-suffix {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-weight: 600;
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .calculate-btn:active {
+            transform: translateY(0);
+        }
+
+        .results {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 12px;
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .result-value {
+            font-weight: 700;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+
+        .result-value.large {
+            font-size: 1.3em;
+            color: #764ba2;
+        }
+
+        .info-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #856404;
+        }
+
+        .chart-container {
+            margin-top: 25px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-container h3 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .chart-wrapper {
+            max-width: 350px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .tab {
+                padding: 15px 10px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 FD & RD Calculator</h1>
+            <p>Calculate your returns on Fixed Deposits and Recurring Deposits</p>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('fd')">Fixed Deposit (FD)</div>
+            <div class="tab" onclick="switchTab('rd')">Recurring Deposit (RD)</div>
+        </div>
+
+        <div class="content">
+            <!-- FD Calculator -->
+            <div id="fd-calculator" class="calculator active">
+                <div class="input-group">
+                    <label for="fd-principal">Principal Amount</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="fd-principal" placeholder="Enter amount" value="100000">
+                        <span class="input-suffix">₹</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="fd-rate">Annual Interest Rate</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="fd-rate" placeholder="Enter rate" value="7.5" step="0.1">
+                        <span class="input-suffix">%</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="fd-tenure">Tenure (in months)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="fd-tenure" placeholder="Enter tenure" value="12">
+                        <span class="input-suffix">months</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="fd-compound">Compounding Frequency</label>
+                    <select id="fd-compound" style="width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1em;">
+                        <option value="4">Quarterly</option>
+                        <option value="2">Half-Yearly</option>
+                        <option value="1">Yearly</option>
+                        <option value="12">Monthly</option>
+                    </select>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateFD()">Calculate FD Returns</button>
+
+                <div id="fd-results" class="results">
+                    <div class="result-item">
+                        <span class="result-label">Principal Amount:</span>
+                        <span class="result-value" id="fd-principal-result">₹0</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Interest Earned:</span>
+                        <span class="result-value" id="fd-interest-result">₹0</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Maturity Amount:</span>
+                        <span class="result-value large" id="fd-maturity-result">₹0</span>
+                    </div>
+                </div>
+
+                <div id="fd-chart-container" class="chart-container" style="display: none;">
+                    <h3>💰 Investment Breakdown</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="fd-chart"></canvas>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <strong>Note:</strong> FD uses compound interest. The formula is: A = P(1 + r/n)^(nt), where P is principal, r is annual rate, n is compounding frequency, and t is time in years.
+                </div>
+            </div>
+
+            <!-- RD Calculator -->
+            <div id="rd-calculator" class="calculator">
+                <div class="input-group">
+                    <label for="rd-monthly">Monthly Installment</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="rd-monthly" placeholder="Enter monthly amount" value="5000">
+                        <span class="input-suffix">₹</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="rd-rate">Annual Interest Rate</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="rd-rate" placeholder="Enter rate" value="7.5" step="0.1">
+                        <span class="input-suffix">%</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="rd-tenure">Tenure (in months)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="rd-tenure" placeholder="Enter tenure" value="12">
+                        <span class="input-suffix">months</span>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateRD()">Calculate RD Returns</button>
+
+                <div id="rd-results" class="results">
+                    <div class="result-item">
+                        <span class="result-label">Total Investment:</span>
+                        <span class="result-value" id="rd-investment-result">₹0</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Interest Earned:</span>
+                        <span class="result-value" id="rd-interest-result">₹0</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Maturity Amount:</span>
+                        <span class="result-value large" id="rd-maturity-result">₹0</span>
+                    </div>
+                </div>
+
+                <div id="rd-chart-container" class="chart-container" style="display: none;">
+                    <h3>💰 Investment Breakdown</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="rd-chart"></canvas>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <strong>Note:</strong> RD interest formula: Interest = P × [n(n+1)/2] × (r/1200), where P is monthly installment, n is number of months, and r is annual interest rate. This is the standard formula used by most Indian banks.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let fdChart = null;
+        let rdChart = null;
+
+        function switchTab(type) {
+            // Update tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update calculators
+            const calculators = document.querySelectorAll('.calculator');
+            calculators.forEach(calc => calc.classList.remove('active'));
+            document.getElementById(`${type}-calculator`).classList.add('active');
+
+            // Hide results
+            document.getElementById('fd-results').classList.remove('show');
+            document.getElementById('rd-results').classList.remove('show');
+        }
+
+        function calculateFD() {
+            const principal = parseFloat(document.getElementById('fd-principal').value);
+            const rate = parseFloat(document.getElementById('fd-rate').value);
+            const tenureMonths = parseFloat(document.getElementById('fd-tenure').value);
+            const compoundFreq = parseFloat(document.getElementById('fd-compound').value);
+
+            if (!principal || !rate || !tenureMonths) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            // Convert to years
+            const years = tenureMonths / 12;
+            
+            // Compound interest formula: A = P(1 + r/n)^(nt)
+            const r = rate / 100;
+            const maturityAmount = principal * Math.pow((1 + r / compoundFreq), compoundFreq * years);
+            const interestEarned = maturityAmount - principal;
+
+            // Display results
+            document.getElementById('fd-principal-result').textContent = '₹' + principal.toLocaleString('en-IN', {maximumFractionDigits: 2});
+            document.getElementById('fd-interest-result').textContent = '₹' + interestEarned.toLocaleString('en-IN', {maximumFractionDigits: 2});
+            document.getElementById('fd-maturity-result').textContent = '₹' + maturityAmount.toLocaleString('en-IN', {maximumFractionDigits: 2});
+            
+            document.getElementById('fd-results').classList.add('show');
+            
+            // Show and update chart
+            document.getElementById('fd-chart-container').style.display = 'block';
+            updateFDChart(principal, interestEarned);
+        }
+
+        function updateFDChart(principal, interest) {
+            const ctx = document.getElementById('fd-chart').getContext('2d');
+            
+            if (fdChart) {
+                fdChart.destroy();
+            }
+            
+            fdChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Principal Amount', 'Interest Earned'],
+                    datasets: [{
+                        data: [principal, interest],
+                        backgroundColor: [
+                            '#667eea',
+                            '#48bb78'
+                        ],
+                        borderColor: [
+                            '#ffffff',
+                            '#ffffff'
+                        ],
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 13,
+                                    weight: '600'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed || 0;
+                                    const percentage = ((value / (principal + interest)) * 100).toFixed(1);
+                                    return label + ': ₹' + value.toLocaleString('en-IN', {maximumFractionDigits: 2}) + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function calculateRD() {
+            const monthly = parseFloat(document.getElementById('rd-monthly').value);
+            const rate = parseFloat(document.getElementById('rd-rate').value);
+            const tenureMonths = parseFloat(document.getElementById('rd-tenure').value);
+
+            if (!monthly || !rate || !tenureMonths) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            // Standard RD formula used by most banks
+            // Maturity Amount = P × n + P × [n × (n + 1) / 2] × (r / 1200)
+            // Where: P = monthly installment, n = number of months, r = annual interest rate
+            
+            const P = monthly;
+            const n = tenureMonths;
+            const r = rate;
+            
+            const totalInvestment = P * n;
+            const interest = P * (n * (n + 1) / 2) * (r / 1200);
+            const maturityAmount = totalInvestment + interest;
+
+            // Display results
+            document.getElementById('rd-investment-result').textContent = '₹' + totalInvestment.toLocaleString('en-IN', {maximumFractionDigits: 2});
+            document.getElementById('rd-interest-result').textContent = '₹' + interest.toLocaleString('en-IN', {maximumFractionDigits: 2});
+            document.getElementById('rd-maturity-result').textContent = '₹' + maturityAmount.toLocaleString('en-IN', {maximumFractionDigits: 2});
+            
+            document.getElementById('rd-results').classList.add('show');
+            
+            // Show and update chart
+            document.getElementById('rd-chart-container').style.display = 'block';
+            updateRDChart(totalInvestment, interest);
+        }
+
+        function updateRDChart(investment, interest) {
+            const ctx = document.getElementById('rd-chart').getContext('2d');
+            
+            if (rdChart) {
+                rdChart.destroy();
+            }
+            
+            rdChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Total Investment', 'Interest Earned'],
+                    datasets: [{
+                        data: [investment, interest],
+                        backgroundColor: [
+                            '#764ba2',
+                            '#f6ad55'
+                        ],
+                        borderColor: [
+                            '#ffffff',
+                            '#ffffff'
+                        ],
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 13,
+                                    weight: '600'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed || 0;
+                                    const percentage = ((value / (investment + interest)) * 100).toFixed(1);
+                                    return label + ': ₹' + value.toLocaleString('en-IN', {maximumFractionDigits: 2}) + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Calculate FD on page load with default values
+        window.onload = function() {
+            calculateFD();
+        };
+    </script>
+</body>
+</html>
