@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WealthPath — Asset Appreciation vs. Inflation</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; }
+
+  /* ── Theme Variables ─────────────────────────────────── */
+  :root, [data-theme="dark"] {
+    --bg-body: #111113;
+    --bg-sidebar: #15151a;
+    --bg-card: #18181b;
+    --bg-panel: #15151a;
+    --bg-input: #1e1e22;
+    --border-subtle: #1e1e22;
+    --border-default: #27272a;
+    --border-hover: #3f3f46;
+    --text-primary: #f4f4f5;
+    --text-secondary: #d4d4d8;
+    --text-muted: #a1a1aa;
+    --text-faint: #71717a;
+    --text-dim: #52525b;
+    --grid-line: rgba(63,63,70,0.25);
+    --grid-line-soft: rgba(63,63,70,0.18);
+    --tooltip-bg: #1e1e22;
+    --tooltip-border: #3f3f46;
+    --scrollbar-thumb: #3f3f46;
+    --glow-opacity: 0.06;
+    --chart-hover-border: #111113;
+    --arrow-muted: #52525b;
+  }
+
+  [data-theme="light"] {
+    --bg-body: #f5f5f7;
+    --bg-sidebar: #ffffff;
+    --bg-card: #ffffff;
+    --bg-panel: #ffffff;
+    --bg-input: #f0f0f3;
+    --border-subtle: #e5e5e5;
+    --border-default: #d4d4d8;
+    --border-hover: #a1a1aa;
+    --text-primary: #18181b;
+    --text-secondary: #27272a;
+    --text-muted: #52525b;
+    --text-faint: #71717a;
+    --text-dim: #a1a1aa;
+    --grid-line: rgba(0,0,0,0.07);
+    --grid-line-soft: rgba(0,0,0,0.04);
+    --tooltip-bg: #ffffff;
+    --tooltip-border: #d4d4d8;
+    --scrollbar-thumb: #c4c4c4;
+    --glow-opacity: 0.08;
+    --chart-hover-border: #ffffff;
+    --arrow-muted: #a1a1aa;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg-body);
+    color: var(--text-primary);
+    transition: background 0.35s, color 0.35s;
+  }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+
+  .input-field {
+    background: var(--bg-input);
+    border: 1px solid var(--border-default);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: var(--text-primary);
+    font-size: 15px;
+    font-family: 'DM Sans', sans-serif;
+    width: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.35s, color 0.35s;
+    -moz-appearance: textfield;
+  }
+  .input-field::-webkit-outer-spin-button,
+  .input-field::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .input-field:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+  }
+
+  .metric-card {
+    position: relative; overflow: hidden; border-radius: 14px;
+    background: var(--bg-card); border: 1px solid var(--border-default);
+    padding: 22px 24px;
+    transition: border-color 0.3s, transform 0.2s, background 0.35s;
+  }
+  .metric-card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+  .metric-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 3px; border-radius: 14px 14px 0 0;
+  }
+  .metric-card.green::before { background: linear-gradient(90deg, #10b981, #34d399); }
+  .metric-card.red::before { background: linear-gradient(90deg, #f43f5e, #fb7185); }
+  .metric-card.blue::before { background: linear-gradient(90deg, #0ea5e9, #38bdf8); }
+
+  .sidebar {
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border-subtle);
+    transition: background 0.35s, border-color 0.35s;
+  }
+  @media (max-width: 1023px) {
+    .sidebar { border-right: none; border-bottom: 1px solid var(--border-subtle); }
+  }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .animate-in { animation: fadeUp 0.5s ease-out forwards; }
+  .delay-1 { animation-delay: 0.1s; opacity: 0; }
+  .delay-2 { animation-delay: 0.2s; opacity: 0; }
+  .delay-3 { animation-delay: 0.3s; opacity: 0; }
+  .delay-4 { animation-delay: 0.35s; opacity: 0; }
+
+  .chart-glow {
+    position: absolute; width: 50%; height: 50%; top: 20%; left: 25%;
+    background: radial-gradient(ellipse, rgba(16,185,129,var(--glow-opacity)) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
+  }
+
+  .input-label {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.05em;
+    text-transform: uppercase; color: var(--text-faint);
+    margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
+    transition: color 0.35s;
+  }
+
+  .logo-dot {
+    width: 10px; height: 10px; background: #10b981;
+    border-radius: 50%; display: inline-block;
+    box-shadow: 0 0 8px rgba(16,185,129,0.5);
+  }
+
+  .t-panel {
+    background: var(--bg-panel); border: 1px solid var(--border-default);
+    transition: background 0.35s, border-color 0.35s;
+  }
+  .t-card-item {
+    background: var(--bg-panel); border: 1px solid var(--border-default);
+    transition: background 0.35s, border-color 0.35s;
+  }
+  .t-card-item:hover { border-color: var(--border-hover); }
+
+  .t-primary { color: var(--text-primary); transition: color 0.35s; }
+  .t-secondary { color: var(--text-secondary); transition: color 0.35s; }
+  .t-muted { color: var(--text-muted); transition: color 0.35s; }
+  .t-faint { color: var(--text-faint); transition: color 0.35s; }
+  .t-dim { color: var(--text-dim); transition: color 0.35s; }
+
+  .erosion-track { background: var(--border-default); transition: background 0.35s; }
+
+  /* ── Theme Toggle ──────────────────────────────────── */
+  .theme-toggle {
+    position: relative; width: 52px; height: 28px;
+    border-radius: 14px; background: var(--border-default);
+    border: 1px solid var(--border-hover);
+    cursor: pointer; transition: background 0.3s, border-color 0.3s;
+    flex-shrink: 0;
+  }
+  .theme-toggle .knob {
+    position: absolute; top: 3px; left: 3px;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--text-primary);
+    transition: transform 0.3s, background 0.3s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  [data-theme="light"] .theme-toggle .knob { transform: translateX(24px); }
+  .theme-toggle .knob svg { width: 12px; height: 12px; }
+  [data-theme="dark"] .theme-toggle .icon-sun { display: none; }
+  [data-theme="dark"] .theme-toggle .icon-moon { display: block; color: var(--bg-body); }
+  [data-theme="light"] .theme-toggle .icon-moon { display: none; }
+  [data-theme="light"] .theme-toggle .icon-sun { display: block; color: var(--bg-body); }
+</style>
+</head>
+<body class="min-h-screen">
+<div class="flex flex-col lg:flex-row min-h-screen">
+
+  <!-- Sidebar -->
+  <aside class="sidebar w-full lg:w-[340px] xl:w-[370px] flex-shrink-0 p-6 lg:p-8 lg:min-h-screen overflow-y-auto">
+    <div class="animate-in">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-3">
+          <span class="logo-dot"></span>
+          <h1 style="font-family:'Instrument Serif',Georgia,serif;" class="text-2xl t-primary tracking-tight">WealthPath</h1>
+        </div>
+        <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+          <div class="knob">
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          </div>
+        </button>
+      </div>
+      <p class="t-faint text-sm mb-8 ml-[22px]">Asset growth vs. inflation, visualized.</p>
+
+      <div class="space-y-5">
+        <div>
+          <label class="input-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            Initial Investment (₹)
+          </label>
+          <input type="number" id="initialInvestment" value="100000" min="0" step="1000" class="input-field" />
+        </div>
+        <div>
+          <label class="input-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Monthly Contribution (₹)
+          </label>
+          <input type="number" id="monthlyContribution" value="10000" min="0" step="500" class="input-field" />
+        </div>
+        <div>
+          <label class="input-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            Annual Growth Rate (%)
+          </label>
+          <input type="number" id="growthRate" value="12" min="0" max="50" step="0.1" class="input-field" />
+        </div>
+        <div>
+          <label class="input-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            Annual Inflation Rate (%)
+          </label>
+          <input type="number" id="inflationRate" value="6" min="0" max="30" step="0.1" class="input-field" />
+        </div>
+        <div>
+          <label class="input-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Time Horizon (Years)
+          </label>
+          <input type="number" id="timeHorizon" value="20" min="1" max="60" step="1" class="input-field" />
+        </div>
+      </div>
+
+      <button id="calculateBtn" class="w-full mt-6 py-3 px-6 rounded-xl font-semibold text-sm tracking-wide text-white transition-all duration-200" style="background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 4px 16px rgba(16,185,129,0.25);" onmouseover="this.style.boxShadow='0 6px 24px rgba(16,185,129,0.4)'; this.style.transform='translateY(-1px)';" onmouseout="this.style.boxShadow='0 4px 16px rgba(16,185,129,0.25)'; this.style.transform='translateY(0)';">
+        Calculate Wealth Path
+      </button>
+
+      <div class="mt-8 pt-6 space-y-3" style="border-top: 1px solid var(--border-default);">
+        <div class="flex items-center gap-3 text-sm t-faint"><span class="w-3 h-3 rounded-full shrink-0" style="background:#10b981;"></span> Nominal Wealth</div>
+        <div class="flex items-center gap-3 text-sm t-faint"><span class="w-3 h-3 rounded-full shrink-0" style="background:#38bdf8;"></span> Inflation-Adjusted</div>
+        <div class="flex items-center gap-3 text-sm t-faint"><span class="w-3 h-3 rounded-full shrink-0" style="background:#a78bfa;"></span> Total Deposits</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="flex-1 p-6 lg:p-10 xl:p-12 overflow-y-auto">
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 animate-in delay-1">
+      <div class="metric-card green">
+        <p class="text-xs font-semibold uppercase tracking-wider t-faint mb-1">Final Balance</p>
+        <p id="metricBalance" class="text-2xl xl:text-3xl font-bold font-body tabular-nums" style="color:#10b981;">₹0</p>
+        <p id="metricBalanceSub" class="text-xs t-faint mt-1"></p>
+      </div>
+      <div class="metric-card blue">
+        <p class="text-xs font-semibold uppercase tracking-wider t-faint mb-1">Real Purchasing Power</p>
+        <p id="metricReal" class="text-2xl xl:text-3xl font-bold font-body tabular-nums" style="color:#38bdf8;">₹0</p>
+        <p id="metricRealSub" class="text-xs t-faint mt-1"></p>
+      </div>
+      <div class="metric-card red">
+        <p class="text-xs font-semibold uppercase tracking-wider t-faint mb-1">Purchasing Power Loss</p>
+        <p id="metricLoss" class="text-2xl xl:text-3xl font-bold font-body tabular-nums" style="color:#fb7185;">₹0</p>
+        <p id="metricLossSub" class="text-xs t-faint mt-1"></p>
+      </div>
+    </div>
+
+    <div class="relative t-panel rounded-2xl p-4 sm:p-6 lg:p-8 animate-in delay-2">
+      <div class="chart-glow"></div>
+      <div class="flex items-center justify-between mb-4 relative z-10">
+        <h2 style="font-family:'Instrument Serif',Georgia,serif;" class="text-xl t-secondary">Wealth Projection</h2>
+        <span id="chartSubtitle" class="text-xs t-faint font-body"></span>
+      </div>
+      <div class="relative z-10" style="height: clamp(300px, 50vh, 520px);">
+        <canvas id="wealthChart"></canvas>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 animate-in delay-3">
+      <div class="t-panel rounded-xl p-4">
+        <p class="text-xs font-semibold uppercase tracking-wider t-faint mb-1">Total Invested</p>
+        <p id="statInvested" class="text-lg font-bold t-secondary tabular-nums">₹0</p>
+      </div>
+      <div class="t-panel rounded-xl p-4">
+        <p class="text-xs font-semibold uppercase tracking-wider t-faint mb-1">Total Profit</p>
+        <p id="statProfit" class="text-lg font-bold tabular-nums" style="color:#10b981;">₹0</p>
+      </div>
+      <div class="t-panel rounded-xl p-4">
+        <p class="text-xs font-semibold uppercase tracking-wider t-faint mb-1">Return on Investment</p>
+        <p id="statROI" class="text-lg font-bold tabular-nums" style="color:#10b981;">0%</p>
+      </div>
+      <div class="t-panel rounded-xl p-4">
+        <p class="text-xs font-semibold uppercase tracking-wider t-faint mb-1">Real Growth Rate</p>
+        <p id="statRealRate" class="text-lg font-bold tabular-nums" style="color:#38bdf8;">0%</p>
+      </div>
+    </div>
+
+    <!-- Inflation Impact -->
+    <div class="mt-8 animate-in delay-4">
+      <div class="flex items-center gap-3 mb-5">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: rgba(244,63,94,0.12);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2" stroke-linecap="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        </div>
+        <div>
+          <h2 style="font-family:'Instrument Serif',Georgia,serif;" class="text-xl t-secondary">The Silent Tax: Inflation in Real Life</h2>
+          <p class="text-xs t-faint">How everyday costs rise over your investment horizon</p>
+        </div>
+      </div>
+
+      <div class="t-panel rounded-2xl p-5 sm:p-6 mb-5">
+        <p class="text-sm t-muted mb-3">What <span class="t-primary font-semibold">₹100 today</span> will be worth in <span id="erosionYears" style="color:#fb7185;" class="font-semibold"></span> years</p>
+        <div class="relative h-10 erosion-track rounded-full overflow-hidden">
+          <div id="erosionBar" class="absolute left-0 top-0 h-full rounded-full transition-all duration-700 ease-out flex items-center justify-end pr-3" style="background: linear-gradient(90deg, #f43f5e, #fb7185);">
+            <span id="erosionValue" class="text-xs font-bold text-white drop-shadow"></span>
+          </div>
+          <div class="absolute right-3 top-1/2 -translate-y-1/2 text-xs t-faint font-medium">₹100</div>
+        </div>
+        <p id="erosionNote" class="text-xs t-dim mt-2"></p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="itemsGrid"></div>
+
+      <div class="t-panel rounded-2xl p-5 sm:p-6 mt-5">
+        <p class="text-xs font-semibold uppercase tracking-wider t-faint mb-4">Historical Perspective — How Prices Have Already Risen</p>
+        <div class="space-y-4" id="historicalItems"></div>
+      </div>
+    </div>
+
+    <p class="text-center text-xs t-dim mt-6 animate-in delay-4">
+      Projections are illustrative and do not constitute financial advice. Past performance ≠ future results.
+    </p>
+  </main>
+</div>
+
+<script>
+// ── Theme Toggle ────────────────────────────────────────
+const html = document.documentElement;
+const themeBtn = document.getElementById('themeToggle');
+let isDark = true;
+
+themeBtn.addEventListener('click', () => {
+  isDark = !isDark;
+  html.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  updateChartTheme();
+});
+
+function getThemeColors() {
+  const cs = getComputedStyle(html);
+  return {
+    gridLine: cs.getPropertyValue('--grid-line').trim(),
+    gridLineSoft: cs.getPropertyValue('--grid-line-soft').trim(),
+    tickColor: cs.getPropertyValue('--text-dim').trim(),
+    tooltipBg: cs.getPropertyValue('--tooltip-bg').trim(),
+    tooltipBorder: cs.getPropertyValue('--tooltip-border').trim(),
+    titleColor: cs.getPropertyValue('--text-secondary').trim(),
+    bodyColor: cs.getPropertyValue('--text-muted').trim(),
+    hoverBorder: cs.getPropertyValue('--chart-hover-border').trim(),
+  };
+}
+
+function updateChartTheme() {
+  const t = getThemeColors();
+  chart.options.scales.x.grid.color = t.gridLine;
+  chart.options.scales.y.grid.color = t.gridLineSoft;
+  chart.options.scales.x.ticks.color = t.tickColor;
+  chart.options.scales.y.ticks.color = t.tickColor;
+  chart.options.plugins.tooltip.backgroundColor = t.tooltipBg;
+  chart.options.plugins.tooltip.borderColor = t.tooltipBorder;
+  chart.options.plugins.tooltip.titleColor = t.titleColor;
+  chart.options.plugins.tooltip.bodyColor = t.bodyColor;
+  chart.data.datasets.forEach(ds => { ds.pointHoverBorderColor = t.hoverBorder; });
+  chart.update('none');
+}
+
+// ── Formatters ──────────────────────────────────────────
+const fmtCurrency = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+const fmtCurrencyFull = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+// ── DOM refs ────────────────────────────────────────────
+const inputs = {
+  initial: document.getElementById('initialInvestment'),
+  monthly: document.getElementById('monthlyContribution'),
+  growth: document.getElementById('growthRate'),
+  inflation: document.getElementById('inflationRate'),
+  years: document.getElementById('timeHorizon'),
+};
+
+// ── Chart setup ─────────────────────────────────────────
+const ctx = document.getElementById('wealthChart').getContext('2d');
+
+function makeGradient(ctx, r, g, b) {
+  const grad = ctx.createLinearGradient(0, 0, 0, ctx.canvas.clientHeight);
+  grad.addColorStop(0, `rgba(${r},${g},${b},0.18)`);
+  grad.addColorStop(1, `rgba(${r},${g},${b},0.0)`);
+  return grad;
+}
+
+const initT = getThemeColors();
+const chart = new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: [],
+    datasets: [
+      {
+        label: 'Nominal Wealth', data: [],
+        borderColor: '#10b981', backgroundColor: () => makeGradient(ctx, 16, 185, 129),
+        fill: true, tension: 0.35, borderWidth: 2.5,
+        pointRadius: 0, pointHoverRadius: 6,
+        pointHoverBackgroundColor: '#10b981', pointHoverBorderColor: initT.hoverBorder, pointHoverBorderWidth: 3,
+      },
+      {
+        label: 'Inflation-Adjusted', data: [],
+        borderColor: '#38bdf8', backgroundColor: () => makeGradient(ctx, 56, 189, 248),
+        fill: true, tension: 0.35, borderWidth: 2.5,
+        pointRadius: 0, pointHoverRadius: 6,
+        pointHoverBackgroundColor: '#38bdf8', pointHoverBorderColor: initT.hoverBorder, pointHoverBorderWidth: 3,
+      },
+      {
+        label: 'Total Deposits', data: [],
+        borderColor: '#a78bfa', backgroundColor: 'transparent',
+        borderDash: [6, 4], fill: false, tension: 0, borderWidth: 2,
+        pointRadius: 0, pointHoverRadius: 5,
+        pointHoverBackgroundColor: '#a78bfa', pointHoverBorderColor: initT.hoverBorder, pointHoverBorderWidth: 3,
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: initT.tooltipBg, titleColor: initT.titleColor, bodyColor: initT.bodyColor,
+        borderColor: initT.tooltipBorder, borderWidth: 1, cornerRadius: 10, padding: 14,
+        titleFont: { family: 'DM Sans', size: 13, weight: '600' },
+        bodyFont: { family: 'DM Sans', size: 12 },
+        displayColors: true, boxWidth: 10, boxHeight: 10, boxPadding: 4,
+        callbacks: {
+          title: (items) => `Year ${items[0].label}`,
+          label: (item) => ` ${item.dataset.label}: ${fmtCurrencyFull.format(item.raw)}`
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: { color: initT.gridLine, drawTicks: false }, border: { display: false },
+        ticks: { color: initT.tickColor, font: { family: 'DM Sans', size: 11 }, padding: 8, maxTicksLimit: 12,
+          callback: function(val) { return 'Yr ' + this.getLabelForValue(val); } }
+      },
+      y: {
+        grid: { color: initT.gridLineSoft, drawTicks: false }, border: { display: false },
+        ticks: { color: initT.tickColor, font: { family: 'DM Sans', size: 11 }, padding: 12, maxTicksLimit: 7,
+          callback: (val) => {
+            if (val >= 1_00_00_000) return '₹' + (val / 1_00_00_000).toFixed(1) + 'Cr';
+            if (val >= 1_00_000) return '₹' + (val / 1_00_000).toFixed(1) + 'L';
+            if (val >= 1_000) return '₹' + (val / 1_000).toFixed(0) + 'K';
+            return '₹' + val;
+          } }
+      }
+    }
+  }
+});
+
+// ── Calculation ─────────────────────────────────────────
+function calculate() {
+  const P = Math.max(0, parseFloat(inputs.initial.value) || 0);
+  const M = Math.max(0, parseFloat(inputs.monthly.value) || 0);
+  const rNom = Math.max(0, (parseFloat(inputs.growth.value) || 0)) / 100;
+  const iRate = Math.max(0, (parseFloat(inputs.inflation.value) || 0)) / 100;
+  const T = Math.min(60, Math.max(1, parseInt(inputs.years.value) || 1));
+  const rReal = (1 + rNom) / (1 + iRate) - 1;
+  const mNom = rNom / 12, mReal = rReal / 12;
+
+  const labels = [], nominalData = [], realData = [], depositData = [];
+  let nomBalance = P, realBalance = P, totalDeposits = P;
+  labels.push(0); nominalData.push(P); realData.push(P); depositData.push(P);
+
+  for (let year = 1; year <= T; year++) {
+    for (let m = 0; m < 12; m++) {
+      nomBalance = nomBalance * (1 + mNom) + M;
+      realBalance = realBalance * (1 + mReal) + M;
+      totalDeposits += M;
+    }
+    labels.push(year); nominalData.push(nomBalance);
+    realData.push(realBalance); depositData.push(totalDeposits);
+  }
+  return { labels, nominalData, realData, depositData, totalDeposits, nomBalance, realBalance, rReal };
+}
+
+// ── Update UI ───────────────────────────────────────────
+function update() {
+  const { labels, nominalData, realData, depositData, totalDeposits, nomBalance, realBalance, rReal } = calculate();
+
+  chart.data.labels = labels;
+  chart.data.datasets[0].data = nominalData;
+  chart.data.datasets[1].data = realData;
+  chart.data.datasets[2].data = depositData;
+  chart.update('none');
+
+  const years = parseInt(inputs.years.value) || 1;
+  const purchasingPowerLoss = nomBalance - realBalance;
+  const totalProfit = nomBalance - totalDeposits;
+  const roi = totalDeposits > 0 ? totalProfit / totalDeposits : 0;
+
+  document.getElementById('metricBalance').textContent = fmtCurrency.format(nomBalance);
+  document.getElementById('metricBalanceSub').textContent = `After ${years} year${years !== 1 ? 's' : ''} of compounding`;
+  document.getElementById('metricReal').textContent = fmtCurrency.format(realBalance);
+  document.getElementById('metricRealSub').textContent = `In today's rupees`;
+  document.getElementById('metricLoss').textContent = fmtCurrency.format(purchasingPowerLoss);
+  document.getElementById('metricLossSub').textContent = `${((purchasingPowerLoss / nomBalance) * 100).toFixed(1)}% of nominal value`;
+  document.getElementById('statInvested').textContent = fmtCurrency.format(totalDeposits);
+  document.getElementById('statProfit').textContent = fmtCurrency.format(totalProfit);
+  document.getElementById('statROI').textContent = (roi * 100).toFixed(1) + '%';
+  document.getElementById('statRealRate').textContent = (rReal * 100).toFixed(2) + '%';
+  document.getElementById('chartSubtitle').textContent = `${years}-year projection · ${inputs.growth.value}% growth · ${inputs.inflation.value}% inflation`;
+
+  // ── Inflation Impact ──
+  const iRate = Math.max(0, (parseFloat(inputs.inflation.value) || 0)) / 100;
+  const futureValueOf100 = 100 / Math.pow(1 + iRate, years);
+  document.getElementById('erosionYears').textContent = years;
+  document.getElementById('erosionBar').style.width = Math.max(5, futureValueOf100) + '%';
+  document.getElementById('erosionValue').textContent = '₹' + futureValueOf100.toFixed(2);
+  document.getElementById('erosionNote').textContent = `Your ₹100 loses ₹${(100 - futureValueOf100).toFixed(2)} in purchasing power — a ${((1 - futureValueOf100/100)*100).toFixed(1)}% erosion over ${years} years.`;
+
+  const everydayItems = [
+    { emoji: '🥛', name: 'Milk (1 litre)', price: 60 },
+    { emoji: '⛽', name: 'Petrol (1 litre)', price: 105 },
+    { emoji: '🍚', name: 'Rice (1 kg)', price: 55 },
+    { emoji: '☕', name: 'Chai at café', price: 30 },
+    { emoji: '🎬', name: 'Movie ticket', price: 250 },
+    { emoji: '🏥', name: 'Doctor visit', price: 800 },
+    { emoji: '📱', name: 'Mobile recharge', price: 299 },
+    { emoji: '🍽️', name: 'Thali meal', price: 150 },
+    { emoji: '📚', name: 'School textbook', price: 450 },
+  ];
+
+  document.getElementById('itemsGrid').innerHTML = everydayItems.map(item => {
+    const futurePrice = item.price * Math.pow(1 + iRate, years);
+    const increase = futurePrice - item.price;
+    const pctIncrease = ((futurePrice / item.price - 1) * 100).toFixed(0);
+    return `
+      <div class="t-card-item rounded-xl p-4">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="text-2xl">${item.emoji}</span>
+          <div>
+            <p class="text-sm font-medium t-secondary">${item.name}</p>
+            <p class="text-xs t-faint">Approx. today's price</p>
+          </div>
+        </div>
+        <div class="flex items-end justify-between mt-2">
+          <div>
+            <p class="text-xs t-dim mb-0.5">Today</p>
+            <p class="text-base font-bold t-secondary tabular-nums">${fmtCurrency.format(item.price)}</p>
+          </div>
+          <div class="text-center px-2">
+            <svg width="28" height="12" viewBox="0 0 28 12" style="color:#fb7185;"><path d="M2 6h20m0 0l-4-4m4 4l-4 4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="text-right">
+            <p class="text-xs t-dim mb-0.5">In ${years} yrs</p>
+            <p class="text-base font-bold tabular-nums" style="color:#fb7185;">${fmtCurrency.format(Math.round(futurePrice))}</p>
+          </div>
+        </div>
+        <div class="mt-3 relative h-1.5 erosion-track rounded-full overflow-hidden">
+          <div class="absolute left-0 top-0 h-full rounded-full" style="width:${Math.min(100, pctIncrease / 3)}%; background:linear-gradient(90deg,#f43f5e,#fb7185);"></div>
+        </div>
+        <p class="text-xs mt-1.5 font-medium" style="color:#fb7185;">+${pctIncrease}% (+${fmtCurrency.format(Math.round(increase))})</p>
+      </div>`;
+  }).join('');
+
+  const historicalData = [
+    { emoji: '⛽', name: 'Petrol (1L, Delhi)', past: 28, pastYear: 2000, now: 105, nowYear: 2025 },
+    { emoji: '🥇', name: 'Gold (10g)', past: 4400, pastYear: 2000, now: 78000, nowYear: 2025 },
+    { emoji: '🥛', name: 'Milk (1L)', past: 14, pastYear: 2000, now: 60, nowYear: 2025 },
+    { emoji: '🎬', name: 'Movie ticket (metro)', past: 50, pastYear: 2000, now: 250, nowYear: 2025 },
+    { emoji: '📬', name: 'Postage stamp (inland)', past: 3, pastYear: 2000, now: 25, nowYear: 2025 },
+  ];
+
+  document.getElementById('historicalItems').innerHTML = historicalData.map(item => {
+    const multiplier = (item.now / item.past).toFixed(1);
+    const barWidth = Math.min(100, (item.now / item.past) / 20 * 100);
+    return `
+      <div class="flex items-center gap-4">
+        <span class="text-xl shrink-0 w-8 text-center">${item.emoji}</span>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between mb-1">
+            <p class="text-sm t-muted font-medium truncate">${item.name}</p>
+            <span class="text-xs font-bold shrink-0 ml-2" style="color:#fb7185;">${multiplier}x</span>
+          </div>
+          <div class="flex items-center gap-3 text-xs t-dim">
+            <span class="tabular-nums">${item.pastYear}: <span class="t-muted">${fmtCurrency.format(item.past)}</span></span>
+            <svg width="16" height="8" viewBox="0 0 16 8"><path d="M1 4h11m0 0l-3-3m3 3l-3 3" stroke="var(--arrow-muted)" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="tabular-nums">${item.nowYear}: <span style="color:#fb7185;" class="font-medium">${fmtCurrency.format(item.now)}</span></span>
+          </div>
+          <div class="mt-1.5 relative h-1 erosion-track rounded-full overflow-hidden">
+            <div class="absolute left-0 top-0 h-full rounded-full" style="width:${barWidth}%; background:linear-gradient(90deg,#f97316,#f43f5e);"></div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── Events ──────────────────────────────────────────────
+document.getElementById('calculateBtn').addEventListener('click', update);
+Object.values(inputs).forEach(el => el.addEventListener('keydown', (e) => { if (e.key === 'Enter') update(); }));
+update();
+</script>
+</body>
+</html>
