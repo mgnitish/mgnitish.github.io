@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>India Financial Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--up:#059669;--down:#dc2626;--upBg:#ecfdf5;--downBg:#fef2f2;--accent:#2563eb;--gold:#d97706;--goldBg:#fffbeb;--btc:#ea580c;--text:#0f172a;--sub:#475569;--dim:#94a3b8;--faint:#e2e8f0;--bg:#f1f5f9;--card:#ffffff;--border:#e2e8f0;--mono:'JetBrains Mono',monospace;--sans:'Plus Jakarta Sans',system-ui,sans-serif;--shadow:0 1px 3px rgba(0,0,0,0.04),0 4px 24px rgba(0,0,0,0.06)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:hidden}
+  .blob{position:fixed;border-radius:50%;pointer-events:none;filter:blur(80px);opacity:.5}
+  .b1{top:-120px;left:-80px;width:400px;height:400px;background:linear-gradient(135deg,#dbeafe,#bfdbfe)}
+  .b2{top:30%;right:-120px;width:350px;height:350px;background:linear-gradient(135deg,#d1fae5,#a7f3d0)}
+  .b3{bottom:-100px;left:30%;width:450px;height:350px;background:linear-gradient(135deg,#fef3c7,#fde68a)}
+  .header{padding:24px 28px 18px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px;position:relative;z-index:1;border-bottom:1px solid var(--border);background:rgba(255,255,255,0.7);backdrop-filter:blur(16px)}
+  .flag{display:inline-flex;gap:3px;margin-right:10px;vertical-align:middle}.flag span{width:6px;height:18px;border-radius:2px}.flag .o{background:#ff9933}.flag .w{background:#fff;border:1px solid #e2e8f0}.flag .g{background:#138808}
+  .sdot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:8px;vertical-align:middle}
+  .sdot.live{background:var(--up);box-shadow:0 0 0 3px rgba(5,150,105,0.15)}
+  .sdot.loading{background:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,0.15);animation:pulse 1.2s infinite}
+  .sdot.partial{background:var(--gold);box-shadow:0 0 0 3px rgba(217,119,6,0.15)}
+  .sdot.err{background:var(--down);box-shadow:0 0 0 3px rgba(220,38,38,0.15)}
+  .slabel{font-size:10px;color:var(--sub);font-family:var(--mono);letter-spacing:1.5px;font-weight:600;vertical-align:middle}
+  .htitle{margin:6px 0 0;font-size:26px;font-weight:800;color:var(--text);letter-spacing:-.5px}
+  .hsub{font-size:11px;color:var(--sub);margin-top:4px;font-family:var(--mono);letter-spacing:.3px}
+  .mode-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:9px;font-weight:700;font-family:var(--mono);margin-left:8px;vertical-align:middle}
+  .mode-tag.api{background:#eff6ff;color:#2563eb}.mode-tag.free{background:#ecfdf5;color:#059669}
+  .hr{display:flex;align-items:center;gap:12px}
+  .ts{font-size:10px;color:var(--sub);font-family:var(--mono)}
+  .rbtn{display:flex;align-items:center;gap:6px;padding:8px 18px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--sans);transition:all .2s;box-shadow:0 2px 8px rgba(37,99,235,0.25)}
+  .rbtn:hover{background:#1d4ed8}.rbtn:disabled{background:var(--dim);cursor:not-allowed;box-shadow:none}
+  .rbtn .ic{display:inline-block;font-size:14px}.rbtn.sp .ic{animation:spin .8s linear infinite}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;padding:20px 28px 36px;position:relative;z-index:1}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;transition:box-shadow .2s}
+  .card:hover{box-shadow:0 2px 6px rgba(0,0,0,0.04),0 8px 32px rgba(0,0,0,0.08)}
+  .ch{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,#fafbfc,#f8fafc)}
+  .chl{display:flex;align-items:center;gap:10px}
+  .ci{font-size:20px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:10px}
+  .ci.idx{background:#eff6ff}.ci.com{background:#fef3c7}.ci.fx{background:#f0fdf4}.ci.btc{background:#fff7ed}.ci.bond{background:#faf5ff}.ci.rbi{background:#fef2f2}.ci.sav{background:#ecfdf5}.ci.fd{background:#eff6ff}
+  .ct{font-weight:700;font-size:14px;color:var(--text)}.cs{font-size:10px;color:var(--dim);font-weight:500}
+  .cb{flex:1;min-height:80px}
+  .ld{width:7px;height:7px;border-radius:50%;background:var(--up);box-shadow:0 0 0 3px rgba(5,150,105,0.12)}
+  .spn{width:14px;height:14px;border:2px solid var(--faint);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+  .sk{padding:20px;display:flex;flex-direction:column;gap:18px}.skr{display:flex;justify-content:space-between}
+  .sh{height:18px;border-radius:6px;background:linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 50%,#f1f5f9 75%);background-size:200% 100%;animation:shimmer 1.5s infinite}
+  .eb{padding:20px}.eb .err-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .eb .err-badge{padding:3px 8px;border-radius:5px;font-size:9px;font-weight:700;font-family:var(--mono);background:var(--downBg);color:var(--down)}
+  .eb .err-title{color:var(--down);font-size:13px;font-weight:700}
+  .eb .err-msg{color:var(--sub);font-size:11px;margin-bottom:8px;line-height:1.6}
+  .eb .err-detail{color:var(--dim);font-size:10px;margin-bottom:8px;line-height:1.5;background:#f8fafc;padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-family:var(--mono);word-break:break-all;max-height:80px;overflow-y:auto}
+  .eb .err-hint{color:var(--sub);font-size:10px;line-height:1.5;margin-bottom:12px;padding:8px 12px;border-radius:6px;background:#fffbeb;border:1px solid #fef3c7}
+  .eb .err-hint strong{color:var(--gold)}
+  .rtb{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:7px 18px;font-size:11px;cursor:pointer;font-family:var(--sans);font-weight:700}
+  .row{display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid #f1f5f9;transition:background .15s}.row:hover{background:#f8fafc}.row:last-child{border-bottom:none}
+  .rl{font-weight:600;font-size:14px;color:var(--text)}.rsl{font-size:10px;color:var(--dim);margin-top:2px;font-weight:500}
+  .rv{font-family:var(--mono);font-size:17px;font-weight:700;color:var(--text);text-align:right}.rv.lg{font-size:18px}
+  .rc{font-family:var(--mono);font-size:11px;font-weight:600;margin-top:2px;padding:2px 8px;border-radius:4px;display:inline-block}.rc.up{color:var(--up);background:var(--upBg)}.rc.down{color:var(--down);background:var(--downBg)}
+  .sg{padding:10px 20px 5px;font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:1.2px}
+  .sr{display:flex;justify-content:space-between;align-items:center;padding:9px 20px;border-bottom:1px solid #f1f5f9;transition:background .15s}.sr:hover{background:#f8fafc}.sr:last-child{border-bottom:none}
+  .sn{font-weight:500;font-size:13px;color:var(--text)}.st{font-size:10px;color:var(--dim);margin-top:1px}
+  .srt{font-family:var(--mono);font-size:15px;font-weight:700}.srt.f{color:var(--gold)}.srt.n{color:var(--sub)}
+  .snt{padding:8px 20px 10px;font-size:9px;color:var(--dim);font-style:italic}
+  .btcc{padding:20px}.btcl{font-size:10px;color:var(--dim);font-weight:700;letter-spacing:.8px;margin-bottom:8px;text-transform:uppercase}
+  .btcp{font-family:var(--mono);font-size:30px;font-weight:800;color:var(--btc);letter-spacing:-1px;margin-bottom:4px}
+  .btcu{font-family:var(--mono);font-size:14px;color:var(--sub);margin-bottom:16px}
+  .btcb{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:8px;font-size:13px;font-weight:700;font-family:var(--mono)}
+  .btcb.up{background:var(--upBg);color:var(--up)}.btcb.down{background:var(--downBg);color:var(--down)}
+  .btcb .dm{color:var(--dim);font-weight:500;font-size:11px}
+  .btcm{margin-top:18px;padding-top:14px;border-top:1px solid var(--border);display:flex;gap:28px}
+  .btcml{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;font-weight:600}
+  .btcmv{font-family:var(--mono);font-size:13px;color:var(--text);font-weight:600}
+  .rate-row{display:flex;justify-content:space-between;align-items:center;padding:10px 20px;border-bottom:1px solid #f1f5f9;transition:background .15s}.rate-row:hover{background:#f8fafc}.rate-row:last-child{border-bottom:none}
+  .rate-name{font-weight:600;font-size:13px;color:var(--text)}.rate-detail{font-size:10px;color:var(--dim);margin-top:1px}
+  .rate-val{font-family:var(--mono);font-size:15px;font-weight:700;text-align:right}.rate-val.accent{color:var(--accent)}.rate-val.gold{color:var(--gold)}.rate-val.green{color:var(--up)}
+  .fd-hdr{padding:10px 20px 8px;display:flex;justify-content:space-between;align-items:center;background:#f8fafc;border-bottom:1px solid var(--border)}
+  .fd-hdr span{font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:1px}
+  .fd-row{display:flex;justify-content:space-between;align-items:center;padding:9px 20px;border-bottom:1px solid #f1f5f9;transition:background .15s}.fd-row:hover{background:#f8fafc}.fd-row:last-child{border-bottom:none}
+  .fd-bank{flex:1;font-size:13px;font-weight:600;color:var(--text)}.fd-val{width:55px;text-align:center;font-family:var(--mono);font-size:13px;font-weight:700;color:var(--accent)}
+  .footer{text-align:center;padding:0 28px 24px;font-size:9px;color:var(--dim);font-family:var(--mono);position:relative;z-index:1}
+  @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+</style>
+</head>
+<body>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+
+<div class="header">
+  <div>
+    <div>
+      <span class="flag"><span class="o"></span><span class="w"></span><span class="g"></span></span>
+      <span id="sDot" class="sdot loading"></span><span id="sLbl" class="slabel">LOADING...</span>
+      <span id="modeTag" class="mode-tag api" style="display:none"></span>
+    </div>
+    <h1 class="htitle">India Financial Dashboard</h1>
+    <div class="hsub">Markets · Commodities · Forex · Savings · Rates · Crypto</div>
+  </div>
+  <div class="hr"><span id="ts" class="ts"></span><button id="rBtn" class="rbtn sp" onclick="loadAll()"><span class="ic">⟳</span> Refresh</button></div>
+</div>
+<div class="grid">
+  <div class="card"><div class="ch"><div class="chl"><div class="ci idx">📈</div><div><div class="ct">Stock Indices</div><div class="cs">NSE · BSE</div></div></div><div id="xIndS"></div></div><div class="cb" id="xInd"></div></div>
+  <div class="card"><div class="ch"><div class="chl"><div class="ci com">🪙</div><div><div class="ct">Commodities</div><div class="cs">Gold · Silver · Oil · Gas</div></div></div><div id="xComS"></div></div><div class="cb" id="xCom"></div></div>
+  <div class="card"><div class="ch"><div class="chl"><div class="ci fx">💱</div><div><div class="ct">Currency & Forex</div><div class="cs">vs INR</div></div></div><div id="xFxS"></div></div><div class="cb" id="xFx"></div></div>
+  <div class="card"><div class="ch"><div class="chl"><div class="ci btc">₿</div><div><div class="ct">Bitcoin</div><div class="cs">Crypto</div></div></div><div id="xBtcS"></div></div><div class="cb" id="xBtc"></div></div>
+  <div class="card"><div class="ch"><div class="chl"><div class="ci bond">📊</div><div><div class="ct">Bonds & Inflation</div><div class="cs">G-Sec · CPI · WPI</div></div></div><div class="ld"></div></div><div class="cb" id="xBond"></div></div>
+  <div class="card"><div class="ch"><div class="chl"><div class="ci rbi">🏛️</div><div><div class="ct">RBI Policy Rates</div><div class="cs">Monetary Policy</div></div></div><div class="ld"></div></div><div class="cb" id="xRbi"></div></div>
+  <div class="card"><div class="ch"><div class="chl"><div class="ci sav">🏦</div><div><div class="ct">Small Savings</div><div class="cs">Govt. Schemes</div></div></div><div class="ld"></div></div><div class="cb" id="xSav"></div></div>
+  <div class="card"><div class="ch"><div class="chl"><div class="ci fd">🏧</div><div><div class="ct">Bank FD Rates</div><div class="cs">General Public</div></div></div><div class="ld"></div></div><div class="cb" id="xFd"></div></div>
+</div>
+<div class="footer" id="footerText">Detecting data sources... · Static rates: RBI / GOI Gazette · For informational purposes only</div>
+
+<script>
+/* ═══════════════════════════════
+   STATIC DATA
+   ═══════════════════════════════ */
+const SAVINGS=[{n:"Public Provident Fund (PPF)",r:7.1,t:"15 years",c:"p"},{n:"Sukanya Samriddhi Yojana",r:8.2,t:"21 years",c:"p"},{n:"Senior Citizens Savings Scheme",r:8.2,t:"5 years",c:"p"},{n:"National Savings Certificate",r:7.7,t:"5 years",c:"p"},{n:"Kisan Vikas Patra",r:7.5,t:"115 months",c:"o"},{n:"PO Monthly Income Scheme",r:7.4,t:"5 years",c:"o"},{n:"PO Time Deposit — 1 Yr",r:6.9,t:"1 year",c:"o"},{n:"PO Time Deposit — 2 Yr",r:7.0,t:"2 years",c:"o"},{n:"PO Time Deposit — 3 Yr",r:7.1,t:"3 years",c:"o"},{n:"PO Time Deposit — 5 Yr",r:7.5,t:"5 years",c:"o"},{n:"PO Recurring Deposit",r:6.7,t:"5 years",c:"o"},{n:"PO Savings Account",r:4.0,t:"Flexible",c:"o"}];
+const RBI_DATA=[{n:"Repo Rate",r:5.25,d:"Held steady · Feb 2026"},{n:"Standing Deposit Facility",r:5.00,d:"Repo − 25 bps"},{n:"Marginal Standing Facility",r:5.50,d:"Repo + 25 bps"},{n:"Bank Rate",r:5.50,d:"Same as MSF"},{n:"CRR",r:4.00,d:"Cash Reserve Ratio"},{n:"SLR",r:18.00,d:"Statutory Liquidity Ratio"}];
+const FD_DATA=[{b:"State Bank of India",r1:"6.25",r3:"6.30",r5:"6.05"},{b:"HDFC Bank",r1:"6.25",r3:"6.45",r5:"6.60"},{b:"ICICI Bank",r1:"6.25",r3:"6.60",r5:"6.60"},{b:"Axis Bank",r1:"6.25",r3:"6.60",r5:"6.60"},{b:"Kotak Mahindra",r1:"6.25",r3:"6.50",r5:"6.70"},{b:"Punjab National Bank",r1:"6.40",r3:"6.50",r5:"6.50"}];
+const BONDS_DATA={gsec10y:6.68,cpi:1.33,wpi:2.37,cpiMonth:"December 2025"};
+
+/* ═══════════════════════════════
+   FORMATTERS
+   ═══════════════════════════════ */
+const fINR=n=>n==null?"—":new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:2}).format(n);
+const fN=(n,d=2)=>n==null?"—":new Intl.NumberFormat("en-IN",{maximumFractionDigits:d,minimumFractionDigits:d}).format(n);
+const fCr=n=>{if(!n)return"—";if(n>=1e12)return"₹"+(n/1e12).toFixed(1)+"L Cr";if(n>=1e7)return"₹"+(n/1e7).toFixed(0)+" Cr";return fINR(n)};
+
+/* ═══════════════════════════════
+   HTML HELPERS
+   ═══════════════════════════════ */
+function skelHTML(r=3){let h='<div class="sk">';for(let i=0;i<r;i++)h+='<div class="skr"><div class="sh" style="width:42%"></div><div class="sh" style="width:26%"></div></div>';return h+'</div>'}
+function errHTML(code,title,msg,detail,hint){
+  let h=`<div class="eb"><div class="err-header"><span class="err-badge">${code}</span><span class="err-title">${title}</span></div><div class="err-msg">${msg}</div>`;
+  if(detail)h+=`<div class="err-detail">${detail}</div>`;
+  if(hint)h+=`<div class="err-hint">${hint}</div>`;
+  return h+`<button class="rtb" onclick="loadAll()">Retry</button></div>`}
+
+/* ═══════════════════════════════
+   RENDER: STATIC
+   ═══════════════════════════════ */
+function renderSavings(){const p=SAVINGS.filter(s=>s.c==="p"),o=SAVINGS.filter(s=>s.c!=="p");let h='<div class="sg">Featured Schemes</div>';p.forEach(s=>{h+=`<div class="sr"><div><div class="sn">${s.n}</div><div class="st">${s.t}</div></div><div class="srt f">${s.r}%</div></div>`});h+='<div class="sg" style="padding-top:12px">Post Office Schemes</div>';o.forEach(s=>{h+=`<div class="sr"><div><div class="sn">${s.n}</div><div class="st">${s.t}</div></div><div class="srt n">${s.r}%</div></div>`});h+='<div class="snt">Rates per GOI notification · Q1 FY2025-26</div>';document.getElementById("xSav").innerHTML=h}
+function renderRBI(){let h='';RBI_DATA.forEach(r=>{h+=`<div class="rate-row"><div><div class="rate-name">${r.n}</div><div class="rate-detail">${r.d}</div></div><div class="rate-val green">${r.r}%</div></div>`});h+='<div class="snt">RBI MPC · Feb 6, 2026 · Neutral stance · 125 bps cumulative cut in FY25-26</div>';document.getElementById("xRbi").innerHTML=h}
+function renderFD(){let h=`<div class="fd-hdr"><span style="flex:1">Bank</span><span style="width:55px;text-align:center">1 Yr</span><span style="width:55px;text-align:center">3 Yr</span><span style="width:55px;text-align:center">5 Yr</span></div>`;FD_DATA.forEach(f=>{h+=`<div class="fd-row"><div class="fd-bank">${f.b}</div><div class="fd-val">${f.r1}%</div><div class="fd-val">${f.r3}%</div><div class="fd-val">${f.r5}%</div></div>`});h+='<div class="snt">General public rates · Post Dec 2025 RBI rate cut revision · Verify with bank</div>';document.getElementById("xFd").innerHTML=h}
+function renderBonds(){const d=BONDS_DATA;let h='';h+=`<div class="rate-row"><div><div class="rate-name">10-Year G-Sec Yield</div><div class="rate-detail">Government Bond</div></div><div class="rate-val gold">${fN(d.gsec10y)}%</div></div>`;const cCol=d.cpi>6?'var(--down)':d.cpi>4?'var(--gold)':'var(--up)';h+=`<div class="rate-row"><div><div class="rate-name">CPI Inflation (YoY)</div><div class="rate-detail">Consumer Price Index</div></div><div class="rate-val" style="color:${cCol}">${fN(d.cpi)}%</div></div>`;const wCol=d.wpi>6?'var(--down)':d.wpi>4?'var(--gold)':'var(--up)';h+=`<div class="rate-row"><div><div class="rate-name">WPI Inflation (YoY)</div><div class="rate-detail">Wholesale Price Index</div></div><div class="rate-val" style="color:${wCol}">${fN(d.wpi)}%</div></div>`;h+=`<div class="snt">Latest: ${d.cpiMonth}</div>`;document.getElementById("xBond").innerHTML=h}
+
+/* ═══════════════════════════════
+   RENDER: LIVE SECTIONS
+   ═══════════════════════════════ */
+function renderIndices(d){let h='';d.forEach(v=>{const c=v.status==="up"?"up":"down",a=v.status==="up"?"▲":"▼";h+=`<div class="row"><div><div class="rl">${v.name}</div></div><div style="text-align:right"><div class="rv lg">${fN(v.value)}</div><div class="rc ${c}">${a} ${fN(Math.abs(v.change))} (${fN(Math.abs(v.changePercent))}%)</div></div></div>`});document.getElementById("xInd").innerHTML=h;document.getElementById("xIndS").innerHTML='<div class="ld"></div>'}
+
+function renderCommodities(d){let h='';d.forEach(v=>{const c=v.status==="up"?"up":"down",a=v.status==="up"?"▲":"▼";h+=`<div class="row"><div><div class="rl">${v.name}</div><div class="rsl">${v.unit||''}</div></div><div style="text-align:right"><div class="rv">${fINR(v.value)}</div><div class="rc ${c}">${a} ${fN(Math.abs(v.changePercent))}%</div></div></div>`});document.getElementById("xCom").innerHTML=h;document.getElementById("xComS").innerHTML='<div class="ld"></div>'}
+
+function renderForex(d){let h='';d.forEach(v=>{h+=`<div class="row"><div><div class="rl">${v.pair}</div></div><div style="text-align:right"><div class="rv">${fN(v.value,4)}</div>${v.noChange?'<div style="font-size:10px;color:var(--dim);margin-top:2px">Mid-market rate</div>':`<div class="rc ${v.status==="up"?"up":"down"}">${v.status==="up"?"▲":"▼"} ${fN(Math.abs(v.change),4)} (${fN(Math.abs(v.changePercent))}%)</div>`}</div></div>`});document.getElementById("xFx").innerHTML=h;document.getElementById("xFxS").innerHTML='<div class="ld"></div>'}
+
+function renderBitcoin(d){const c=d.status==="up"?"up":"down",a=d.status==="up"?"▲":"▼";let h=`<div class="btcc"><div class="btcl">Bitcoin (BTC)</div><div class="btcp">${fINR(d.priceINR)}</div><div class="btcu">≈ $${fN(d.priceUSD)}</div><div class="btcb ${c}">${a} ${fN(Math.abs(d.change24h))}% <span class="dm">24h</span></div>`;if(d.marketCap)h+=`<div class="btcm"><div><div class="btcml">Market Cap</div><div class="btcmv">${d.marketCap}</div></div></div>`;h+='</div>';document.getElementById("xBtc").innerHTML=h;document.getElementById("xBtcS").innerHTML='<div class="ld"></div>'}
+
+/* ═══════════════════════════════
+   MODE A: FREE APIS (for Netlify/external)
+   ═══════════════════════════════ */
+const PROXIES=[
+  url=>"https://corsproxy.io/?"+encodeURIComponent(url),
+  url=>"https://api.allorigins.win/raw?url="+encodeURIComponent(url),
+];
+
+async function fetchWithProxy(url){
+  for(let i=0;i<PROXIES.length;i++){
+    try{
+      const r=await fetch(PROXIES[i](url));
+      if(r.ok){const t=await r.text();return JSON.parse(t)}
+    }catch(e){if(i===PROXIES.length-1)throw e}
+  }
+  throw new Error("All CORS proxies failed")
+}
+
+async function freeYahoo(){
+  const syms=[
+    {s:"%5ENSEI",n:"Nifty 50",t:"idx"},{s:"%5EBSESN",n:"Sensex",t:"idx"},
+    {s:"GC%3DF",n:"Gold",t:"com",u:"per 10g"},{s:"SI%3DF",n:"Silver",t:"com",u:"per kg"},
+    {s:"CL%3DF",n:"Crude Oil",t:"com",u:"per barrel"},{s:"NG%3DF",n:"Natural Gas",t:"com",u:"per mmBtu"},
+  ];
+  const base="https://query1.finance.yahoo.com/v8/finance/chart/";
+  const res=await Promise.allSettled(syms.map(s=>fetchWithProxy(base+s.s+"?range=1d&interval=1d")));
+  let usdInr=86.5;try{const fx=await fetch("https://open.er-api.com/v6/latest/USD");if(fx.ok){const d=await fx.json();usdInr=d.rates?.INR||86.5}}catch(e){}
+  const TROY=31.1035;
+  const indices=[],commodities=[];
+  syms.forEach((s,i)=>{
+    if(res[i].status!=="fulfilled")return;
+    try{
+      const m=res[i].value.chart.result[0].meta;
+      const p=m.regularMarketPrice,pc=m.chartPreviousClose||m.previousClose;
+      const ch=p-pc,pct=pc?(ch/pc)*100:0,st=ch>=0?"up":"down";
+      if(s.t==="idx")indices.push({name:s.n,value:p,change:ch,changePercent:pct,status:st});
+      else{
+        let v=p*usdInr;
+        if(s.n==="Gold")v=(p/TROY)*10*usdInr;
+        if(s.n==="Silver")v=(p/TROY)*1000*usdInr;
+        commodities.push({name:s.n,value:v,unit:s.u,changePercent:pct,status:st});
+      }
+    }catch(e){}
+  });
+  return{indices,commodities};
+}
+
+async function freeForex(){
+  const r=await fetch("https://open.er-api.com/v6/latest/USD");
+  if(!r.ok)throw new Error("HTTP "+r.status);
+  const d=await r.json();const rt=d.rates;if(!rt?.INR)throw new Error("No INR");
+  return[
+    {pair:"USD / INR",value:rt.INR,change:0,changePercent:0,status:"up",noChange:true},
+    {pair:"EUR / INR",value:rt.INR/rt.EUR,change:0,changePercent:0,status:"up",noChange:true},
+    {pair:"GBP / INR",value:rt.INR/rt.GBP,change:0,changePercent:0,status:"up",noChange:true},
+  ];
+}
+
+async function freeBitcoin(){
+  const r=await fetch("https://api.coingecko.com/api/v3/coins/bitcoin?localization=false&tickers=false&community_data=false&developer_data=false&sparkline=false");
+  if(!r.ok)throw new Error("HTTP "+r.status);
+  const d=await r.json();const md=d.market_data;
+  return{priceUSD:md.current_price?.usd||0,priceINR:md.current_price?.inr||0,change24h:md.price_change_percentage_24h||0,status:(md.price_change_percentage_24h||0)>=0?"up":"down",marketCap:fCr(md.market_cap?.inr)};
+}
+
+/* ═══════════════════════════════
+   MODE B: ANTHROPIC API (for Claude.ai sandbox)
+   ═══════════════════════════════ */
+function extractJSON(t){try{return JSON.parse(t)}catch(e){}const c=t.replace(/```(?:json)?\s*/g,"").replace(/```/g,"").trim();try{return JSON.parse(c)}catch(e){}const m=c.match(/\{[\s\S]*\}/);if(m)try{return JSON.parse(m[0])}catch(e){}throw new Error("JSON parse failed")}
+
+async function anthropicFetchAll(){
+  const prompt=`Search the web for ALL of the following current Indian financial data:
+1. NSE Nifty 50 — value, point change, % change
+2. BSE Sensex — value, point change, % change
+3. MCX Gold price INR per 10g, % change
+4. MCX Silver price INR per kg, % change
+5. MCX Crude Oil price INR per barrel, % change
+6. MCX Natural Gas price INR per mmBtu, % change
+7. USD/INR exchange rate, change, % change
+8. EUR/INR exchange rate, change, % change
+9. GBP/INR exchange rate, change, % change
+10. Bitcoin price in USD and INR, 24h % change, market cap in INR
+
+Respond with ONLY this JSON (replace all zeros):
+{"indices":[{"name":"Nifty 50","value":0,"change":0,"changePercent":0,"status":"up"},{"name":"Sensex","value":0,"change":0,"changePercent":0,"status":"up"}],"commodities":[{"name":"Gold","value":0,"unit":"per 10g","changePercent":0,"status":"up"},{"name":"Silver","value":0,"unit":"per kg","changePercent":0,"status":"up"},{"name":"Crude Oil","value":0,"unit":"per barrel","changePercent":0,"status":"up"},{"name":"Natural Gas","value":0,"unit":"per mmBtu","changePercent":0,"status":"up"}],"forex":[{"pair":"USD / INR","value":0,"change":0,"changePercent":0,"status":"up"},{"pair":"EUR / INR","value":0,"change":0,"changePercent":0,"status":"up"},{"pair":"GBP / INR","value":0,"change":0,"changePercent":0,"status":"up"}],"bitcoin":{"priceUSD":0,"priceINR":0,"change24h":0,"status":"up","marketCap":"₹XX.XL Cr"}}
+Rules: status="up" if positive else "down". Values in INR except bitcoin priceUSD. ONLY JSON.`;
+
+  const resp=await fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1500,
+      system:"You are a financial data API. Search the web, then respond with ONLY raw JSON. No markdown, no backticks, no explanation.",
+      messages:[{role:"user",content:prompt}],
+      tools:[{type:"web_search_20250305",name:"web_search"}],
+    }),
+  });
+  if(!resp.ok)throw new Error("Anthropic HTTP "+resp.status);
+  const data=await resp.json();
+  if(data.error)throw new Error(data.error.message);
+  const texts=(data.content||[]).filter(b=>b.type==="text"&&b.text).map(b=>b.text);
+  if(!texts.length)throw new Error("Empty API response");
+  return extractJSON(texts.join("\n"));
+}
+
+/* ═══════════════════════════════
+   SMART LOADER: tries free → falls back to Anthropic
+   ═══════════════════════════════ */
+let gen=0;
+
+async function loadAll(){
+  const g=++gen;
+  let mode="";
+  let successCount=0,failCount=0;
+
+  // UI: loading
+  document.getElementById("sDot").className="sdot loading";
+  document.getElementById("sLbl").textContent="FETCHING DATA...";
+  const btn=document.getElementById("rBtn");btn.classList.add("sp");btn.disabled=true;
+  ["xInd","xCom","xFx","xBtc"].forEach(id=>{document.getElementById(id).innerHTML=skelHTML()});
+  ["xIndS","xComS","xFxS","xBtcS"].forEach(id=>{document.getElementById(id).innerHTML='<div class="spn"></div>'});
+
+  // Step 1: Try free APIs first (fast probe with CoinGecko)
+  let freeWorks=false;
+  try{
+    const probe=await fetch("https://api.coingecko.com/api/v3/ping");
+    freeWorks=probe.ok;
+  }catch(e){freeWorks=false}
+
+  if(g!==gen)return;
+
+  if(freeWorks){
+    // ──── MODE: FREE APIS ────
+    mode="free";
+    console.log("Mode: Free APIs (CoinGecko, Yahoo, ExchangeRate)");
+
+    // Parallel fetch all 3 sources
+    const [yahooRes, fxRes, btcRes]=await Promise.allSettled([freeYahoo(), freeForex(), freeBitcoin()]);
+    if(g!==gen)return;
+
+    // Yahoo → indices + commodities
+    if(yahooRes.status==="fulfilled"){
+      const yd=yahooRes.value;
+      if(yd.indices.length){renderIndices(yd.indices);successCount++}
+      else{document.getElementById("xInd").innerHTML=errHTML("EMPTY","No Index Data","Markets may be closed. Try during trading hours.","","");document.getElementById("xIndS").innerHTML="";failCount++}
+      if(yd.commodities.length){renderCommodities(yd.commodities);successCount++}
+      else{document.getElementById("xCom").innerHTML=errHTML("EMPTY","No Commodity Data","Yahoo returned no commodity futures data.","","");document.getElementById("xComS").innerHTML="";failCount++}
+    }else{
+      const e=yahooRes.reason;
+      console.error("Yahoo fail:",e);
+      const msg=e.message||String(e);
+      const hint=msg.includes("proxy")?"<strong>Cause:</strong> CORS proxies (corsproxy.io, allorigins.win) are down or rate-limiting. These are free community services.":"<strong>Cause:</strong> Yahoo Finance may have changed their API format or be temporarily unavailable.";
+      document.getElementById("xInd").innerHTML=errHTML("YAHOO","Yahoo Finance Error","Could not fetch stock indices.",msg,hint);
+      document.getElementById("xCom").innerHTML=errHTML("YAHOO","Yahoo Finance Error","Could not fetch commodity prices.",msg,hint);
+      ["xIndS","xComS"].forEach(id=>{document.getElementById(id).innerHTML=""});
+      failCount+=2;
+    }
+
+    // Forex
+    if(fxRes.status==="fulfilled"){renderForex(fxRes.value);successCount++}
+    else{
+      console.error("Forex fail:",fxRes.reason);
+      document.getElementById("xFx").innerHTML=errHTML("FOREX","Exchange Rate Error","Could not fetch forex rates.",fxRes.reason?.message||"","<strong>Cause:</strong> open.er-api.com may be temporarily down or has hit its daily limit (free tier: 1,500 requests/month).");
+      document.getElementById("xFxS").innerHTML="";failCount++;
+    }
+
+    // Bitcoin
+    if(btcRes.status==="fulfilled"){renderBitcoin(btcRes.value);successCount++}
+    else{
+      console.error("BTC fail:",btcRes.reason);
+      const msg=btcRes.reason?.message||"";
+      document.getElementById("xBtc").innerHTML=errHTML(msg.includes("429")?"429":"API",msg.includes("429")?"Rate Limited":"CoinGecko Error","Could not fetch Bitcoin price.",msg,msg.includes("429")?"<strong>Cause:</strong> CoinGecko free API rate limit (~30 req/min). Wait a minute.":"<strong>Cause:</strong> CoinGecko API may be temporarily unavailable.");
+      document.getElementById("xBtcS").innerHTML="";failCount++;
+    }
+
+  }else{
+    // ──── MODE: ANTHROPIC API (Claude.ai sandbox) ────
+    mode="api";
+    console.log("Mode: Anthropic API fallback (Claude.ai sandbox detected)");
+
+    try{
+      const r=await anthropicFetchAll();
+      if(g!==gen)return;
+
+      const sections=[
+        {k:"indices",el:"xInd",fn:renderIndices,l:"Stock Indices"},
+        {k:"commodities",el:"xCom",fn:renderCommodities,l:"Commodities"},
+        {k:"forex",el:"xFx",fn:renderForex,l:"Forex"},
+        {k:"bitcoin",el:"xBtc",fn:renderBitcoin,l:"Bitcoin"},
+      ];
+      sections.forEach(s=>{
+        if(r[s.k]){try{s.fn(r[s.k]);successCount++}catch(e){
+          document.getElementById(s.el).innerHTML=errHTML("RENDER",s.l+" Error","Data received but display failed.",e.message,"<strong>Tip:</strong> Click Retry.");failCount++;
+        }}else{
+          document.getElementById(s.el).innerHTML=errHTML("MISSING","No "+s.l,"The API didn't return this data.","Keys found: "+Object.keys(r).join(", "),"<strong>Tip:</strong> Retry often fixes this.");
+          document.getElementById(s.el.replace("x","x")+"S") // status
+          failCount++;
+        }
+      });
+    }catch(e){
+      if(g!==gen)return;
+      console.error("Anthropic fail:",e);
+      const msg=e.message||String(e);
+      const hint=msg.includes("401")?"<strong>Cause:</strong> Not running inside Claude.ai and no API key available."
+        :msg.includes("429")?"<strong>Cause:</strong> Rate limited. Wait a moment."
+        :"<strong>Cause:</strong> Both free APIs (blocked by sandbox) and Anthropic API failed. Try refreshing.";
+      ["xInd","xCom","xFx","xBtc"].forEach(id=>{document.getElementById(id).innerHTML=errHTML("FAIL","All Sources Failed","Could not load data from any source.",msg,hint)});
+      ["xIndS","xComS","xFxS","xBtcS"].forEach(id=>{document.getElementById(id).innerHTML=""});
+      failCount=4;
+    }
+  }
+
+  if(g!==gen)return;
+
+  // Final status
+  btn.classList.remove("sp");btn.disabled=false;
+  document.getElementById("ts").textContent=new Date().toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  const tag=document.getElementById("modeTag");
+  tag.style.display="inline-block";
+  tag.className="mode-tag "+(mode==="free"?"free":"api");
+  tag.textContent=mode==="free"?"FREE APIs":"CLAUDE AI";
+
+  if(failCount===0){
+    document.getElementById("sDot").className="sdot live";
+    document.getElementById("sLbl").textContent="LIVE";
+  }else if(successCount>0){
+    document.getElementById("sDot").className="sdot partial";
+    document.getElementById("sLbl").textContent=`PARTIAL · ${failCount} failed`;
+  }else{
+    document.getElementById("sDot").className="sdot err";
+    document.getElementById("sLbl").textContent="ALL FAILED";
+  }
+
+  document.getElementById("footerText").textContent=
+    (mode==="free"?"Sources: Yahoo Finance · CoinGecko · ExchangeRate API":"Source: Anthropic Claude AI + web search")
+    +" · Static: RBI / GOI Gazette · For informational purposes only";
+}
+
+/* ═══════════════════════════════
+   INIT
+   ═══════════════════════════════ */
+renderSavings();renderRBI();renderFD();renderBonds();loadAll();
+</script>
+</body>
+</html>

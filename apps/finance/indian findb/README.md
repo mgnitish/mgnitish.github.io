@@ -1,0 +1,1 @@
+Track India's financial pulse in real time — Nifty, Sensex, gold, forex, Bitcoin, and more — all on one page. Compare bank FD rates, government savings schemes, and RBI policy rates alongside live market data, no login or API keys required."

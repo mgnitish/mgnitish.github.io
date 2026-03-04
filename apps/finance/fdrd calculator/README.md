@@ -1,0 +1,1 @@
+Effortlessly project your savings growth with precision tools designed for calculating Fixed and Recurring Deposit returns. Gain instant clarity on your wealth with real-time interest breakdowns and interactive visualization of your compounding journey.
