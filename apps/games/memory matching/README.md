@@ -1,0 +1,2 @@
+**NEON MATCH is a solo cyberpunk-themed memory card matching game playable across 8 categories (Animals, Fruits, Games, Currency, Emojis, Space, Food, Nature) with 3 difficulty levels (Easy, Medium, Hard).**
+Built as a single self-contained HTML file with a neon glow aesthetic, 3D card flip animations, move counter, best-score tracking, and a compact device-frame layout fully optimized for mobile screens.
