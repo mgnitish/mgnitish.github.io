@@ -1,0 +1,1 @@
+       A comprehensive financial tool that estimates your credit score (300-850) based on payment history, credit utilization, and other factors, then calculates your eligibility for personal loans, home loans, and auto loans based on realistic income multiples and DTI ratios. Features real-time calculations, interactive charts and a pleasing dark mode

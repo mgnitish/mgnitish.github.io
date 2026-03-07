@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Score & Loan Eligibility Calculator - India</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Tailwind configuration for dark mode
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <style>
+        /* Custom animations and transitions */
+        .gauge-container {
+            position: relative;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slider-track {
+            background: linear-gradient(to right, #ef4444, #f59e0b, #10b981);
+        }
+        
+        /* Custom scrollbar for dark mode */
+        .dark-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .dark-scrollbar::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        
+        .dark-scrollbar::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+        
+        .dark-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300 dark-scrollbar">
+    <!-- Header with Dark Mode Toggle -->
+    <header class="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50 transition-colors duration-300">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                    </svg>
+                    <h1 class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Credit Score Calculator (India)</h1>
+                </div>
+                <button id="darkModeToggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                    <svg id="sunIcon" class="w-6 h-6 text-gray-800 dark:text-gray-200 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                    <svg id="moonIcon" class="w-6 h-6 text-gray-800 dark:text-gray-200 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- Progress Indicator -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Step <span id="currentStep">1</span> of 3</span>
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300"><span id="progressPercent">33</span>%</span>
+            </div>
+            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div id="progressBar" class="bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: 33%"></div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Column - Input Forms -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- Step 1: Credit Score Factors -->
+                <div id="step1" class="step-container bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 transition-colors duration-300">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Credit Score Factors</h2>
+                    
+                    <!-- Payment History -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Payment History (35% weight)
+                            <span class="text-blue-600 dark:text-blue-400 font-semibold ml-2" id="paymentHistoryValue">100%</span>
+                        </label>
+                        <input type="range" id="paymentHistory" min="0" max="100" value="100" class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider-track">
+                        <div class="flex justify-between text-xs text-gray-600 dark:text-gray-400 mt-1">
+                            <span>Many Late Payments</span>
+                            <span>Always On-Time</span>
+                        </div>
+                    </div>
+
+                    <!-- Credit Utilization -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Credit Utilization (30% weight)
+                            <span class="text-blue-600 dark:text-blue-400 font-semibold ml-2" id="utilizationValue">10%</span>
+                        </label>
+                        <input type="range" id="creditUtilization" min="0" max="100" value="10" class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                        <div class="flex justify-between text-xs text-gray-600 dark:text-gray-400 mt-1">
+                            <span>0% Used</span>
+                            <span>100% Maxed Out</span>
+                        </div>
+                    </div>
+
+                    <!-- Credit History Length -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Length of Credit History (15% weight)
+                            <span class="text-blue-600 dark:text-blue-400 font-semibold ml-2" id="historyLengthValue">10 years</span>
+                        </label>
+                        <input type="range" id="creditHistoryLength" min="0" max="30" value="10" class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                        <div class="flex justify-between text-xs text-gray-600 dark:text-gray-400 mt-1">
+                            <span>0 years</span>
+                            <span>30+ years</span>
+                        </div>
+                    </div>
+
+                    <!-- Recent Inquiries -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Recent Credit Inquiries (10% weight)
+                            <span class="text-blue-600 dark:text-blue-400 font-semibold ml-2" id="inquiriesValue">0</span>
+                        </label>
+                        <input type="range" id="recentInquiries" min="0" max="10" value="0" class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                        <div class="flex justify-between text-xs text-gray-600 dark:text-gray-400 mt-1">
+                            <span>0 inquiries</span>
+                            <span>10+ inquiries</span>
+                        </div>
+                    </div>
+
+                    <button onclick="nextStep()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200">
+                        Next: Financial Information
+                    </button>
+                </div>
+
+                <!-- Step 2: Financial Information -->
+                <div id="step2" class="step-container bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 transition-colors duration-300 hidden">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Financial Information</h2>
+                    
+                    <!-- Monthly Income -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Monthly Gross Income
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-3 text-gray-500 dark:text-gray-400">₹</span>
+                            <input type="number" id="monthlyIncome" value="50000" min="0" step="1000" 
+                                class="w-full pl-8 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-gray-900 dark:text-white">
+                        </div>
+                    </div>
+
+                    <!-- Existing Monthly Debt -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Existing Monthly Debt Payments
+                            <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">(rent, car, credit cards, etc.)</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-3 text-gray-500 dark:text-gray-400">₹</span>
+                            <input type="number" id="monthlyDebt" value="15000" min="0" step="1000" 
+                                class="w-full pl-8 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-gray-900 dark:text-white">
+                        </div>
+                    </div>
+
+                    <!-- Current DTI Display -->
+                    <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Current Debt-to-Income Ratio:</span>
+                            <span id="currentDTI" class="text-2xl font-bold text-blue-600 dark:text-blue-400">30%</span>
+                        </div>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                            Lower DTI ratios indicate better financial health. Most lenders prefer DTI below 36%.
+                        </p>
+                    </div>
+
+                    <div class="flex space-x-4">
+                        <button onclick="prevStep()" class="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200">
+                            Back
+                        </button>
+                        <button onclick="nextStep()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200">
+                            Calculate Results
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Results -->
+                <div id="step3" class="step-container bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 transition-colors duration-300 hidden">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Loan Eligibility Results</h2>
+                    
+                    <!-- Info Box -->
+                    <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <div class="text-sm text-gray-700 dark:text-gray-300">
+                                <p class="font-semibold mb-1">Loan amounts calculated based on your income:</p>
+                                <ul class="list-disc list-inside space-y-1 text-xs">
+                                    <li>Personal Loans: 15-25× monthly income</li>
+                                    <li>Home Loans: 3-6× annual income</li>
+                                    <li>Auto Loans: 1.5-3× annual income</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Loan Cards -->
+                    <div class="space-y-4" id="loanResults">
+                        <!-- Loan cards will be inserted here by JavaScript -->
+                    </div>
+
+                    <div class="mt-6 flex space-x-4">
+                        <button onclick="prevStep()" class="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200">
+                            Back
+                        </button>
+                        <button onclick="resetCalculator()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200">
+                            Start Over
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Score Display & Chart -->
+            <div class="lg:col-span-1 space-y-6">
+                
+                <!-- Credit Score Gauge -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 transition-colors duration-300 sticky top-24">
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Your Estimated Credit Score</h3>
+                    
+                    <!-- Gauge Chart -->
+                    <div class="gauge-container mb-4">
+                        <canvas id="gaugeChart"></canvas>
+                    </div>
+                    
+                    <!-- Score Number -->
+                    <div class="text-center mb-4">
+                        <div id="creditScore" class="text-5xl font-bold text-blue-600 dark:text-blue-400">750</div>
+                        <div id="scoreRating" class="text-lg font-medium text-gray-600 dark:text-gray-400 mt-2">Very Good</div>
+                    </div>
+
+                    <!-- Score Breakdown Chart -->
+                    <div class="mt-6">
+                        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Score Breakdown</h4>
+                        <canvas id="breakdownChart" class="max-h-64"></canvas>
+                    </div>
+
+                    <!-- Score Range Legend -->
+                    <div class="mt-6 space-y-2 text-xs">
+                        <div class="flex items-center justify-between">
+                            <span class="flex items-center">
+                                <span class="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
+                                Poor
+                            </span>
+                            <span class="text-gray-600 dark:text-gray-400">300-579</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="flex items-center">
+                                <span class="w-3 h-3 bg-orange-500 rounded-full mr-2"></span>
+                                Fair
+                            </span>
+                            <span class="text-gray-600 dark:text-gray-400">580-669</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="flex items-center">
+                                <span class="w-3 h-3 bg-yellow-500 rounded-full mr-2"></span>
+                                Good
+                            </span>
+                            <span class="text-gray-600 dark:text-gray-400">670-739</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="flex items-center">
+                                <span class="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+                                Very Good
+                            </span>
+                            <span class="text-gray-600 dark:text-gray-400">740-799</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="flex items-center">
+                                <span class="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
+                                Excellent
+                            </span>
+                            <span class="text-gray-600 dark:text-gray-400">800-850</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-12 py-6 transition-colors duration-300">
+        <div class="container mx-auto px-4 text-center text-sm text-gray-600 dark:text-gray-400">
+            <p>This calculator provides estimates based on Indian lending standards. Actual credit scores and loan eligibility may vary.</p>
+            <p class="mt-2">Interest rates are approximate and subject to lender policies. Consult with a financial advisor for personalized advice.</p>
+        </div>
+    </footer>
+
+    <script>
+        // ========================================
+        // GLOBAL STATE MANAGEMENT
+        // ========================================
+        let currentStepNum = 1;
+        let gaugeChart = null;
+        let breakdownChart = null;
+        
+        // ========================================
+        // DARK MODE FUNCTIONALITY
+        // ========================================
+        function initDarkMode() {
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            const htmlElement = document.documentElement;
+            
+            // Check for saved preference or default to light mode
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            if (savedTheme === 'dark') {
+                htmlElement.classList.add('dark');
+            }
+            
+            darkModeToggle.addEventListener('click', () => {
+                htmlElement.classList.toggle('dark');
+                const newTheme = htmlElement.classList.contains('dark') ? 'dark' : 'light';
+                localStorage.setItem('theme', newTheme);
+                
+                // Update charts with new theme colors
+                updateChartColors();
+            });
+        }
+        
+        // ========================================
+        // CREDIT SCORE CALCULATION ENGINE
+        // ========================================
+        
+        /**
+         * Calculate credit score based on multiple factors
+         * Uses industry-standard weights:
+         * - Payment History: 35%
+         * - Credit Utilization: 30%
+         * - Length of History: 15%
+         * - New Credit (Inquiries): 10%
+         * - Credit Mix: 10% (not captured in this simplified model)
+         * 
+         * @returns {number} Estimated credit score (300-850)
+         */
+        function calculateCreditScore() {
+            // Get input values
+            const paymentHistory = parseFloat(document.getElementById('paymentHistory').value);
+            const creditUtilization = parseFloat(document.getElementById('creditUtilization').value);
+            const historyLength = parseFloat(document.getElementById('creditHistoryLength').value);
+            const inquiries = parseFloat(document.getElementById('recentInquiries').value);
+            
+            // Payment History Component (35% weight)
+            // Scale: 100% on-time = 300 points, 0% = 0 points
+            const paymentScore = (paymentHistory / 100) * 300;
+            
+            // Credit Utilization Component (30% weight)
+            // Lower is better: 0% = 260 points, 100% = 0 points
+            // Optimal utilization is below 30%
+            const utilizationScore = (1 - (creditUtilization / 100)) * 260;
+            
+            // Credit History Length Component (15% weight)
+            // Longer is better: 30 years = 130 points, 0 years = 0 points
+            const historyScore = (historyLength / 30) * 130;
+            
+            // Recent Inquiries Component (10% weight)
+            // Fewer is better: 0 inquiries = 90 points, 10+ = 0 points
+            const inquiryScore = (1 - (inquiries / 10)) * 90;
+            
+            // Credit Mix Component (10% weight)
+            // Simplified assumption: give 70 points as baseline
+            const mixScore = 70;
+            
+            // Calculate total score (base 300 + components)
+            let totalScore = 300 + paymentScore + utilizationScore + historyScore + inquiryScore + mixScore;
+            
+            // Ensure score is within valid range
+            totalScore = Math.max(300, Math.min(850, Math.round(totalScore)));
+            
+            return totalScore;
+        }
+        
+        /**
+         * Get credit score rating and color based on score
+         * @param {number} score - Credit score (300-850)
+         * @returns {object} Rating info with text and color
+         */
+        function getScoreRating(score) {
+            if (score >= 800) return { text: 'Excellent', color: '#3b82f6', bgColor: '#dbeafe' };
+            if (score >= 740) return { text: 'Very Good', color: '#10b981', bgColor: '#d1fae5' };
+            if (score >= 670) return { text: 'Good', color: '#eab308', bgColor: '#fef9c3' };
+            if (score >= 580) return { text: 'Fair', color: '#f97316', bgColor: '#ffedd5' };
+            return { text: 'Poor', color: '#ef4444', bgColor: '#fee2e2' };
+        }
+        
+        // ========================================
+        // LOAN ELIGIBILITY CALCULATION
+        // ========================================
+        
+        /**
+         * Calculate Debt-to-Income ratio
+         * @param {number} monthlyIncome - Gross monthly income
+         * @param {number} monthlyDebt - Total monthly debt payments
+         * @returns {number} DTI ratio as percentage
+         */
+        function calculateDTI(monthlyIncome, monthlyDebt) {
+            if (monthlyIncome <= 0) return 0;
+            return ((monthlyDebt / monthlyIncome) * 100).toFixed(1);
+        }
+        
+        /**
+         * Determine loan eligibility based on credit score, DTI, and income
+         * @param {number} creditScore - Estimated credit score
+         * @param {number} dti - Debt-to-income ratio
+         * @param {number} monthlyIncome - Monthly gross income
+         * @returns {array} Array of loan eligibility objects
+         */
+        function determineLoanEligibility(creditScore, dti, monthlyIncome) {
+            const loans = [];
+            
+            // Personal Loan Eligibility
+            // Criteria: Score >= 580, DTI <= 43%
+            // Loan amount based on 15-25x monthly income
+            // Better rates with score >= 700, DTI <= 36%
+            const personalLoan = {
+                type: 'Personal Loan',
+                icon: '💳',
+                eligible: false,
+                message: '',
+                maxAmount: 0,
+                estimatedRate: 0
+            };
+            
+            if (creditScore >= 700 && dti <= 36) {
+                personalLoan.eligible = true;
+                personalLoan.message = 'Excellent eligibility';
+                personalLoan.maxAmount = Math.min(monthlyIncome * 25, 2500000); // Max 25x income or ₹25 Lakhs
+                personalLoan.estimatedRate = '10.5% - 14.0%';
+            } else if (creditScore >= 640 && dti <= 40) {
+                personalLoan.eligible = true;
+                personalLoan.message = 'Good eligibility';
+                personalLoan.maxAmount = Math.min(monthlyIncome * 20, 2000000); // Max 20x income or ₹20 Lakhs
+                personalLoan.estimatedRate = '14.0% - 18.0%';
+            } else if (creditScore >= 580 && dti <= 43) {
+                personalLoan.eligible = true;
+                personalLoan.message = 'May qualify with higher rates';
+                personalLoan.maxAmount = Math.min(monthlyIncome * 15, 1500000); // Max 15x income or ₹15 Lakhs
+                personalLoan.estimatedRate = '18.0% - 24.0%';
+            } else {
+                personalLoan.message = creditScore < 580 ? 
+                    'Credit score too low (minimum 580)' : 
+                    'DTI too high (maximum 43%)';
+            }
+            loans.push(personalLoan);
+            
+            // Home Loan (Mortgage) Eligibility
+            // Criteria: Score >= 620, DTI <= 43% (standard)
+            // Loan amount based on 3-6x annual income
+            // Budget loans: Score >= 580, DTI <= 50%
+            const homeLoan = {
+                type: 'Home Loan',
+                icon: '🏠',
+                eligible: false,
+                message: '',
+                maxAmount: 0,
+                estimatedRate: 0
+            };
+            
+            if (creditScore >= 740 && dti <= 36) {
+                homeLoan.eligible = true;
+                homeLoan.message = 'Excellent eligibility - Best rates';
+                homeLoan.maxAmount = Math.min(monthlyIncome * 12 * 6, 10000000); // Max 6x annual income or ₹1 Crore
+                homeLoan.estimatedRate = '8.5% - 9.0%';
+            } else if (creditScore >= 670 && dti <= 43) {
+                homeLoan.eligible = true;
+                homeLoan.message = 'Good eligibility - Standard home loan';
+                homeLoan.maxAmount = Math.min(monthlyIncome * 12 * 5, 7500000); // Max 5x annual income or ₹75 Lakhs
+                homeLoan.estimatedRate = '9.0% - 9.5%';
+            } else if (creditScore >= 620 && dti <= 43) {
+                homeLoan.eligible = true;
+                homeLoan.message = 'May qualify - Higher rates';
+                homeLoan.maxAmount = Math.min(monthlyIncome * 12 * 4, 5000000); // Max 4x annual income or ₹50 Lakhs
+                homeLoan.estimatedRate = '9.5% - 10.5%';
+            } else if (creditScore >= 580 && dti <= 50) {
+                homeLoan.eligible = true;
+                homeLoan.message = 'Budget home loan possible';
+                homeLoan.maxAmount = Math.min(monthlyIncome * 12 * 3, 3000000); // Max 3x annual income or ₹30 Lakhs
+                homeLoan.estimatedRate = '10.0% - 11.5%';
+            } else {
+                homeLoan.message = creditScore < 580 ? 
+                    'Credit score too low (minimum 580 required)' : 
+                    'DTI too high (maximum 50%)';
+            }
+            loans.push(homeLoan);
+            
+            // Auto Loan Eligibility
+            // Criteria: Score >= 500, DTI <= 45%
+            // Loan amount based on 1.5-3x annual income
+            const autoLoan = {
+                type: 'Auto Loan',
+                icon: '🚗',
+                eligible: false,
+                message: '',
+                maxAmount: 0,
+                estimatedRate: 0
+            };
+            
+            if (creditScore >= 720 && dti <= 36) {
+                autoLoan.eligible = true;
+                autoLoan.message = 'Excellent eligibility - Best rates';
+                autoLoan.maxAmount = Math.min(monthlyIncome * 12 * 3, 2500000); // Max 3x annual income or ₹25 Lakhs
+                autoLoan.estimatedRate = '8.5% - 10.0%';
+            } else if (creditScore >= 660 && dti <= 40) {
+                autoLoan.eligible = true;
+                autoLoan.message = 'Good eligibility';
+                autoLoan.maxAmount = Math.min(monthlyIncome * 12 * 2.5, 2000000); // Max 2.5x annual income or ₹20 Lakhs
+                autoLoan.estimatedRate = '10.0% - 12.5%';
+            } else if (creditScore >= 580 && dti <= 45) {
+                autoLoan.eligible = true;
+                autoLoan.message = 'May qualify - Higher rates';
+                autoLoan.maxAmount = Math.min(monthlyIncome * 12 * 2, 1500000); // Max 2x annual income or ₹15 Lakhs
+                autoLoan.estimatedRate = '12.5% - 16.0%';
+            } else if (creditScore >= 500 && dti <= 45) {
+                autoLoan.eligible = true;
+                autoLoan.message = 'Subprime rates - Limited options';
+                autoLoan.maxAmount = Math.min(monthlyIncome * 12 * 1.5, 1000000); // Max 1.5x annual income or ₹10 Lakhs
+                autoLoan.estimatedRate = '16.0% - 20.0%';
+            } else {
+                autoLoan.message = creditScore < 500 ? 
+                    'Credit score too low (minimum 500)' : 
+                    'DTI too high (maximum 45%)';
+            }
+            loans.push(autoLoan);
+            
+            return loans;
+        }
+        
+        // ========================================
+        // CHART RENDERING
+        // ========================================
+        
+        /**
+         * Create or update the gauge chart showing credit score
+         */
+        function updateGaugeChart() {
+            const score = calculateCreditScore();
+            const rating = getScoreRating(score);
+            const isDark = document.documentElement.classList.contains('dark');
+            
+            const ctx = document.getElementById('gaugeChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (gaugeChart) {
+                gaugeChart.destroy();
+            }
+            
+            // Create gauge using doughnut chart
+            gaugeChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [score - 300, 850 - score],
+                        backgroundColor: [
+                            rating.color,
+                            isDark ? '#374151' : '#e5e7eb'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    circumference: 180,
+                    rotation: 270,
+                    cutout: '75%',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: false
+                        }
+                    }
+                }
+            });
+            
+            // Update score display
+            document.getElementById('creditScore').textContent = score;
+            document.getElementById('creditScore').style.color = rating.color;
+            document.getElementById('scoreRating').textContent = rating.text;
+        }
+        
+        /**
+         * Update the breakdown chart showing factor contributions
+         */
+        function updateBreakdownChart() {
+            const paymentHistory = parseFloat(document.getElementById('paymentHistory').value);
+            const creditUtilization = parseFloat(document.getElementById('creditUtilization').value);
+            const historyLength = parseFloat(document.getElementById('creditHistoryLength').value);
+            const inquiries = parseFloat(document.getElementById('recentInquiries').value);
+            const isDark = document.documentElement.classList.contains('dark');
+            
+            const ctx = document.getElementById('breakdownChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (breakdownChart) {
+                breakdownChart.destroy();
+            }
+            
+            // Calculate component scores (0-100 scale for visualization)
+            const paymentScore = paymentHistory;
+            const utilizationScore = 100 - creditUtilization;
+            const historyScore = (historyLength / 30) * 100;
+            const inquiryScore = (1 - (inquiries / 10)) * 100;
+            
+            breakdownChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Payment History', 'Credit Utilization', 'History Length', 'Inquiries'],
+                    datasets: [{
+                        label: 'Factor Score',
+                        data: [paymentScore, utilizationScore, historyScore, inquiryScore],
+                        backgroundColor: [
+                            '#3b82f6',
+                            '#10b981',
+                            '#f59e0b',
+                            '#ef4444'
+                        ],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                color: isDark ? '#9ca3af' : '#4b5563'
+                            },
+                            grid: {
+                                color: isDark ? '#374151' : '#e5e7eb'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: isDark ? '#9ca3af' : '#4b5563',
+                                font: {
+                                    size: 11
+                                }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.parsed.x.toFixed(0) + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        /**
+         * Update chart colors when theme changes
+         */
+        function updateChartColors() {
+            updateGaugeChart();
+            updateBreakdownChart();
+        }
+        
+        // ========================================
+        // STEP NAVIGATION
+        // ========================================
+        
+        function nextStep() {
+            if (currentStepNum < 3) {
+                // Hide current step
+                document.getElementById(`step${currentStepNum}`).classList.add('hidden');
+                
+                // Increment step
+                currentStepNum++;
+                
+                // Show next step
+                document.getElementById(`step${currentStepNum}`).classList.remove('hidden');
+                document.getElementById(`step${currentStepNum}`).classList.add('fade-in');
+                
+                // Update progress
+                updateProgress();
+                
+                // If moving to step 3, calculate and display results
+                if (currentStepNum === 3) {
+                    displayResults();
+                }
+                
+                // Save state
+                saveState();
+            }
+        }
+        
+        function prevStep() {
+            if (currentStepNum > 1) {
+                // Hide current step
+                document.getElementById(`step${currentStepNum}`).classList.add('hidden');
+                
+                // Decrement step
+                currentStepNum--;
+                
+                // Show previous step
+                document.getElementById(`step${currentStepNum}`).classList.remove('hidden');
+                document.getElementById(`step${currentStepNum}`).classList.add('fade-in');
+                
+                // Update progress
+                updateProgress();
+                
+                // Save state
+                saveState();
+            }
+        }
+        
+        function updateProgress() {
+            const percent = (currentStepNum / 3) * 100;
+            document.getElementById('progressBar').style.width = `${percent}%`;
+            document.getElementById('currentStep').textContent = currentStepNum;
+            document.getElementById('progressPercent').textContent = Math.round(percent);
+        }
+        
+        // ========================================
+        // RESULTS DISPLAY
+        // ========================================
+        
+        function displayResults() {
+            const creditScore = calculateCreditScore();
+            const monthlyIncome = parseFloat(document.getElementById('monthlyIncome').value);
+            const monthlyDebt = parseFloat(document.getElementById('monthlyDebt').value);
+            const dti = parseFloat(calculateDTI(monthlyIncome, monthlyDebt));
+            
+            const loans = determineLoanEligibility(creditScore, dti, monthlyIncome);
+            const resultsContainer = document.getElementById('loanResults');
+            
+            // Clear previous results
+            resultsContainer.innerHTML = '';
+            
+            // Create loan cards
+            loans.forEach(loan => {
+                const card = document.createElement('div');
+                card.className = `p-5 rounded-lg border-2 ${
+                    loan.eligible 
+                        ? 'bg-green-50 dark:bg-green-900/20 border-green-500 dark:border-green-700' 
+                        : 'bg-red-50 dark:bg-red-900/20 border-red-500 dark:border-red-700'
+                }`;
+                
+                card.innerHTML = `
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex items-center">
+                            <span class="text-3xl mr-3">${loan.icon}</span>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">${loan.type}</h3>
+                                <p class="text-sm ${loan.eligible ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}">
+                                    ${loan.message}
+                                </p>
+                            </div>
+                        </div>
+                        <span class="text-2xl">
+                            ${loan.eligible ? '✅' : '❌'}
+                        </span>
+                    </div>
+                    ${loan.eligible ? `
+                        <div class="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-300 dark:border-gray-600">
+                            <div>
+                                <p class="text-xs text-gray-600 dark:text-gray-400">Max Amount</p>
+                                <p class="text-lg font-semibold text-gray-900 dark:text-white">₹${loan.maxAmount.toLocaleString('en-IN')}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-600 dark:text-gray-400">Est. Interest Rate</p>
+                                <p class="text-lg font-semibold text-gray-900 dark:text-white">${loan.estimatedRate}</p>
+                            </div>
+                        </div>
+                    ` : ''}
+                `;
+                
+                resultsContainer.appendChild(card);
+            });
+        }
+        
+        // ========================================
+        // LOCAL STORAGE MANAGEMENT
+        // ========================================
+        
+        /**
+         * Save current state to localStorage
+         */
+        function saveState() {
+            const state = {
+                currentStep: currentStepNum,
+                paymentHistory: document.getElementById('paymentHistory').value,
+                creditUtilization: document.getElementById('creditUtilization').value,
+                creditHistoryLength: document.getElementById('creditHistoryLength').value,
+                recentInquiries: document.getElementById('recentInquiries').value,
+                monthlyIncome: document.getElementById('monthlyIncome').value,
+                monthlyDebt: document.getElementById('monthlyDebt').value
+            };
+            localStorage.setItem('creditCalculatorState', JSON.stringify(state));
+        }
+        
+        /**
+         * Load saved state from localStorage
+         */
+        function loadState() {
+            const savedState = localStorage.getItem('creditCalculatorState');
+            if (savedState) {
+                const state = JSON.parse(savedState);
+                
+                // Restore input values
+                document.getElementById('paymentHistory').value = state.paymentHistory || 100;
+                document.getElementById('creditUtilization').value = state.creditUtilization || 10;
+                document.getElementById('creditHistoryLength').value = state.creditHistoryLength || 10;
+                document.getElementById('recentInquiries').value = state.recentInquiries || 0;
+                document.getElementById('monthlyIncome').value = state.monthlyIncome || 50000;
+                document.getElementById('monthlyDebt').value = state.monthlyDebt || 15000;
+                
+                // Update displays
+                updateAllDisplays();
+            }
+        }
+        
+        /**
+         * Reset calculator to default state
+         */
+        function resetCalculator() {
+            // Clear localStorage
+            localStorage.removeItem('creditCalculatorState');
+            
+            // Reset to step 1
+            document.getElementById(`step${currentStepNum}`).classList.add('hidden');
+            currentStepNum = 1;
+            document.getElementById('step1').classList.remove('hidden');
+            updateProgress();
+            
+            // Reset all inputs to defaults
+            document.getElementById('paymentHistory').value = 100;
+            document.getElementById('creditUtilization').value = 10;
+            document.getElementById('creditHistoryLength').value = 10;
+            document.getElementById('recentInquiries').value = 0;
+            document.getElementById('monthlyIncome').value = 50000;
+            document.getElementById('monthlyDebt').value = 15000;
+            
+            // Update all displays
+            updateAllDisplays();
+        }
+        
+        // ========================================
+        // INPUT HANDLERS & REAL-TIME UPDATES
+        // ========================================
+        
+        function setupInputHandlers() {
+            // Payment History slider
+            document.getElementById('paymentHistory').addEventListener('input', (e) => {
+                document.getElementById('paymentHistoryValue').textContent = `${e.target.value}%`;
+                updateGaugeChart();
+                updateBreakdownChart();
+                saveState();
+            });
+            
+            // Credit Utilization slider
+            document.getElementById('creditUtilization').addEventListener('input', (e) => {
+                document.getElementById('utilizationValue').textContent = `${e.target.value}%`;
+                updateGaugeChart();
+                updateBreakdownChart();
+                saveState();
+            });
+            
+            // Credit History Length slider
+            document.getElementById('creditHistoryLength').addEventListener('input', (e) => {
+                document.getElementById('historyLengthValue').textContent = `${e.target.value} years`;
+                updateGaugeChart();
+                updateBreakdownChart();
+                saveState();
+            });
+            
+            // Recent Inquiries slider
+            document.getElementById('recentInquiries').addEventListener('input', (e) => {
+                document.getElementById('inquiriesValue').textContent = e.target.value;
+                updateGaugeChart();
+                updateBreakdownChart();
+                saveState();
+            });
+            
+            // Financial inputs
+            document.getElementById('monthlyIncome').addEventListener('input', () => {
+                updateDTIDisplay();
+                saveState();
+            });
+            
+            document.getElementById('monthlyDebt').addEventListener('input', () => {
+                updateDTIDisplay();
+                saveState();
+            });
+        }
+        
+        function updateDTIDisplay() {
+            const income = parseFloat(document.getElementById('monthlyIncome').value) || 0;
+            const debt = parseFloat(document.getElementById('monthlyDebt').value) || 0;
+            const dti = calculateDTI(income, debt);
+            document.getElementById('currentDTI').textContent = `${dti}%`;
+        }
+        
+        function updateAllDisplays() {
+            // Update slider value displays
+            document.getElementById('paymentHistoryValue').textContent = 
+                `${document.getElementById('paymentHistory').value}%`;
+            document.getElementById('utilizationValue').textContent = 
+                `${document.getElementById('creditUtilization').value}%`;
+            document.getElementById('historyLengthValue').textContent = 
+                `${document.getElementById('creditHistoryLength').value} years`;
+            document.getElementById('inquiriesValue').textContent = 
+                document.getElementById('recentInquiries').value;
+            
+            // Update charts
+            updateGaugeChart();
+            updateBreakdownChart();
+            
+            // Update DTI
+            updateDTIDisplay();
+        }
+        
+        // ========================================
+        // INITIALIZATION
+        // ========================================
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize dark mode
+            initDarkMode();
+            
+            // Load saved state
+            loadState();
+            
+            // Setup input handlers
+            setupInputHandlers();
+            
+            // Initialize charts
+            updateGaugeChart();
+            updateBreakdownChart();
+            
+            // Update DTI display
+            updateDTIDisplay();
+            
+            console.log('Credit Score Calculator initialized successfully');
+        });
+    </script>
+</body>
+</html>
