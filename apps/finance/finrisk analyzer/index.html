@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Risk-O-Meter</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root{--bg:#0c1220;--card:#111827;--border:#1e2d45;--text:#f1f5f9;--muted:#64829e;--highlight:#2563eb;--low:#10b981;--mid:#f59e0b;--high:#ef4444;}
+  :root.light{--bg:#f0f4f8;--card:#ffffff;--border:#d1dce8;--text:#0a1628;--muted:#4a6480;--highlight:#1d4ed8;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--text);min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s;}
+  body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.025'/%3E%3C/svg%3E");}
+  .wrap{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:32px 20px;}
+
+  /* ── Typography ── */
+  .tag{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);border:1px solid var(--border);padding:3px 9px;border-radius:2px;display:inline-block;}
+  h1{font-family:'DM Serif Display',serif;font-size:clamp(2rem,4vw,3.2rem);line-height:1.05;letter-spacing:-.02em;}
+  h1 em{font-style:italic;color:transparent;-webkit-text-stroke:1px rgba(226,232,240,.35);}
+  :root.light h1 em{-webkit-text-stroke:1px rgba(10,22,40,.25);}
+
+  /* ── Cards ── */
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;transition:background .3s,border-color .3s;}
+  :root.light .card{box-shadow:0 1px 4px rgba(10,22,40,.06),0 4px 16px rgba(10,22,40,.04);}
+
+  /* ── Inputs ── */
+  .input-group{position:relative;margin-bottom:14px;}
+  .input-group label{font-family:'DM Mono',monospace;font-size:.63rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;}
+  .inp-pre{position:absolute;left:12px;bottom:11px;font-family:'DM Mono',monospace;font-size:.82rem;color:var(--muted);pointer-events:none;}
+  .inp{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 12px 10px 26px;font-family:'DM Mono',monospace;font-size:.9rem;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s,background .3s;}
+  .inp::placeholder{color:#243550;opacity:1;}
+  :root.light .inp::placeholder{color:#a8bbd0;opacity:1;}
+  .inp:focus{border-color:var(--highlight);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+  .inp.error{border-color:rgba(239,68,68,.5);box-shadow:0 0 0 3px rgba(239,68,68,.08);}
+
+  /* ── Buttons ── */
+  .btn-primary{width:100%;padding:13px;background:var(--highlight);color:#fff;border:none;border-radius:8px;font-family:'DM Mono',monospace;font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;font-weight:500;cursor:pointer;position:relative;overflow:hidden;transition:filter .15s,transform .15s,box-shadow .15s;}
+  .btn-primary:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 8px 24px rgba(37,99,235,.3);}
+  .btn-primary:active{transform:translateY(0);}
+  .btn-primary.loading{pointer-events:none;}
+  .btn-primary .bt{transition:opacity .2s;}
+  .btn-primary.loading .bt{opacity:0;}
+  .btn-primary .bsp{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;}
+  .btn-primary.loading .bsp{opacity:1;}
+  .btn-ghost{width:100%;padding:10px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:8px;font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:border-color .2s,color .2s;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:7px;}
+  .btn-ghost:hover{border-color:var(--highlight);color:var(--highlight);}
+
+  /* ── Theme toggle ── */
+  .theme-btn{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:99px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-family:'DM Mono',monospace;font-size:.63rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .2s;user-select:none;}
+  .theme-btn:hover{border-color:var(--highlight);color:var(--highlight);}
+  .tog-track{width:28px;height:16px;border-radius:99px;background:var(--border);position:relative;transition:background .3s;flex-shrink:0;}
+  .tog-thumb{position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--muted);transition:transform .25s,background .3s;}
+  :root.light .tog-track{background:#0f1f35;}
+  :root.light .tog-thumb{transform:translateX(12px);background:#f0f4f8;}
+
+  /* ── Gauge ── */
+  .gauge-wrap{width:220px;height:120px;margin:0 auto;}
+  .gauge-svg{width:100%;height:auto;overflow:visible;}
+  #gauge-arc{transition:stroke-dashoffset .85s cubic-bezier(.4,0,.2,1);}
+  .gauge-score{font-family:'DM Serif Display',serif;font-size:3rem;line-height:1;text-align:center;margin-top:4px;}
+  .gauge-sub{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;text-align:center;color:var(--muted);}
+
+  /* ── Category badge ── */
+  .cat-badge{display:inline-flex;align-items:center;gap:6px;border-radius:4px;padding:5px 12px;font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;font-weight:500;border:1px solid var(--border);color:var(--muted);transition:all .4s;}
+  .cat-badge.low {background:rgba(16,185,129,.1);color:#10b981;border-color:rgba(16,185,129,.3);}
+  .cat-badge.mid {background:rgba(245,158,11,.1);color:#f59e0b;border-color:rgba(245,158,11,.3);}
+  .cat-badge.high{background:rgba(239,68,68,.1); color:#ef4444;border-color:rgba(239,68,68,.3);}
+  .pdot{width:7px;height:7px;border-radius:50%;display:inline-block;animation:pulse 2s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.75)}}
+
+  /* ── Stacked bar ── */
+  .sbar{display:flex;height:6px;border-radius:99px;overflow:hidden;gap:2px;background:var(--border);}
+  .sbar-seg{height:100%;border-radius:99px;transition:width .75s cubic-bezier(.4,0,.2,1);}
+
+  /* ── TABS ── */
+  .tabs-nav{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:0;}
+  .tab-btn{flex:1;padding:10px 4px;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:color .2s,border-color .2s;margin-bottom:-1px;}
+  .tab-btn:hover{color:var(--text);}
+  .tab-btn.active{color:var(--highlight);border-bottom-color:var(--highlight);}
+  .tab-pane{display:none;padding:18px 0 4px;}
+  .tab-pane.active{display:block;}
+
+  /* ── Breakdown table ── */
+  .bd-table{width:100%;border-collapse:collapse;}
+  .bd-table th{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:6px 8px;text-align:left;border-bottom:1px solid var(--border);font-weight:400;}
+  .bd-table th:last-child{text-align:right;}
+  .bd-table td{padding:9px 8px;font-size:.8rem;border-bottom:1px solid var(--border);}
+  .bd-table tr:last-child td{border-bottom:none;}
+  .bd-table td:first-child{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.06em;color:var(--muted);width:38%;}
+  .bd-table td:nth-child(2){font-family:'DM Mono',monospace;font-size:.75rem;color:var(--text);width:24%;}
+  .bd-table td:last-child{text-align:right;width:38%;}
+  .chip{display:inline-flex;align-items:center;padding:3px 8px;border-radius:3px;font-family:'DM Mono',monospace;font-size:.68rem;font-weight:500;}
+  .chip.good{background:rgba(16,185,129,.12);color:#10b981;}
+  .chip.ok  {background:rgba(245,158,11,.12);color:#f59e0b;}
+  .chip.poor{background:rgba(239,68,68,.12); color:#ef4444;}
+
+  /* ── Donut ── */
+  .donut-seg{transition:stroke-dasharray .9s cubic-bezier(.4,0,.2,1),stroke-dashoffset .9s cubic-bezier(.4,0,.2,1);}
+  .leg-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:.8rem;}
+  .leg-row:last-child{border-bottom:none;}
+  .leg-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0;margin-right:9px;}
+  .leg-name{flex:1;color:var(--muted);font-size:.75rem;font-family:'DM Mono',monospace;}
+  .leg-pct{font-family:'DM Mono',monospace;font-size:.8rem;font-weight:500;color:var(--text);}
+
+  /* ── Insight cards ── */
+  .ins-card{display:flex;gap:10px;padding:11px 12px;background:var(--bg);border-radius:6px;border:1px solid var(--border);margin-bottom:8px;}
+  .ins-card:last-child{margin-bottom:0;}
+
+  /* ── Summary ── */
+  .summary{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:.85rem;line-height:1.7;color:var(--muted);font-style:italic;}
+
+  /* ── Divider ── */
+  .div{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:14px 0;}
+
+  /* ── Placeholder ── */
+  .placeholder{text-align:center;padding:48px 24px;}
+  .ph-icon{width:56px;height:56px;border-radius:50%;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 14px;}
+
+  /* ── Animations ── */
+  .fade-in{opacity:0;animation:fadeUp .5s ease forwards;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  .d1{animation-delay:.1s}.d2{animation-delay:.2s}.d3{animation-delay:.3s}
+  .reveal{animation:revealIn .5s cubic-bezier(.4,0,.2,1) forwards;}
+  @keyframes revealIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
+
+  /* ── Profile strip ── */
+  .profile-strip{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+
+  @media(max-width:768px){.two-col{flex-direction:column!important;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="fade-in" style="margin-bottom:28px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+      <div class="tag">Financial Risk Analyzer</div>
+      <button class="theme-btn" onclick="toggleTheme()">
+        <span id="ti">☀️</span><span id="tl">Light Mode</span>
+        <div class="tog-track"><div class="tog-thumb"></div></div>
+      </button>
+    </div>
+    <h1 style="margin-bottom:8px;">Risk-<em>O</em>-Meter</h1>
+    <p style="color:var(--muted);font-size:.88rem;max-width:420px;line-height:1.6;">Enter your financials to get your risk score, portfolio allocation and personalised guidance.</p>
+  </div>
+
+  <!-- Two column -->
+  <div class="two-col" style="display:flex;gap:20px;align-items:flex-start;">
+
+    <!-- ── LEFT: Input form ── -->
+    <div class="flex-1 fade-in d1">
+      <div class="card" style="padding:24px;">
+        <div class="tag" style="margin-bottom:18px;">Your Financials</div>
+
+        <div id="err" style="display:none;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:6px;padding:9px 12px;margin-bottom:14px;font-size:.76rem;color:#ef4444;font-family:'DM Mono',monospace;">
+          ⚠ Monthly Income and Expenses are required.
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 14px;">
+          <div class="input-group">
+            <label>Monthly Income <span style="color:#ef4444">*</span></label>
+            <span class="inp-pre">₹</span>
+            <input class="inp" type="text" inputmode="numeric" id="income" placeholder="80000" autocomplete="off"/>
+          </div>
+          <div class="input-group">
+            <label>Monthly Expenses <span style="color:#ef4444">*</span></label>
+            <span class="inp-pre">₹</span>
+            <input class="inp" type="text" inputmode="numeric" id="expenses" placeholder="45000" autocomplete="off"/>
+          </div>
+          <div class="input-group">
+            <label>Total Savings</label>
+            <span class="inp-pre">₹</span>
+            <input class="inp" type="text" inputmode="numeric" id="savings" placeholder="300000" autocomplete="off"/>
+          </div>
+          <div class="input-group">
+            <label>Monthly Investment</label>
+            <span class="inp-pre">₹</span>
+            <input class="inp" type="text" inputmode="numeric" id="investment" placeholder="10000" autocomplete="off"/>
+          </div>
+          <div class="input-group">
+            <label>Total Liabilities</label>
+            <span class="inp-pre">₹</span>
+            <input class="inp" type="text" inputmode="numeric" id="liabilities" placeholder="200000" autocomplete="off"/>
+          </div>
+          <div class="input-group">
+            <label>Total Assets</label>
+            <span class="inp-pre">₹</span>
+            <input class="inp" type="text" inputmode="numeric" id="assets" placeholder="1000000" autocomplete="off"/>
+          </div>
+        </div>
+
+        <div class="div"></div>
+
+        <button class="btn-primary" id="calc-btn" onclick="handleSubmit()">
+          <span class="bt">Calculate My Risk Score &nbsp;→</span>
+          <span class="bsp">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83">
+                <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur=".8s" repeatCount="indefinite"/>
+              </path>
+            </svg>
+          </span>
+        </button>
+        <button class="btn-ghost" id="reset-btn" onclick="handleReset()" style="display:none;">↺ &nbsp;Reset & Recalculate</button>
+        <button class="btn-ghost" id="pdf-btn" onclick="exportPDF()" style="display:none;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Export as PDF
+        </button>
+
+        <!-- How scoring works -->
+        <div class="div"></div>
+        <div class="tag" style="margin-bottom:12px;">How Scoring Works</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:center;gap:10px;font-size:.8rem;color:var(--muted);">
+            <div style="width:8px;height:8px;border-radius:50%;background:#10b981;flex-shrink:0;"></div>
+            <span><strong style="color:var(--text);">Safety Net</strong> — Savings ÷ Expenses (max 35 pts)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:.8rem;color:var(--muted);">
+            <div style="width:8px;height:8px;border-radius:50%;background:#f59e0b;flex-shrink:0;"></div>
+            <span><strong style="color:var(--text);">Debt Ratio</strong> — Liabilities ÷ Assets (max 35 pts)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:.8rem;color:var(--muted);">
+            <div style="width:8px;height:8px;border-radius:50%;background:#818cf8;flex-shrink:0;"></div>
+            <span><strong style="color:var(--text);">Surplus Ratio</strong> — (Income − Expenses) ÷ Income (max 30 pts)</span>
+          </div>
+          <div class="div" style="margin:6px 0;"></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <span style="font-family:'DM Mono',monospace;font-size:.65rem;background:rgba(16,185,129,.1);color:#10b981;border-radius:3px;padding:3px 8px;">0–30: Conservative</span>
+            <span style="font-family:'DM Mono',monospace;font-size:.65rem;background:rgba(245,158,11,.1);color:#f59e0b;border-radius:3px;padding:3px 8px;">31–60: Moderate</span>
+            <span style="font-family:'DM Mono',monospace;font-size:.65rem;background:rgba(239,68,68,.1);color:#ef4444;border-radius:3px;padding:3px 8px;">61–100: Aggressive</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── RIGHT: Results ── -->
+    <div style="width:420px;flex-shrink:0;" class="fade-in d2">
+
+      <!-- Placeholder -->
+      <div id="ph" class="card placeholder">
+        <div class="ph-icon">📊</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:1.2rem;margin-bottom:8px;">Awaiting Your Data</div>
+        <div style="color:var(--muted);font-size:.8rem;line-height:1.6;max-width:200px;margin:0 auto;">Fill in your financials and hit <strong style="color:var(--text)">Calculate</strong> to see your risk report.</div>
+      </div>
+
+      <!-- Result panel -->
+      <div id="rp" style="display:none;">
+        <div class="card reveal" style="overflow:hidden;">
+
+          <!-- Score header — always visible -->
+          <div style="padding:20px 22px 16px;border-bottom:1px solid var(--border);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+              <span class="cat-badge" id="cat-badge">
+                <span class="pdot" id="pdot" style="background:var(--muted)"></span>
+                <span id="cat-text">—</span>
+              </span>
+              <span style="font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);" id="prof-name-small"></span>
+            </div>
+
+            <!-- Gauge + score -->
+            <div class="gauge-wrap">
+              <svg class="gauge-svg" viewBox="0 0 220 120">
+                <defs>
+                  <linearGradient id="gGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#10b981"/>
+                    <stop offset="50%" stop-color="#f59e0b"/>
+                    <stop offset="100%" stop-color="#ef4444"/>
+                  </linearGradient>
+                </defs>
+                <path d="M 15 110 A 95 95 0 0 1 205 110" fill="none" stroke="#1e2d45" stroke-width="12" stroke-linecap="round"/>
+                <path id="gauge-arc" d="M 15 110 A 95 95 0 0 1 205 110" fill="none" stroke="url(#gGrad)" stroke-width="12" stroke-linecap="round" stroke-dasharray="298" stroke-dashoffset="298"/>
+                <circle id="ndot" cx="15" cy="110" r="6" fill="#0c1220" stroke="#e2e8f0" stroke-width="2" style="transition:cx .85s cubic-bezier(.4,0,.2,1),cy .85s cubic-bezier(.4,0,.2,1)"/>
+                <text x="10"  y="126" fill="#64829e" font-size="8" font-family="DM Mono">LOW</text>
+                <text x="96"  y="132" fill="#64829e" font-size="8" font-family="DM Mono">MED</text>
+                <text x="186" y="126" fill="#64829e" font-size="8" font-family="DM Mono">HIGH</text>
+              </svg>
+            </div>
+            <div class="gauge-score" id="score-display">0</div>
+            <div class="gauge-sub">out of 100</div>
+
+            <!-- Stacked composition bar -->
+            <div class="sbar" style="margin-top:10px;">
+              <div class="sbar-seg" id="ss1" style="background:#10b981;width:0%"></div>
+              <div class="sbar-seg" id="ss2" style="background:#f59e0b;width:0%"></div>
+              <div class="sbar-seg" id="ss3" style="background:#818cf8;width:0%"></div>
+            </div>
+            <div style="display:flex;gap:12px;margin-top:5px;justify-content:center;flex-wrap:wrap;">
+              <span style="font-family:'DM Mono',monospace;font-size:.55rem;color:#10b981;">● SAFETY</span>
+              <span style="font-family:'DM Mono',monospace;font-size:.55rem;color:#f59e0b;">● DEBT</span>
+              <span style="font-family:'DM Mono',monospace;font-size:.55rem;color:#818cf8;">● SURPLUS</span>
+            </div>
+          </div>
+
+          <!-- Tabs -->
+          <div style="padding:0 22px;">
+            <div class="tabs-nav">
+              <button class="tab-btn active" onclick="switchTab('breakdown',this)">Breakdown</button>
+              <button class="tab-btn" onclick="switchTab('allocation',this)">Allocation</button>
+              <button class="tab-btn" onclick="switchTab('insights',this)">Insights</button>
+              <button class="tab-btn" onclick="switchTab('guidance',this)">Guidance</button>
+            </div>
+          </div>
+
+          <!-- Tab: Breakdown -->
+          <div id="tab-breakdown" class="tab-pane active" style="padding:16px 22px 20px;">
+            <table class="bd-table">
+              <thead><tr>
+                <th>Component</th><th>Metric</th><th>Points</th>
+              </tr></thead>
+              <tbody>
+                <tr><td>Safety Net</td><td id="v-safety">—</td><td><span class="chip" id="c-safety">—</span></td></tr>
+                <tr><td>Debt / Assets</td><td id="v-dta">—</td><td><span class="chip" id="c-dta">—</span></td></tr>
+                <tr><td>Surplus Ratio</td><td id="v-surplus">—</td><td><span class="chip" id="c-surplus">—</span></td></tr>
+                <tr style="border-top:2px solid var(--border);">
+                  <td style="color:var(--text);font-family:'DM Mono',monospace;font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;">Total</td>
+                  <td></td>
+                  <td><span class="chip" id="c-total" style="font-size:.75rem;padding:4px 10px;">—</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Tab: Allocation -->
+          <div id="tab-allocation" class="tab-pane" style="padding:16px 22px 20px;">
+            <div style="display:flex;gap:16px;align-items:center;">
+              <svg id="donut" width="120" height="120" viewBox="0 0 120 120" style="flex-shrink:0;">
+                <circle cx="60" cy="60" r="46" fill="none" stroke="var(--border)" stroke-width="18"/>
+                <circle id="d-eq"   cx="60" cy="60" r="46" fill="none" stroke="#2563eb" stroke-width="18" stroke-dasharray="0 289" transform="rotate(-90 60 60)" class="donut-seg"/>
+                <circle id="d-debt" cx="60" cy="60" r="46" fill="none" stroke="#10b981" stroke-width="18" stroke-dasharray="0 289" transform="rotate(-90 60 60)" class="donut-seg"/>
+                <circle id="d-gold" cx="60" cy="60" r="46" fill="none" stroke="#f59e0b" stroke-width="18" stroke-dasharray="0 289" transform="rotate(-90 60 60)" class="donut-seg"/>
+                <circle id="d-cash" cx="60" cy="60" r="46" fill="none" stroke="#818cf8" stroke-width="18" stroke-dasharray="0 289" transform="rotate(-90 60 60)" class="donut-seg"/>
+                <text id="d-lbl" x="60" y="56" text-anchor="middle" font-family="DM Serif Display" font-size="13" fill="var(--text)">—</text>
+                <text x="60" y="70" text-anchor="middle" font-family="DM Mono" font-size="6.5" fill="var(--muted)" letter-spacing="1">PROFILE</text>
+              </svg>
+              <div style="flex:1;" id="d-legend"></div>
+            </div>
+          </div>
+
+          <!-- Tab: Insights -->
+          <div id="tab-insights" class="tab-pane" style="padding:16px 22px 20px;">
+            <div id="insights-list"></div>
+          </div>
+
+          <!-- Tab: Guidance -->
+          <div id="tab-guidance" class="tab-pane" style="padding:16px 22px 20px;">
+            <div style="margin-bottom:12px;">
+              <div style="font-family:'DM Serif Display',serif;font-size:1.15rem;line-height:1.3;margin-bottom:5px;" id="prof-name">—</div>
+              <div style="font-size:.78rem;color:var(--muted);line-height:1.5;" id="prof-desc"></div>
+            </div>
+            <div class="div"></div>
+            <div class="summary" id="summary"></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="fade-in d3" style="color:var(--muted);font-size:.65rem;font-family:'DM Mono',monospace;letter-spacing:.08em;text-align:center;margin-top:28px;">
+    FOR EDUCATIONAL PURPOSES ONLY — NOT FINANCIAL ADVICE
+  </div>
+</div>
+
+<script>
+  const CIRC = 298, DCIRC = 289;
+  let af, disp = 0, light = false;
+
+  // ── Theme ────────────────────────────────────────────────
+  function toggleTheme() {
+    light = !light;
+    document.documentElement.classList.toggle('light', light);
+    document.getElementById('ti').textContent = light ? '🌙' : '☀️';
+    document.getElementById('tl').textContent = light ? 'Dark Mode' : 'Light Mode';
+    const nd = document.getElementById('ndot');
+    if (nd) nd.setAttribute('fill', light ? '#f0f4f8' : '#0c1220');
+  }
+
+  // ── Tabs ─────────────────────────────────────────────────
+  function switchTab(id, btn) {
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-'+id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  // ── Gauge ────────────────────────────────────────────────
+  function setGauge(score) {
+    const pct = Math.min(Math.max(score,0),100)/100;
+    document.getElementById('gauge-arc').style.strokeDashoffset = CIRC*(1-pct);
+    const ang = Math.PI - pct*Math.PI;
+    const nx = 110+95*Math.cos(ang), ny = 110-95*Math.sin(ang);
+    const nd = document.getElementById('ndot');
+    nd.setAttribute('cx', nx); nd.setAttribute('cy', ny);
+    const col = score>60?'#ef4444':score>30?'#f59e0b':'#10b981';
+    nd.setAttribute('stroke', col);
+    document.getElementById('gauge-arc').style.filter = `drop-shadow(0 0 8px ${col}88)`;
+  }
+
+  function animScore(target) {
+    cancelAnimationFrame(af);
+    const t0 = performance.now();
+    function step(now) {
+      const t = Math.min((now-t0)/900,1), e = 1-Math.pow(1-t,3);
+      disp = Math.round(e*target);
+      document.getElementById('score-display').textContent = disp;
+      if (t<1) af = requestAnimationFrame(step); else disp = target;
+    }
+    af = requestAnimationFrame(step);
+  }
+
+  // ── Donut ────────────────────────────────────────────────
+  function drawDonut(alloc) {
+    const ids = ['d-eq','d-debt','d-gold','d-cash'];
+    ids.forEach(id => { const el=document.getElementById(id); el.style.strokeDasharray='0 289'; el.style.strokeDashoffset='0'; });
+    setTimeout(() => {
+      let off = 0;
+      alloc.forEach((s,i) => {
+        const len = s.pct/100*DCIRC;
+        const el = document.getElementById(ids[i]);
+        el.setAttribute('stroke', s.color);
+        el.style.strokeDasharray = `${len} ${DCIRC-len}`;
+        el.style.strokeDashoffset = -off;
+        off += len;
+      });
+    }, 200);
+    const leg = document.getElementById('d-legend');
+    leg.innerHTML = alloc.map(s=>`
+      <div class="leg-row">
+        <div class="leg-dot" style="background:${s.color}"></div>
+        <span class="leg-name">${s.name}</span>
+        <span class="leg-pct">${s.pct}%</span>
+      </div>`).join('');
+  }
+
+  function getAlloc(score) {
+    if (score<=30) { document.getElementById('d-lbl').textContent='Safe'; return [{pct:20,color:'#2563eb',name:'Equity'},{pct:50,color:'#10b981',name:'Debt / FD'},{pct:15,color:'#f59e0b',name:'Gold'},{pct:15,color:'#818cf8',name:'Cash'}]; }
+    if (score<=60) { document.getElementById('d-lbl').textContent='Balanced'; return [{pct:55,color:'#2563eb',name:'Equity'},{pct:25,color:'#10b981',name:'Debt / FD'},{pct:10,color:'#f59e0b',name:'Gold'},{pct:10,color:'#818cf8',name:'Cash'}]; }
+    document.getElementById('d-lbl').textContent='Growth';
+    return [{pct:75,color:'#2563eb',name:'Equity'},{pct:10,color:'#10b981',name:'Debt / FD'},{pct:10,color:'#f59e0b',name:'Gold'},{pct:5,color:'#818cf8',name:'Cash'}];
+  }
+
+  // ── Helpers ──────────────────────────────────────────────
+  function chipCls(pts,max){ const r=pts/max; return r>=.7?'good':r>=.35?'ok':'poor'; }
+  function setChip(id,pts,max){ const el=document.getElementById(id); el.className='chip '+chipCls(pts,max); el.textContent=pts+' / '+max+' pts'; }
+
+  function insCard(label,status,body) {
+    const c={good:'#10b981',ok:'#f59e0b',poor:'#ef4444'}[status];
+    const i={good:'✓',ok:'⚑',poor:'✗'}[status];
+    return `<div class="ins-card" style="border-left:3px solid ${c}">
+      <span style="font-family:'DM Mono',monospace;font-size:.82rem;color:${c};flex-shrink:0;">${i}</span>
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:${c};margin-bottom:3px;">${label}</div>
+        <div style="font-size:.78rem;color:var(--muted);line-height:1.55;">${body}</div>
+      </div></div>`;
+  }
+
+  // ── Submit ───────────────────────────────────────────────
+  function handleSubmit() {
+    const get = id => parseFloat(document.getElementById(id).value.replace(/[^0-9.]/g,''))||0;
+    const income=get('income'),expenses=get('expenses'),savings=get('savings'),
+          investment=get('investment'),liabilities=get('liabilities'),assets=get('assets');
+
+    document.querySelectorAll('.inp').forEach(f=>f.classList.remove('error'));
+    document.getElementById('err').style.display='none';
+    if (!income||!expenses) {
+      if(!income)   document.getElementById('income').classList.add('error');
+      if(!expenses) document.getElementById('expenses').classList.add('error');
+      document.getElementById('err').style.display='block'; return;
+    }
+
+    const btn = document.getElementById('calc-btn');
+    btn.classList.add('loading');
+
+    setTimeout(() => {
+      btn.classList.remove('loading');
+
+      // Safety Net (max 35)
+      let sP=0,sM=0,sS='poor',sI='';
+      if(expenses>0){
+        sM=savings/expenses;
+        if(sM>=12)    {sP=35;sS='good';sI=`Excellent — savings cover <strong>${sM.toFixed(1)} months</strong> of expenses, well above the 6-month benchmark.`;}
+        else if(sM>=6){sP=20;sS='good';sI=`Good safety net: <strong>${sM.toFixed(1)} months</strong> covered. Push toward 12 months for maximum resilience.`;}
+        else if(sM>=3){sP=10;sS='ok';  sI=`Savings cover <strong>${sM.toFixed(1)} months</strong> of expenses. Aim for 6 months before increasing risk.`;}
+        else          {sP=0; sS='poor'; sI=`Only <strong>${sM.toFixed(1)} months</strong> covered. Building your emergency fund is your most urgent priority.`;}
+      } else { sI='No expense data — cannot calculate safety net.'; }
+
+      // Debt-to-Asset (max 35)
+      let dP=0,dR=0,dS='poor',dI='';
+      if(assets>0){
+        dR=liabilities/assets;
+        if(dR<=0.10)     {dP=35;dS='good';dI=`Outstanding — debt is just <strong>${(dR*100).toFixed(1)}%</strong> of assets. Enormous financial flexibility.`;}
+        else if(dR<=0.30){dP=25;dS='good';dI=`Healthy leverage at <strong>${(dR*100).toFixed(1)}%</strong>. Keep paying down liabilities.`;}
+        else if(dR<=0.50){dP=15;dS='ok';  dI=`Moderate leverage at <strong>${(dR*100).toFixed(1)}%</strong>. Prioritise debt reduction to unlock more capacity.`;}
+        else if(dR<=0.70){dP=5; dS='ok';  dI=`Elevated debt at <strong>${(dR*100).toFixed(1)}%</strong>. Debt management should take priority.`;}
+        else             {dP=0; dS='poor'; dI=`High burden: <strong>${(dR*100).toFixed(1)}%</strong> of assets are debt-financed.`;}
+      } else if(liabilities===0){ dP=35;dR=0;dS='good';dI='Debt-free position grants maximum financial flexibility.'; }
+      else { dI='No asset data — cannot assess debt-to-asset ratio.'; }
+
+      // Surplus Ratio (max 30)
+      let rP=0,rR=0,rS='poor',rI='';
+      if(income>0){
+        rR=(income-expenses)/income;
+        if(rR>=0.50)      {rP=30;rS='good';rI=`Excellent surplus of <strong>${(rR*100).toFixed(1)}%</strong> — over half your income is free to invest.`;}
+        else if(rR>=0.30) {rP=20;rS='good';rI=`Strong surplus of <strong>${(rR*100).toFixed(1)}%</strong>. Solid capacity for savings and investments.`;}
+        else if(rR>=0.15) {rP=12;rS='ok';  rI=`Modest surplus of <strong>${(rR*100).toFixed(1)}%</strong>. Look to reduce expenses or grow income.`;}
+        else if(rR>=0)    {rP=5; rS='ok';  rI=`Thin surplus of <strong>${(rR*100).toFixed(1)}%</strong>. Expenses consuming most income.`;}
+        else              {rP=0; rS='poor'; rI=`Expenses exceed income by <strong>${Math.abs(rR*100).toFixed(1)}%</strong>. Address this deficit immediately.`;}
+      } else { rI='No income data provided.'; }
+
+      const score = Math.min(sP+dP+rP,100);
+
+      // Gauge & score
+      setTimeout(()=>setGauge(score),80);
+      setTimeout(()=>animScore(score),120);
+
+      // Stacked bar
+      setTimeout(()=>{
+        document.getElementById('ss1').style.width=sP+'%';
+        document.getElementById('ss2').style.width=dP+'%';
+        document.getElementById('ss3').style.width=rP+'%';
+      },180);
+
+      // Donut
+      setTimeout(()=>drawDonut(getAlloc(score)),300);
+
+      // Breakdown table
+      document.getElementById('v-safety').textContent  = expenses>0?`${sM.toFixed(1)} mo`:'—';
+      document.getElementById('v-dta').textContent     = (assets>0||liabilities===0)?`${(dR*100).toFixed(1)}%`:'—';
+      document.getElementById('v-surplus').textContent = income>0?`${(rR*100).toFixed(1)}%`:'—';
+      setChip('c-safety', sP, 35);
+      setChip('c-dta',    dP, 35);
+      setChip('c-surplus',rP, 30);
+      const tc = document.getElementById('c-total');
+      tc.className='chip '+(score>60?'poor':score>30?'ok':'good');
+      tc.textContent=`${score} / 100 pts`;
+
+      // Insights
+      document.getElementById('insights-list').innerHTML =
+        insCard('Safety Net', sS, sI) +
+        insCard('Debt-to-Asset', dS, dI) +
+        insCard('Surplus Ratio', rS, rI);
+
+      // Badge & guidance
+      const badge=document.getElementById('cat-badge');
+      badge.className='cat-badge';
+      const dot=document.getElementById('pdot');
+      let profName,profDesc,guidance;
+
+      if(score<=30){
+        badge.classList.add('low'); document.getElementById('cat-text').textContent='Conservative'; dot.style.background='#10b981';
+        profName='The Steady Builder';
+        profDesc='You prioritise stability and capital preservation. Strengthen your financial foundation before taking on significant risk.';
+        guidance=`With a score of ${score}/100, focus on building a 6-month emergency fund and reducing high-interest debt. Conservative instruments — fixed deposits, liquid funds, and low-volatility index funds — suit your current stage best.`;
+      } else if(score<=60){
+        badge.classList.add('mid'); document.getElementById('cat-text').textContent='Moderate'; dot.style.background='#f59e0b';
+        profName='The Balanced Strategist';
+        profDesc='Solid financial base with meaningful room to grow. A diversified approach balancing growth and security suits you.';
+        guidance=`At ${score}/100, your surplus and savings offer real capacity for calculated risk. A portfolio of ~55% equity, 25% debt, 10% gold and 10% cash — with consistent SIP contributions — aligns well with your profile.`;
+      } else {
+        badge.classList.add('high'); document.getElementById('cat-text').textContent='Aggressive'; dot.style.background='#ef4444';
+        profName='The Growth Maximiser';
+        profDesc='Your strong financial position supports high-growth strategies. You can absorb volatility and aim for superior long-term returns.';
+        guidance=`Your score of ${score}/100 reflects excellent financial health. A growth-oriented allocation of 75% equity is well within your tolerance. Diversified equity funds, index funds, and selective direct equity are ideal for your profile.`;
+      }
+
+      document.getElementById('prof-name').textContent       = profName;
+      document.getElementById('prof-name-small').textContent = profName;
+      document.getElementById('prof-desc').textContent       = profDesc;
+      document.getElementById('summary').textContent         = guidance;
+
+      // Show result, reset to first tab
+      document.getElementById('ph').style.display='none';
+      document.getElementById('rp').style.display='block';
+      document.getElementById('reset-btn').style.display='flex';
+      document.getElementById('pdf-btn').style.display='flex';
+      btn.style.display='none';
+      switchTab('breakdown', document.querySelector('.tab-btn'));
+      document.querySelectorAll('.inp').forEach(f=>{f.setAttribute('readonly',true);f.style.opacity='.5';});
+
+    }, 700);
+  }
+
+  // ── Reset ────────────────────────────────────────────────
+  function handleReset() {
+    document.querySelectorAll('.inp').forEach(f=>{f.removeAttribute('readonly');f.style.opacity='1';f.value='';f.classList.remove('error');});
+    document.getElementById('err').style.display='none';
+    document.getElementById('rp').style.display='none';
+    document.getElementById('ph').style.display='block';
+    document.getElementById('reset-btn').style.display='none';
+    document.getElementById('pdf-btn').style.display='none';
+    document.getElementById('calc-btn').style.display='block';
+    document.getElementById('income').focus();
+  }
+
+  // ── Export PDF ───────────────────────────────────────────
+  function exportPDF() {
+    const score    = parseInt(document.getElementById('score-display').textContent)||0;
+    const catText  = document.getElementById('cat-text').textContent;
+    const profName = document.getElementById('prof-name').textContent;
+    const profDesc = document.getElementById('prof-desc').textContent;
+    const guidance = document.getElementById('summary').textContent;
+    const catColor = score>60?'#ef4444':score>30?'#f59e0b':'#10b981';
+
+    const fields=[['Monthly Income',document.getElementById('income').value],['Monthly Expenses',document.getElementById('expenses').value],['Total Savings',document.getElementById('savings').value],['Monthly Investment',document.getElementById('investment').value],['Total Liabilities',document.getElementById('liabilities').value],['Total Assets',document.getElementById('assets').value]];
+
+    const bdRows=[['Safety Net',document.getElementById('v-safety').textContent,document.getElementById('c-safety').textContent,document.getElementById('c-safety').className],['Debt / Assets',document.getElementById('v-dta').textContent,document.getElementById('c-dta').textContent,document.getElementById('c-dta').className],['Surplus Ratio',document.getElementById('v-surplus').textContent,document.getElementById('c-surplus').textContent,document.getElementById('c-surplus').className],['Total Score','',document.getElementById('c-total').textContent,document.getElementById('c-total').className]];
+
+    const insCards=document.querySelectorAll('#insights-list .ins-card');
+    let insHTML='';
+    insCards.forEach(c=>{
+      const label=c.querySelector('div>div:first-child')?.textContent||'';
+      const body=c.querySelector('div>div:last-child')?.innerHTML||'';
+      const bl=c.style.borderLeft||'';
+      const col=bl.includes('10b981')?'#10b981':bl.includes('f59e0b')?'#f59e0b':'#ef4444';
+      const bg=bl.includes('10b981')?'#f0fdf4':bl.includes('f59e0b')?'#fffbeb':'#fff5f5';
+      insHTML+=`<div style="border-left:3px solid ${col};background:${bg};border-radius:4px;padding:9px 11px;margin-bottom:8px;"><div style="font-size:9px;font-weight:600;color:${col};letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px;">${label}</div><div style="font-size:10.5px;color:#334155;line-height:1.6;">${body}</div></div>`;
+    });
+
+    const legRows=document.querySelectorAll('#d-legend .leg-row');
+    const aC=['#2563eb','#10b981','#f59e0b','#818cf8'];
+    let allocHTML='';
+    legRows.forEach((r,i)=>{
+      const name=r.querySelector('.leg-name')?.textContent||'';
+      const pct=parseInt(r.querySelector('.leg-pct')?.textContent)||0;
+      allocHTML+=`<div style="margin-bottom:8px;"><div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:3px;"><span style="color:#475569;">${name}</span><span style="font-weight:600;color:#0f172a;">${pct}%</span></div><div style="background:#e2e8f0;border-radius:3px;height:6px;"><div style="background:${aC[i]};width:${pct}%;height:6px;border-radius:3px;"></div></div></div>`;
+    });
+
+    function chipSt(cls){if(cls.includes('good'))return 'background:#dcfce7;color:#15803d;';if(cls.includes('ok'))return 'background:#fef9c3;color:#92400e;';return 'background:#fee2e2;color:#b91c1c;';}
+
+    const fHTML=fields.map(([l,v])=>`<tr><td style="padding:6px 8px;font-size:10px;color:#64748b;border-bottom:1px solid #f1f5f9;">${l}</td><td style="padding:6px 8px;font-size:10px;font-weight:600;color:#0f172a;text-align:right;border-bottom:1px solid #f1f5f9;">₹${v?Number(v.replace(/[^0-9]/g,'')).toLocaleString('en-IN'):'—'}</td></tr>`).join('');
+    const bHTML=bdRows.map(([l,v,p,c])=>`<tr><td style="padding:7px 8px;font-size:10px;color:#64748b;border-bottom:1px solid #f1f5f9;">${l}</td><td style="padding:7px 8px;font-size:10px;color:#0f172a;text-align:center;border-bottom:1px solid #f1f5f9;">${v}</td><td style="padding:7px 8px;text-align:right;border-bottom:1px solid #f1f5f9;"><span style="font-size:9px;font-weight:600;padding:2px 7px;border-radius:3px;${chipSt(c)}">${p}</span></td></tr>`).join('');
+
+    const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>Risk-O-Meter Report</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,sans-serif;background:#f0f4f8;padding:20px;}@media print{body{background:#fff;}.noprint{display:none!important;}@page{margin:10mm 12mm;size:A4;}}</style></head><body><div style="max-width:740px;margin:0 auto;">
+    <div style="background:#1d4ed8;border-radius:10px;padding:18px 22px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
+      <div><div style="font-size:20px;font-weight:700;color:#fff;">Risk-O-Meter</div><div style="font-size:10px;color:#bfdbfe;margin-top:2px;">Financial Risk Analysis Report</div></div>
+      <div style="text-align:right;"><div style="font-size:10px;color:#bfdbfe;">${new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}</div><button class="noprint" onclick="window.print()" style="margin-top:6px;background:#fff;color:#1d4ed8;border:none;border-radius:5px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;">🖨 Save as PDF</button></div>
+    </div>
+    <div style="background:#fff;border-radius:10px;padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;gap:16px;border:1px solid #e2e8f0;">
+      <div style="width:58px;height:58px;border-radius:50%;background:${catColor};display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="font-size:22px;font-weight:700;color:#fff;">${score}</span></div>
+      <div><div style="font-size:17px;font-weight:700;color:#0f172a;">${profName}</div><div style="font-size:10px;color:#64748b;margin-top:2px;">Risk Capacity: <strong style="color:${catColor}">${catText}</strong> · Score: ${score}/100</div><div style="font-size:9.5px;color:#94a3b8;margin-top:2px;">${profDesc}</div></div>
+    </div>
+    <div style="display:flex;gap:14px;margin-bottom:14px;">
+      <div style="flex:1;">
+        <div style="background:#fff;border-radius:8px;border:1px solid #e2e8f0;overflow:hidden;margin-bottom:12px;">
+          <div style="background:#f8fafc;padding:7px 10px;font-size:8.5px;font-weight:600;color:#2563eb;letter-spacing:.15em;text-transform:uppercase;border-bottom:1px solid #e2e8f0;">Your Financials</div>
+          <table style="width:100%;border-collapse:collapse;">${fHTML}</table>
+        </div>
+        <div style="background:#fff;border-radius:8px;border:1px solid #e2e8f0;overflow:hidden;">
+          <div style="background:#f8fafc;padding:7px 10px;font-size:8.5px;font-weight:600;color:#2563eb;letter-spacing:.15em;text-transform:uppercase;border-bottom:1px solid #e2e8f0;">Score Breakdown</div>
+          <table style="width:100%;border-collapse:collapse;"><thead><tr><th style="padding:5px 8px;font-size:8.5px;color:#94a3b8;text-align:left;border-bottom:1px solid #e2e8f0;font-weight:400;">Component</th><th style="padding:5px 8px;font-size:8.5px;color:#94a3b8;text-align:center;border-bottom:1px solid #e2e8f0;font-weight:400;">Metric</th><th style="padding:5px 8px;font-size:8.5px;color:#94a3b8;text-align:right;border-bottom:1px solid #e2e8f0;font-weight:400;">Points</th></tr></thead><tbody>${bHTML}</tbody></table>
+        </div>
+      </div>
+      <div style="width:230px;flex-shrink:0;display:flex;flex-direction:column;gap:12px;">
+        <div style="background:#fff;border-radius:8px;border:1px solid #e2e8f0;overflow:hidden;">
+          <div style="background:#f8fafc;padding:7px 10px;font-size:8.5px;font-weight:600;color:#2563eb;letter-spacing:.15em;text-transform:uppercase;border-bottom:1px solid #e2e8f0;">Recommended Allocation</div>
+          <div style="padding:12px 10px;">${allocHTML}</div>
+        </div>
+        <div style="background:#eff6ff;border-radius:8px;border:1px solid #bfdbfe;padding:12px 10px;">
+          <div style="font-size:8.5px;font-weight:600;color:#2563eb;letter-spacing:.15em;text-transform:uppercase;margin-bottom:6px;">Guidance</div>
+          <div style="font-size:10px;color:#334155;line-height:1.65;font-style:italic;">${guidance}</div>
+        </div>
+      </div>
+    </div>
+    <div style="background:#fff;border-radius:8px;border:1px solid #e2e8f0;overflow:hidden;margin-bottom:14px;">
+      <div style="background:#f8fafc;padding:7px 10px;font-size:8.5px;font-weight:600;color:#2563eb;letter-spacing:.15em;text-transform:uppercase;border-bottom:1px solid #e2e8f0;">Component Insights</div>
+      <div style="padding:12px 10px;">${insHTML}</div>
+    </div>
+    <div style="text-align:center;font-size:8.5px;color:#94a3b8;padding:8px 0;">FOR EDUCATIONAL PURPOSES ONLY — NOT FINANCIAL ADVICE · Generated by Risk-O-Meter</div>
+    </div></body></html>`;
+
+    const blob=new Blob([html],{type:'text/html'});
+    const url=URL.createObjectURL(blob);
+    const win=window.open(url,'_blank');
+    if(!win){const a=document.createElement('a');a.href=url;a.download='Risk-O-Meter-Report.html';a.click();}
+    setTimeout(()=>URL.revokeObjectURL(url),10000);
+  }
+</script>
+</body>
+</html>
