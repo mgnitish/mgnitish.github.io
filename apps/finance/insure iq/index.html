@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InsureIQ — Know Your Coverage</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { margin: 0; font-family: 'DM Sans', 'Segoe UI', sans-serif; }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    const formatINR = (n) => {
+      if (n >= 10000000) return `₹${(n / 10000000).toFixed(1)}Cr`;
+      if (n >= 100000) return `₹${(n / 100000).toFixed(1)}L`;
+      if (n >= 1000) return `₹${(n / 1000).toFixed(0)}K`;
+      return `₹${n}`;
+    };
+    const formatINRFull = (n) => "₹" + n.toLocaleString("en-IN");
+
+    // ── Theme Definitions ──
+    const themes = {
+      dark: {
+        bg: "linear-gradient(145deg, #020617 0%, #0f172a 50%, #020617 100%)",
+        text: "#f1f5f9", textSecondary: "#cbd5e1", textMuted: "#94a3b8", textDim: "#64748b", textFaint: "#475569",
+        cardBg: "linear-gradient(180deg, rgba(15,23,42,0.85) 0%, rgba(30,41,59,0.9) 100%)", cardBorder: "#334155", cardShadow: "0 20px 60px rgba(0,0,0,0.4)",
+        inputBg: "#0f172a", inputBorder: "#334155",
+        pillBg: "linear-gradient(135deg, #1e3a5f, #1e293b)", pillBorder: "#334155",
+        barTrack: "#1e293b", divider: "#1e293b", rowBg: "#0f172a",
+        disclaimerBg: "#0c1425", disclaimerBorder: "#1e293b",
+        stepActiveBg: "#1e40af", stepDoneBg: "#164e63", stepDefaultBg: "#1e293b",
+        stepDotDone: "#22c55e", stepDotActive: "#3b82f6", stepDotDefault: "#334155",
+        h1Gradient: "linear-gradient(135deg, #e2e8f0, #64748b)",
+        checkActiveBg: "#1e293b", checkActiveBorder: "#3b82f6",
+        tierMetBgSuffix: "10", tierDefaultBg: "#0f172a",
+        coverRowBg: "#0c1425", coverRowBorder: "#334155",
+        btnPrimaryBg: "linear-gradient(135deg, #2563eb, #1d4ed8)", btnPrimaryShadow: "0 4px 16px rgba(37,99,235,0.3)",
+        btnSecondaryBg: "transparent", btnSecondaryBorder: "#334155", btnSecondaryColor: "#94a3b8", btnDisabledColor: "#334155",
+        gaugeBg: "#1e293b", tableBorder: "#334155",
+      },
+      light: {
+        bg: "linear-gradient(145deg, #f8fafc 0%, #e2e8f0 50%, #f8fafc 100%)",
+        text: "#0f172a", textSecondary: "#334155", textMuted: "#475569", textDim: "#64748b", textFaint: "#94a3b8",
+        cardBg: "linear-gradient(180deg, rgba(255,255,255,0.82) 0%, rgba(248,250,252,0.88) 100%)", cardBorder: "#cbd5e1", cardShadow: "0 20px 60px rgba(0,0,0,0.06)",
+        inputBg: "#f1f5f9", inputBorder: "#cbd5e1",
+        pillBg: "linear-gradient(135deg, #dbeafe, #eff6ff)", pillBorder: "#93c5fd",
+        barTrack: "#e2e8f0", divider: "#e2e8f0", rowBg: "#f1f5f9",
+        disclaimerBg: "#f8fafc", disclaimerBorder: "#e2e8f0",
+        stepActiveBg: "#2563eb", stepDoneBg: "#0e7490", stepDefaultBg: "#e2e8f0",
+        stepDotDone: "#16a34a", stepDotActive: "#2563eb", stepDotDefault: "#cbd5e1",
+        h1Gradient: "linear-gradient(135deg, #0f172a, #475569)",
+        checkActiveBg: "#eff6ff", checkActiveBorder: "#3b82f6",
+        tierMetBgSuffix: "18", tierDefaultBg: "#f1f5f9",
+        coverRowBg: "#f8fafc", coverRowBorder: "#cbd5e1",
+        btnPrimaryBg: "linear-gradient(135deg, #2563eb, #1d4ed8)", btnPrimaryShadow: "0 4px 16px rgba(37,99,235,0.18)",
+        btnSecondaryBg: "#ffffff", btnSecondaryBorder: "#cbd5e1", btnSecondaryColor: "#475569", btnDisabledColor: "#d1d5db",
+        gaugeBg: "#e2e8f0", tableBorder: "#cbd5e1",
+      },
+    };
+
+    // ── Gauge ──
+    function ScoreGauge({ score, t }) {
+      const r = 80, circ = 2 * Math.PI * r;
+      const offset = circ * (1 - (score / 100) * 0.75);
+      const color = score >= 75 ? "#22c55e" : score >= 50 ? "#eab308" : score >= 25 ? "#f97316" : "#ef4444";
+      return (
+        <div style={{ position: "relative", width: 200, height: 160, margin: "0 auto" }}>
+          <svg width="200" height="160" viewBox="0 0 200 160">
+            <path d="M 20 140 A 80 80 0 1 1 180 140" fill="none" stroke={t.gaugeBg} strokeWidth="14" strokeLinecap="round" />
+            <path d="M 20 140 A 80 80 0 1 1 180 140" fill="none" stroke={color} strokeWidth="14" strokeLinecap="round"
+              strokeDasharray={circ * 0.75} strokeDashoffset={offset}
+              style={{ transition: "stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1), stroke 0.4s" }} />
+          </svg>
+          <div style={{ position: "absolute", bottom: 12, left: "50%", transform: "translateX(-50%)", textAlign: "center" }}>
+            <div style={{ fontSize: 42, fontWeight: 800, color, lineHeight: 1, fontFamily: "'DM Mono', monospace" }}>{score}</div>
+            <div style={{ fontSize: 11, color: t.textMuted, letterSpacing: 2, textTransform: "uppercase", marginTop: 2 }}>out of 100</div>
+          </div>
+        </div>
+      );
+    }
+
+    // ── Bar ──
+    function GapBar({ label, current, recommended, t }) {
+      const pct = recommended > 0 ? Math.min((current / recommended) * 100, 100) : 0;
+      const color = pct >= 80 ? "#22c55e" : pct >= 50 ? "#eab308" : "#ef4444";
+      return (
+        <div style={{ marginBottom: 18 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: t.text }}>{label}</span>
+            <span style={{ fontSize: 12, color: t.textMuted }}>{formatINR(current)} / {formatINR(recommended)}</span>
+          </div>
+          <div style={{ height: 10, background: t.barTrack, borderRadius: 5, overflow: "hidden" }}>
+            <div style={{ width: `${pct}%`, height: "100%", background: `linear-gradient(90deg, ${color}cc, ${color})`, borderRadius: 5, transition: "width 1s cubic-bezier(.4,0,.2,1)" }} />
+          </div>
+        </div>
+      );
+    }
+
+    // ── Inputs ──
+    function Field({ label, sub, value, onChange, placeholder, prefix, t, required, error }) {
+      return (
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: t.textSecondary, marginBottom: 4 }}>
+            {label}
+            {required && <span style={{ color: "#ef4444", marginLeft: 3 }}>*</span>}
+            {sub && <span style={{ fontWeight: 400, color: t.textDim, marginLeft: 6, fontSize: 11 }}>{sub}</span>}
+          </label>
+          <div style={{ position: "relative" }}>
+            {prefix && <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: error ? "#ef4444" : t.textDim, fontSize: 14, fontWeight: 600 }}>{prefix}</span>}
+            <input type="number" value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
+              style={{ width: "100%", padding: prefix ? "10px 12px 10px 28px" : "10px 12px", background: t.inputBg, border: `1px solid ${error ? "#ef4444" : t.inputBorder}`, borderRadius: 8, color: t.text, fontSize: 14, outline: "none", boxSizing: "border-box", fontFamily: "'DM Mono', monospace", transition: "background 0.3s, border-color 0.3s, color 0.3s" }} />
+          </div>
+          {error && <div style={{ fontSize: 11, color: "#ef4444", marginTop: 4 }}>{error}</div>}
+        </div>
+      );
+    }
+
+    function CheckItem({ label, checked, onChange, sub, t }) {
+      return (
+        <label style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "10px 14px", background: checked ? t.checkActiveBg : "transparent", border: `1px solid ${checked ? t.checkActiveBorder : t.inputBorder}`, borderRadius: 10, cursor: "pointer", marginBottom: 8, transition: "all 0.25s" }}>
+          <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} style={{ marginTop: 2, accentColor: "#3b82f6" }} />
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: t.text }}>{label}</div>
+            {sub && <div style={{ fontSize: 11, color: t.textDim, marginTop: 2 }}>{sub}</div>}
+          </div>
+        </label>
+      );
+    }
+
+    function SelectField({ label, value, onChange, options, t }) {
+      return (
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: t.textSecondary, marginBottom: 4 }}>{label}</label>
+          <select value={value} onChange={(e) => onChange(e.target.value)}
+            style={{ width: "100%", padding: "10px 12px", background: t.inputBg, border: `1px solid ${t.inputBorder}`, borderRadius: 8, color: t.text, fontSize: 14, outline: "none", fontFamily: "'DM Mono', monospace", transition: "background 0.3s, border-color 0.3s, color 0.3s" }}>
+            {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+        </div>
+      );
+    }
+
+    // ── Theme Toggle ──
+    function ThemeToggle({ isDark, onToggle }) {
+      return (
+        <button onClick={onToggle} aria-label="Toggle theme"
+          style={{
+            position: "fixed", top: 16, right: 16, zIndex: 100, width: 48, height: 48, borderRadius: 14,
+            border: `1.5px solid ${isDark ? "#334155" : "#cbd5e1"}`,
+            background: isDark ? "linear-gradient(135deg, #1e293b, #0f172a)" : "linear-gradient(135deg, #ffffff, #f1f5f9)",
+            color: isDark ? "#fbbf24" : "#6366f1",
+            fontSize: 22, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+            boxShadow: isDark ? "0 4px 24px rgba(0,0,0,0.4)" : "0 4px 24px rgba(0,0,0,0.08)",
+            transition: "all 0.4s cubic-bezier(.4,0,.2,1)",
+          }}>
+          <span style={{ display: "inline-block", transition: "transform 0.5s cubic-bezier(.4,0,.2,1)", transform: isDark ? "rotate(0deg) scale(1)" : "rotate(220deg) scale(1)" }}>
+            {isDark ? "☀️" : "🌙"}
+          </span>
+        </button>
+      );
+    }
+
+    // ── Analysis Engine ──
+    function analyze(data) {
+      const income = Number(data.income) || 0;
+      const liabilities = Number(data.liabilities) || 0;
+      const dependents = Number(data.dependents) || 0;
+
+      const lifeTiers = {
+        conservative: { label: "Conservative", sub: "The Safety Net", multiplier: "12–15× Income", target: income * 15 + liabilities, color: "#22c55e", icon: "🛡" },
+        balanced:     { label: "Balanced",     sub: "The Standard",   multiplier: "10× Income + Debts", target: income * 10 + liabilities, color: "#3b82f6", icon: "⚖️" },
+        lean:         { label: "Lean",         sub: "The Minimum",    multiplier: "5× Income + Debts",  target: income * 5 + liabilities,  color: "#eab308", icon: "📉" },
+      };
+      const lifeTarget = lifeTiers.balanced.target;
+
+      let lifeCover = 0;
+      const lifeBreakdown = [];
+      if (data.hasTermPlan) { const v = Number(data.termPlanSA) || 0; lifeCover += v; lifeBreakdown.push({ name: "Term Plan", value: v, type: "good" }); }
+      if (data.hasPMJJBY) { lifeCover += 200000; lifeBreakdown.push({ name: "PMJJBY", value: 200000, type: "weak" }); }
+      if (data.hasEndowment) { const v = Number(data.endowmentSA) || 0; lifeCover += v; lifeBreakdown.push({ name: "Endowment/Traditional (SA only)", value: v, type: "caution" }); }
+      if (data.hasULIP) { const v = Number(data.ulipSA) || 0; lifeCover += v; lifeBreakdown.push({ name: "ULIP (SA only, excl. fund value)", value: v, type: "caution" }); }
+      if (data.hasSinglePremium) { const v = Number(data.singlePremiumSA) || 0; lifeCover += v; lifeBreakdown.push({ name: "Single Premium Plan (SA)", value: v, type: "caution" }); }
+      const lifeScore = lifeTarget > 0 ? Math.min((lifeCover / lifeTarget) * 100, 100) : 0;
+
+      const isMetro = data.cityTier === "metro";
+      let medTarget = dependents === 0 ? (isMetro ? 1000000 : 500000) : dependents <= 2 ? (isMetro ? 1500000 : 1000000) : (isMetro ? 2500000 : 1500000);
+      let medCover = 0; const medBreakdown = [];
+      if (data.hasPersonalHealth) { const v = Number(data.personalHealthSA) || 0; medCover += v; medBreakdown.push({ name: "Personal Health Insurance", value: v, type: "good" }); }
+      if (data.hasEmployerHealth) { const v = Number(data.employerHealthSA) || 0; medCover += v; medBreakdown.push({ name: "Employer Health Cover", value: v, type: "caution" }); }
+      if (data.hasPMAY) { medCover += 500000; medBreakdown.push({ name: "PMJAY/Govt. Scheme", value: 500000, type: "weak" }); }
+      if (data.hasSuperTopUp) { const v = Number(data.superTopUpSA) || 0; medCover += v; medBreakdown.push({ name: "Super Top-Up", value: v, type: "good" }); }
+      const medScore = medTarget > 0 ? Math.min((medCover / medTarget) * 100, 100) : 0;
+
+      const accTarget = income * 7;
+      let accCover = 0; const accBreakdown = [];
+      if (data.hasStandalonePA) { const v = Number(data.standalonePASA) || 0; accCover += v; accBreakdown.push({ name: "Standalone PA Cover", value: v, type: "good" }); }
+      if (data.hasPMSBY) { accCover += 200000; accBreakdown.push({ name: "PMSBY", value: 200000, type: "weak" }); }
+      if (data.hasAccidentRider) { const v = Number(data.accidentRiderSA) || 0; accCover += v; accBreakdown.push({ name: "Accident Rider", value: v, type: "good" }); }
+      const accScore = accTarget > 0 ? Math.min((accCover / accTarget) * 100, 100) : 0;
+
+      const overall = Math.round(lifeScore * 0.5 + medScore * 0.3 + accScore * 0.2);
+
+      const recs = [];
+      if (income > 0 && lifeScore < 60) {
+        if (lifeCover < lifeTiers.lean.target) {
+          recs.push({ severity: "critical", text: `Your life cover (${formatINR(lifeCover)}) doesn't meet the Lean minimum of ${formatINR(lifeTiers.lean.target)}. You urgently need a pure Term Plan — start with at least ${formatINR(lifeTiers.lean.target - lifeCover)} additional cover, and aim for the Balanced target of ${formatINR(lifeTiers.balanced.target)}.` });
+        } else {
+          recs.push({ severity: "critical", text: `Your life cover (${formatINR(lifeCover)}) meets the Lean tier but falls short of Balanced (${formatINR(lifeTiers.balanced.target)}). Purchase a Term Plan for the gap of ${formatINR(lifeTiers.balanced.target - lifeCover)}.` });
+        }
+      } else if (income > 0 && lifeScore < 90) {
+        const conGap = lifeTiers.conservative.target - lifeCover;
+        if (conGap > 0) recs.push({ severity: "moderate", text: `You're near Balanced but ${formatINR(conGap)} short of the Conservative safety-net (${formatINR(lifeTiers.conservative.target)}). Consider topping up if you have dependents or volatile income.` });
+      }
+      if (data.hasPMJJBY && !data.hasTermPlan) recs.push({ severity: "critical", text: "PMJJBY provides only ₹2L cover — far too low for primary life insurance. Get a proper Term Plan immediately." });
+      if (data.hasEndowment || data.hasULIP) recs.push({ severity: "moderate", text: "Traditional/Endowment & ULIP plans offer poor SA relative to premium. Consider surrendering (post lock-in) and redirecting premiums to a Term Plan + mutual funds." });
+      if (medScore < 60) recs.push({ severity: "critical", text: `Medical cover gap of ${formatINR(medTarget - medCover)}. Purchase a personal family floater or Super Top-Up plan.` });
+      if (data.hasEmployerHealth && !data.hasPersonalHealth) recs.push({ severity: "critical", text: "You rely solely on employer health cover, which ends when you leave/lose your job. Get a personal health policy now." });
+      if (accScore < 40) recs.push({ severity: "critical", text: `Accident/Disability cover is severely inadequate at ${formatINR(accCover)}. Get a standalone PA policy with PTD benefits of at least ${formatINR(accTarget)}.` });
+      if (data.hasPMSBY && !data.hasStandalonePA) recs.push({ severity: "moderate", text: "PMSBY only provides ₹2L accident cover. Insufficient for your income level. Add a standalone PA policy." });
+      if (dependents > 0 && !data.hasCriticalIllness) recs.push({ severity: "moderate", text: "With dependents, consider adding a Critical Illness rider or standalone policy for lump-sum payouts on major diagnoses." });
+      if (recs.length === 0) recs.push({ severity: "good", text: "Your insurance portfolio looks well-structured. Review annually as income and liabilities change." });
+
+      const noCover = lifeCover === 0 && medCover === 0 && accCover === 0;
+
+      return {
+        overall,
+        noCover,
+        life: { cover: lifeCover, target: lifeTarget, score: Math.round(lifeScore), breakdown: lifeBreakdown, tiers: lifeTiers },
+        medical: { cover: medCover, target: medTarget, score: Math.round(medScore), breakdown: medBreakdown },
+        accident: { cover: accCover, target: accTarget, score: Math.round(accScore), breakdown: accBreakdown },
+        recs,
+      };
+    }
+
+    // ── Main App ──
+    function InsuranceAnalyzer() {
+      const [isDark, setIsDark] = useState(true);
+      const [step, setStep] = useState(0);
+      const [data, setData] = useState({
+        age: "", dependents: "", income: "", expenses: "", liabilities: "", cityTier: "metro",
+        hasTermPlan: false, termPlanSA: "", hasPMJJBY: false, hasEndowment: false, endowmentSA: "",
+        hasULIP: false, ulipSA: "", hasSinglePremium: false, singlePremiumSA: "",
+        hasPersonalHealth: false, personalHealthSA: "", hasEmployerHealth: false, employerHealthSA: "",
+        hasPMAY: false, hasSuperTopUp: false, superTopUpSA: "",
+        hasStandalonePA: false, standalonePASA: "", hasPMSBY: false,
+        hasAccidentRider: false, accidentRiderSA: "", hasCriticalIllness: false,
+      });
+      const [result, setResult] = useState(null);
+      const [animScore, setAnimScore] = useState(0);
+      const [errors, setErrors] = useState({});
+
+      const t = themes[isDark ? "dark" : "light"];
+      const s = (k) => (v) => setData((d) => ({ ...d, [k]: v }));
+
+      const next = () => {
+        if (step === 0) {
+          const errs = {};
+          if (!data.age || Number(data.age) <= 0) errs.age = "Please enter your age";
+          if (!data.income || Number(data.income) <= 0) errs.income = "Annual income is required for analysis";
+          if (Object.keys(errs).length > 0) { setErrors(errs); return; }
+          setErrors({});
+        }
+        if (step === 3) { const r = analyze(data); setResult(r); setAnimScore(0); setStep(4); setTimeout(() => setAnimScore(r.noCover ? 0 : r.overall), 100); }
+        else setStep((x) => x + 1);
+      };
+      const back = () => setStep((x) => Math.max(x - 1, 0));
+
+      const stepLabels = ["Profile", "Life", "Medical", "Accident", "Report"];
+      const sevColor = { critical: "#ef4444", moderate: "#eab308", good: "#22c55e" };
+      const sevIcon = { critical: "⚠", moderate: "◉", good: "✓" };
+      const typeColor = { good: "#22c55e", caution: "#eab308", weak: "#f97316" };
+
+      return (
+        <div style={{ minHeight: "100vh", position: "relative", overflow: "hidden", color: t.text, fontFamily: "'DM Sans', 'Segoe UI', sans-serif", transition: "color 0.3s" }}>
+
+          {/* ── Layered Background ── */}
+          <div style={{ position: "fixed", inset: 0, background: t.bg, transition: "background 0.6s", zIndex: 0 }} />
+
+          <div style={{ position: "fixed", inset: 0, zIndex: 0, overflow: "hidden", opacity: isDark ? 0.4 : 0.3, transition: "opacity 0.6s" }}>
+            <div style={{ position: "absolute", top: "-10%", left: "-10%", width: "50%", height: "50%", borderRadius: "50%", background: isDark ? "radial-gradient(circle, #1e40af55 0%, transparent 70%)" : "radial-gradient(circle, #93c5fd44 0%, transparent 70%)", filter: "blur(80px)" }} />
+            <div style={{ position: "absolute", bottom: "-15%", right: "-10%", width: "60%", height: "60%", borderRadius: "50%", background: isDark ? "radial-gradient(circle, #0e747055 0%, transparent 70%)" : "radial-gradient(circle, #67e8f944 0%, transparent 70%)", filter: "blur(100px)" }} />
+            <div style={{ position: "absolute", top: "40%", left: "50%", transform: "translateX(-50%)", width: "40%", height: "40%", borderRadius: "50%", background: isDark ? "radial-gradient(circle, #7c3aed33 0%, transparent 70%)" : "radial-gradient(circle, #c4b5fd33 0%, transparent 70%)", filter: "blur(90px)" }} />
+          </div>
+
+          <div style={{ position: "fixed", inset: 0, zIndex: 0, opacity: isDark ? 0.06 : 0.04, backgroundImage: `linear-gradient(${isDark ? "#94a3b8" : "#475569"} 1px, transparent 1px), linear-gradient(90deg, ${isDark ? "#94a3b8" : "#475569"} 1px, transparent 1px)`, backgroundSize: "60px 60px" }} />
+
+          <div style={{ position: "fixed", inset: 0, zIndex: 0, overflow: "hidden", pointerEvents: "none" }}>
+            <svg style={{ position: "absolute", top: "8%", right: "8%", opacity: isDark ? 0.06 : 0.05 }} width="180" height="200" viewBox="0 0 180 200" fill="none">
+              <path d="M90 10 L170 60 L170 150 L90 190 L10 150 L10 60 Z" stroke={isDark ? "#60a5fa" : "#3b82f6"} strokeWidth="1.5" fill="none" />
+              <path d="M90 35 L150 70 L150 140 L90 170 L30 140 L30 70 Z" stroke={isDark ? "#60a5fa" : "#3b82f6"} strokeWidth="1" fill="none" opacity="0.5" />
+              <path d="M90 60 L130 82 L130 128 L90 148 L50 128 L50 82 Z" stroke={isDark ? "#60a5fa" : "#3b82f6"} strokeWidth="0.8" fill="none" opacity="0.3" />
+            </svg>
+            <svg style={{ position: "absolute", bottom: "12%", left: "5%", opacity: isDark ? 0.05 : 0.04 }} width="140" height="160" viewBox="0 0 140 160" fill="none">
+              <path d="M70 5 C70 5 130 30 130 75 C130 120 70 155 70 155 C70 155 10 120 10 75 C10 30 70 5 70 5Z" stroke={isDark ? "#22c55e" : "#16a34a"} strokeWidth="1.5" fill="none" />
+              <path d="M70 25 C70 25 115 43 115 78 C115 113 70 140 70 140 C70 140 25 113 25 78 C25 43 70 25 70 25Z" stroke={isDark ? "#22c55e" : "#16a34a"} strokeWidth="1" fill="none" opacity="0.5" />
+            </svg>
+            <svg style={{ position: "absolute", top: "50%", left: "12%", opacity: isDark ? 0.04 : 0.03 }} width="100" height="100" viewBox="0 0 100 100" fill="none">
+              <circle cx="50" cy="50" r="45" stroke={isDark ? "#eab308" : "#ca8a04"} strokeWidth="1" fill="none" />
+              <circle cx="50" cy="50" r="30" stroke={isDark ? "#eab308" : "#ca8a04"} strokeWidth="0.8" fill="none" opacity="0.5" />
+              <line x1="50" y1="15" x2="50" y2="38" stroke={isDark ? "#eab308" : "#ca8a04"} strokeWidth="0.8" opacity="0.4" />
+              <line x1="50" y1="62" x2="50" y2="85" stroke={isDark ? "#eab308" : "#ca8a04"} strokeWidth="0.8" opacity="0.4" />
+              <line x1="15" y1="50" x2="38" y2="50" stroke={isDark ? "#eab308" : "#ca8a04"} strokeWidth="0.8" opacity="0.4" />
+              <line x1="62" y1="50" x2="85" y2="50" stroke={isDark ? "#eab308" : "#ca8a04"} strokeWidth="0.8" opacity="0.4" />
+            </svg>
+            <svg style={{ position: "absolute", top: "20%", left: "50%", opacity: isDark ? 0.03 : 0.025 }} width="200" height="200" viewBox="0 0 200 200" fill="none">
+              <rect x="20" y="20" width="160" height="160" rx="20" stroke={isDark ? "#a78bfa" : "#7c3aed"} strokeWidth="0.8" fill="none" />
+              <rect x="45" y="45" width="110" height="110" rx="14" stroke={isDark ? "#a78bfa" : "#7c3aed"} strokeWidth="0.6" fill="none" opacity="0.5" />
+            </svg>
+          </div>
+
+          <div style={{ position: "fixed", inset: 0, zIndex: 0, background: isDark ? "radial-gradient(ellipse at center, transparent 50%, #020617 100%)" : "radial-gradient(ellipse at center, transparent 50%, #e2e8f0 100%)", transition: "background 0.6s" }} />
+
+          {/* ── Content ── */}
+          <div style={{ position: "relative", zIndex: 1, padding: "24px 16px" }}>
+
+            <ThemeToggle isDark={isDark} onToggle={() => setIsDark((d) => !d)} />
+
+            {/* Header */}
+            <div style={{ textAlign: "center", marginBottom: 28 }}>
+              {/* InsureIQ Logo */}
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+                <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="44" height="44" rx="12" fill="url(#logoGrad)" />
+                  {/* Shield shape */}
+                  <path d="M22 8 L34 13 L34 24 C34 30.5 28.5 36 22 38 C15.5 36 10 30.5 10 24 L10 13 Z" fill="white" fillOpacity="0.15" stroke="white" strokeWidth="1.5" strokeLinejoin="round"/>
+                  {/* IQ text inside shield */}
+                  <text x="15.5" y="27" fontFamily="'DM Sans', sans-serif" fontWeight="800" fontSize="12" fill="white" letterSpacing="-0.5">IQ</text>
+                  {/* Pulse dot */}
+                  <circle cx="33" cy="11" r="4" fill="#22c55e"/>
+                  <circle cx="33" cy="11" r="2" fill="white"/>
+                  <defs>
+                    <linearGradient id="logoGrad" x1="0" y1="0" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+                      <stop stopColor="#2563eb"/>
+                      <stop offset="1" stopColor="#0e7490"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div style={{ textAlign: "left" }}>
+                  <div style={{ fontSize: 26, fontWeight: 800, lineHeight: 1, background: isDark ? "linear-gradient(135deg, #e2e8f0, #93c5fd)" : "linear-gradient(135deg, #1e40af, #0e7490)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                    InsureIQ
+                  </div>
+                  <div style={{ fontSize: 10, letterSpacing: 2, textTransform: "uppercase", color: t.textDim, fontWeight: 600, marginTop: 1 }}>Know Your Coverage</div>
+                </div>
+              </div>
+              <div style={{ marginTop: 4 }}>
+                <h1 style={{ fontSize: 20, fontWeight: 700, margin: 0, color: t.textSecondary }}>
+                  Are You Sufficiently Covered?
+                </h1>
+              </div>
+            </div>
+
+            {/* Progress */}
+            <div style={{ display: "flex", justifyContent: "center", gap: 4, marginBottom: 28, flexWrap: "wrap" }}>
+              {stepLabels.map((l, i) => (
+                <div key={l} style={{ display: "flex", alignItems: "center", gap: 6, padding: "5px 12px", borderRadius: 16, fontSize: 12, fontWeight: 600, background: i === step ? t.stepActiveBg : i < step ? t.stepDoneBg : t.stepDefaultBg, color: i <= step ? "#e2e8f0" : t.textDim, transition: "all 0.3s" }}>
+                  <span style={{ width: 18, height: 18, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, background: i < step ? t.stepDotDone : i === step ? t.stepDotActive : t.stepDotDefault, color: "#fff" }}>
+                    {i < step ? "✓" : i + 1}
+                  </span>{l}
+                </div>
+              ))}
+            </div>
+
+            {/* Card */}
+            <div style={{ maxWidth: 560, margin: "0 auto", background: t.cardBg, border: `1px solid ${t.cardBorder}`, borderRadius: 16, padding: 28, boxShadow: t.cardShadow, backdropFilter: "blur(20px) saturate(1.2)", WebkitBackdropFilter: "blur(20px) saturate(1.2)", transition: "all 0.4s" }}>
+
+              {step === 0 && (
+                <div>
+                  <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, marginTop: 0, color: t.text }}>Financial Profile</h2>
+                  <p style={{ fontSize: 12, color: t.textDim, marginBottom: 20, marginTop: 0 }}>Your personal and financial details for accurate analysis.</p>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
+                    <Field label="Age" value={data.age} onChange={(v) => { s("age")(v); setErrors((e) => ({ ...e, age: "" })); }} placeholder="32" t={t} required error={errors.age} />
+                    <Field label="Dependents" sub="(excl. you)" value={data.dependents} onChange={s("dependents")} placeholder="2" t={t} />
+                  </div>
+                  <Field label="Annual Income" prefix="₹" value={data.income} onChange={(v) => { s("income")(v); setErrors((e) => ({ ...e, income: "" })); }} placeholder="1200000" t={t} required error={errors.income} />
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
+                    <Field label="Monthly Expenses" prefix="₹" value={data.expenses} onChange={s("expenses")} placeholder="50000" t={t} />
+                    <Field label="Total Liabilities" prefix="₹" sub="loans etc." value={data.liabilities} onChange={s("liabilities")} placeholder="3000000" t={t} />
+                  </div>
+                  <SelectField label="City Tier" value={data.cityTier} onChange={s("cityTier")} t={t}
+                    options={[{ value: "metro", label: "Metro (Delhi, Mumbai, Bangalore, Chennai, etc.)" }, { value: "non-metro", label: "Non-Metro / Tier 2-3 City" }]} />
+                </div>
+              )}
+
+              {step === 1 && (
+                <div>
+                  <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, marginTop: 0, color: t.text }}>Life Insurance Holdings</h2>
+                  <p style={{ fontSize: 12, color: t.textDim, marginBottom: 20, marginTop: 0 }}>Select all life covers you currently hold. Enter Sum Assured (not premium).</p>
+                  <CheckItem label="Pure Term Plan" sub="High cover, low premium" checked={data.hasTermPlan} onChange={s("hasTermPlan")} t={t} />
+                  {data.hasTermPlan && <Field label="Term Plan Sum Assured" prefix="₹" value={data.termPlanSA} onChange={s("termPlanSA")} placeholder="10000000" t={t} />}
+                  <CheckItem label="PMJJBY" sub="Pradhan Mantri Jeevan Jyoti Bima Yojana — ₹2L cover" checked={data.hasPMJJBY} onChange={s("hasPMJJBY")} t={t} />
+                  <CheckItem label="Endowment / Traditional Plan" sub="LIC, etc. — low SA relative to premium" checked={data.hasEndowment} onChange={s("hasEndowment")} t={t} />
+                  {data.hasEndowment && <Field label="Endowment Sum Assured" prefix="₹" value={data.endowmentSA} onChange={s("endowmentSA")} placeholder="500000" t={t} />}
+                  <CheckItem label="ULIP" sub="Unit-Linked — enter Sum Assured only, NOT fund value" checked={data.hasULIP} onChange={s("hasULIP")} t={t} />
+                  {data.hasULIP && <Field label="ULIP Sum Assured" prefix="₹" value={data.ulipSA} onChange={s("ulipSA")} placeholder="500000" t={t} />}
+                  <CheckItem label="Single Premium Plan" checked={data.hasSinglePremium} onChange={s("hasSinglePremium")} t={t} />
+                  {data.hasSinglePremium && <Field label="Single Premium SA" prefix="₹" value={data.singlePremiumSA} onChange={s("singlePremiumSA")} placeholder="300000" t={t} />}
+                </div>
+              )}
+
+              {step === 2 && (
+                <div>
+                  <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, marginTop: 0, color: t.text }}>Medical Insurance Holdings</h2>
+                  <p style={{ fontSize: 12, color: t.textDim, marginBottom: 20, marginTop: 0 }}>Select all health covers applicable to you and your family.</p>
+                  <CheckItem label="Personal Health Insurance" sub="Individual or family floater" checked={data.hasPersonalHealth} onChange={s("hasPersonalHealth")} t={t} />
+                  {data.hasPersonalHealth && <Field label="Health Cover Amount" prefix="₹" value={data.personalHealthSA} onChange={s("personalHealthSA")} placeholder="1000000" t={t} />}
+                  <CheckItem label="Employer-Provided Health Cover" sub="Ends with employment" checked={data.hasEmployerHealth} onChange={s("hasEmployerHealth")} t={t} />
+                  {data.hasEmployerHealth && <Field label="Employer Cover Amount" prefix="₹" value={data.employerHealthSA} onChange={s("employerHealthSA")} placeholder="500000" t={t} />}
+                  <CheckItem label="PMJAY / Government Scheme" sub="Ayushman Bharat — ₹5L cover" checked={data.hasPMAY} onChange={s("hasPMAY")} t={t} />
+                  <CheckItem label="Super Top-Up Plan" checked={data.hasSuperTopUp} onChange={s("hasSuperTopUp")} t={t} />
+                  {data.hasSuperTopUp && <Field label="Super Top-Up SA" prefix="₹" value={data.superTopUpSA} onChange={s("superTopUpSA")} placeholder="1000000" t={t} />}
+                </div>
+              )}
+
+              {step === 3 && (
+                <div>
+                  <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, marginTop: 0, color: t.text }}>Accident & Disability Cover</h2>
+                  <p style={{ fontSize: 12, color: t.textDim, marginBottom: 20, marginTop: 0 }}>Includes Personal Accident, PMSBY, and riders on existing policies.</p>
+                  <CheckItem label="Standalone Personal Accident Policy" sub="With PTD & TTD benefits" checked={data.hasStandalonePA} onChange={s("hasStandalonePA")} t={t} />
+                  {data.hasStandalonePA && <Field label="PA Cover Amount" prefix="₹" value={data.standalonePASA} onChange={s("standalonePASA")} placeholder="5000000" t={t} />}
+                  <CheckItem label="PMSBY" sub="Pradhan Mantri Suraksha Bima Yojana — ₹2L cover" checked={data.hasPMSBY} onChange={s("hasPMSBY")} t={t} />
+                  <CheckItem label="Accident Rider on Life Policy" checked={data.hasAccidentRider} onChange={s("hasAccidentRider")} t={t} />
+                  {data.hasAccidentRider && <Field label="Rider Sum Assured" prefix="₹" value={data.accidentRiderSA} onChange={s("accidentRiderSA")} placeholder="5000000" t={t} />}
+                  <CheckItem label="I have Critical Illness Cover" sub="Rider or standalone" checked={data.hasCriticalIllness} onChange={s("hasCriticalIllness")} t={t} />
+                </div>
+              )}
+
+              {/* ── REPORT ── */}
+              {step === 4 && result && (
+                <div>
+                  {result.noCover ? (
+                    <div>
+                      <div style={{ textAlign: "center", marginBottom: 24 }}>
+                        <div style={{ fontSize: 48, marginBottom: 12 }}>⚠️</div>
+                        <div style={{ fontSize: 16, fontWeight: 800, color: "#ef4444", marginBottom: 8 }}>No Insurance Declared</div>
+                        <div style={{ fontSize: 13, color: t.textSecondary, lineHeight: 1.6, maxWidth: 400, margin: "0 auto" }}>
+                          You haven't declared any insurance holdings. Either you have no coverage at all, or you skipped the previous steps. Go back and enter your existing policies for a meaningful analysis.
+                        </div>
+                      </div>
+                      <div style={{ padding: "16px 18px", background: "#ef444415", border: "1px solid #ef444440", borderRadius: 12, marginBottom: 12 }}>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: "#ef4444", marginBottom: 6 }}>⚠ Critical — Life Insurance</div>
+                        <div style={{ fontSize: 13, color: t.textSecondary, lineHeight: 1.5 }}>Without any life cover, your dependents have no financial safety net. A pure Term Plan is the single highest-priority action.</div>
+                      </div>
+                      <div style={{ padding: "16px 18px", background: "#ef444415", border: "1px solid #ef444440", borderRadius: 12, marginBottom: 12 }}>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: "#ef4444", marginBottom: 6 }}>⚠ Critical — Health Insurance</div>
+                        <div style={{ fontSize: 13, color: t.textSecondary, lineHeight: 1.5 }}>No medical cover means any hospitalisation comes entirely out of pocket. Get a personal health floater immediately.</div>
+                      </div>
+                      <div style={{ padding: "16px 18px", background: "#ef444415", border: "1px solid #ef444440", borderRadius: 12, marginBottom: 20 }}>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: "#ef4444", marginBottom: 6 }}>⚠ Critical — Accident Cover</div>
+                        <div style={{ fontSize: 13, color: t.textSecondary, lineHeight: 1.5 }}>No accident or disability protection. A standalone Personal Accident policy is low-cost and covers loss of income from disability.</div>
+                      </div>
+                      <div style={{ padding: "10px 14px", background: t.disclaimerBg, borderRadius: 8, border: `1px solid ${t.disclaimerBorder}`, fontSize: 11, color: t.textFaint, lineHeight: 1.6 }}>
+                        <strong style={{ color: t.textDim }}>Note:</strong> If you do hold insurance policies, please go back and enter them to get an accurate coverage score.
+                      </div>
+                    </div>
+                  ) : (
+                  <div>
+                  <div style={{ textAlign: "center", marginBottom: 8 }}>
+                    <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: t.textDim, marginBottom: 8 }}>Coverage Score</div>
+                    <ScoreGauge score={animScore} t={t} />
+                    <div style={{ fontSize: 14, fontWeight: 700, marginTop: 8, color: result.overall >= 75 ? "#22c55e" : result.overall >= 50 ? "#eab308" : "#ef4444" }}>
+                      {result.overall >= 75 ? "Well Protected" : result.overall >= 50 ? "Partially Covered — Gaps Exist" : result.overall >= 25 ? "Significantly Under-Insured" : "Critically Under-Insured"}
+                    </div>
+                  </div>
+
+                  <div style={{ margin: "24px 0 16px", borderTop: `1px solid ${t.divider}` }} />
+                  <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 14, color: t.textMuted, letterSpacing: 1, textTransform: "uppercase" }}>Gap Analysis</h3>
+
+                  {/* Tiered Life Viz */}
+                  <div style={{ marginBottom: 20 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: t.text, marginBottom: 10 }}>Life Cover — Tiered Projection</div>
+                    <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+                      {["conservative", "balanced", "lean"].map((k) => {
+                        const tier = result.life.tiers[k];
+                        const pct = tier.target > 0 ? Math.min((result.life.cover / tier.target) * 100, 100) : 0;
+                        const met = result.life.cover >= tier.target;
+                        const gap = tier.target - result.life.cover;
+                        return (
+                          <div key={k} style={{ flex: 1, background: met ? `${tier.color}${t.tierMetBgSuffix}` : t.tierDefaultBg, border: `1px solid ${met ? tier.color : t.inputBorder}`, borderRadius: 10, padding: "10px 10px 12px", position: "relative", overflow: "hidden", transition: "all 0.3s" }}>
+                            {met && <div style={{ position: "absolute", top: 6, right: 8, fontSize: 14, color: tier.color }}>✓</div>}
+                            <div style={{ fontSize: 16, marginBottom: 2 }}>{tier.icon}</div>
+                            <div style={{ fontSize: 11, fontWeight: 700, color: tier.color, marginBottom: 1 }}>{tier.label}</div>
+                            <div style={{ fontSize: 9, color: t.textDim, marginBottom: 6 }}>{tier.sub}</div>
+                            <div style={{ fontSize: 10, color: t.textMuted, marginBottom: 2 }}>{tier.multiplier}</div>
+                            <div style={{ fontSize: 13, fontWeight: 700, color: t.text, fontFamily: "'DM Mono', monospace" }}>{formatINR(tier.target)}</div>
+                            <div style={{ height: 4, background: t.barTrack, borderRadius: 2, marginTop: 8, overflow: "hidden" }}>
+                              <div style={{ width: `${pct}%`, height: "100%", background: met ? tier.color : `${tier.color}88`, borderRadius: 2, transition: "width 1s cubic-bezier(.4,0,.2,1)" }} />
+                            </div>
+                            <div style={{ fontSize: 9, color: met ? tier.color : t.textDim, marginTop: 4, fontWeight: 600 }}>{met ? "✓ Covered" : `Gap: ${formatINR(gap)}`}</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 10px", background: t.coverRowBg, borderRadius: 6, border: `1px dashed ${t.coverRowBorder}`, transition: "all 0.3s" }}>
+                      <span style={{ fontSize: 11, color: t.textDim }}>Your total life cover</span>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: t.text, fontFamily: "'DM Mono', monospace" }}>{formatINRFull(result.life.cover)}</span>
+                    </div>
+                  </div>
+
+                  <GapBar label={`Life vs Balanced (Score: ${result.life.score})`} current={result.life.cover} recommended={result.life.target} t={t} />
+                  <GapBar label={`Medical Cover (Score: ${result.medical.score})`} current={result.medical.cover} recommended={result.medical.target} t={t} />
+                  <GapBar label={`Accident Cover (Score: ${result.accident.score})`} current={result.accident.cover} recommended={result.accident.target} t={t} />
+
+                  {/* Breakdown */}
+                  {[{ title: "Life Insurance", data: result.life }, { title: "Medical Insurance", data: result.medical }, { title: "Accident Cover", data: result.accident }].map(({ title, data: d }) =>
+                    d.breakdown.length > 0 ? (
+                      <div key={title} style={{ marginTop: 16 }}>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: t.textDim, marginBottom: 6 }}>{title} Breakdown</div>
+                        {d.breakdown.map((b) => (
+                          <div key={b.name} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 10px", background: t.rowBg, borderRadius: 6, marginBottom: 4, borderLeft: `3px solid ${typeColor[b.type]}`, transition: "background 0.3s" }}>
+                            <span style={{ fontSize: 12, color: t.textSecondary }}>{b.name}</span>
+                            <span style={{ fontSize: 12, fontWeight: 600, color: typeColor[b.type], fontFamily: "'DM Mono', monospace" }}>{formatINRFull(b.value)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : null
+                  )}
+
+                  <div style={{ margin: "24px 0 16px", borderTop: `1px solid ${t.divider}` }} />
+                  <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 14, color: t.textMuted, letterSpacing: 1, textTransform: "uppercase" }}>Recommendations</h3>
+                  {result.recs.map((r, i) => (
+                    <div key={i} style={{ display: "flex", gap: 10, padding: "12px 14px", background: t.rowBg, borderRadius: 10, marginBottom: 8, borderLeft: `3px solid ${sevColor[r.severity]}`, transition: "background 0.3s" }}>
+                      <span style={{ fontSize: 16, flexShrink: 0 }}>{sevIcon[r.severity]}</span>
+                      <div style={{ fontSize: 13, color: t.textSecondary, lineHeight: 1.5 }}>{r.text}</div>
+                    </div>
+                  ))}
+
+                  <div style={{ margin: "24px 0 16px", borderTop: `1px solid ${t.divider}` }} />
+                  <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 14, color: t.textMuted, letterSpacing: 1, textTransform: "uppercase" }}>Summary Table</h3>
+                  <div style={{ overflowX: "auto" }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                      <thead>
+                        <tr style={{ borderBottom: `1px solid ${t.tableBorder}` }}>
+                          {["Category", "Current", "Recommended", "Gap"].map((h) => (
+                            <th key={h} style={{ textAlign: "left", padding: "8px", color: t.textDim, fontWeight: 600, fontSize: 11, letterSpacing: 0.5 }}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {["conservative", "balanced", "lean"].map((k) => {
+                          const tier = result.life.tiers[k]; const gap = tier.target - result.life.cover;
+                          return (
+                            <tr key={k} style={{ borderBottom: `1px solid ${t.divider}` }}>
+                              <td style={{ padding: "10px 8px", fontWeight: 600, color: t.text }}>Life <span style={{ fontSize: 10, color: tier.color, fontWeight: 700 }}>({tier.label})</span></td>
+                              <td style={{ padding: "10px 8px", color: t.textMuted, fontFamily: "'DM Mono', monospace" }}>{formatINR(result.life.cover)}</td>
+                              <td style={{ padding: "10px 8px", color: t.textMuted, fontFamily: "'DM Mono', monospace" }}>{formatINR(tier.target)}</td>
+                              <td style={{ padding: "10px 8px", fontWeight: 700, fontFamily: "'DM Mono', monospace", color: gap <= 0 ? "#22c55e" : "#ef4444" }}>{gap <= 0 ? "✓ Covered" : formatINR(gap)}</td>
+                            </tr>
+                          );
+                        })}
+                        {[{ cat: "Medical", c: result.medical.cover, r: result.medical.target }, { cat: "Accident", c: result.accident.cover, r: result.accident.target }].map(({ cat, c, r: rec }) => {
+                          const gap = rec - c;
+                          return (
+                            <tr key={cat} style={{ borderBottom: `1px solid ${t.divider}` }}>
+                              <td style={{ padding: "10px 8px", fontWeight: 600, color: t.text }}>{cat}</td>
+                              <td style={{ padding: "10px 8px", color: t.textMuted, fontFamily: "'DM Mono', monospace" }}>{formatINR(c)}</td>
+                              <td style={{ padding: "10px 8px", color: t.textMuted, fontFamily: "'DM Mono', monospace" }}>{formatINR(rec)}</td>
+                              <td style={{ padding: "10px 8px", fontWeight: 700, fontFamily: "'DM Mono', monospace", color: gap <= 0 ? "#22c55e" : "#ef4444" }}>{gap <= 0 ? "✓ Covered" : formatINR(gap)}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div style={{ marginTop: 20, padding: "10px 14px", background: t.disclaimerBg, borderRadius: 8, border: `1px solid ${t.disclaimerBorder}`, fontSize: 11, color: t.textFaint, lineHeight: 1.6, transition: "all 0.3s" }}>
+                    <strong style={{ color: t.textDim }}>InsureIQ Disclaimer:</strong> Life cover uses a tiered model — Conservative (12–15× income), Balanced (10× income + debts), and Lean (5× income + debts). Coverage Score benchmarks against Balanced. This is indicative analysis, not a substitute for professional financial advice.
+                  </div>
+                  </div>
+                  )}
+                </div>
+              )}
+
+              {/* Nav */}
+              {step < 4 && (
+                <div style={{ display: "flex", justifyContent: "space-between", marginTop: 24 }}>
+                  <button onClick={back} disabled={step === 0}
+                    style={{ padding: "10px 20px", borderRadius: 8, border: `1px solid ${t.btnSecondaryBorder}`, background: t.btnSecondaryBg, color: step === 0 ? t.btnDisabledColor : t.btnSecondaryColor, fontSize: 13, fontWeight: 600, cursor: step === 0 ? "default" : "pointer", transition: "all 0.3s" }}>
+                    ← Back
+                  </button>
+                  <button onClick={next}
+                    style={{ padding: "10px 24px", borderRadius: 8, border: "none", background: t.btnPrimaryBg, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", boxShadow: t.btnPrimaryShadow, transition: "all 0.3s" }}>
+                    {step === 3 ? "Generate Report →" : "Continue →"}
+                  </button>
+                </div>
+              )}
+              {step === 4 && (
+                <div style={{ textAlign: "center", marginTop: 20 }}>
+                  <button onClick={() => { setStep(0); setResult(null); setData({
+                      age: "", dependents: "", income: "", expenses: "", liabilities: "", cityTier: "metro",
+                      hasTermPlan: false, termPlanSA: "", hasPMJJBY: false, hasEndowment: false, endowmentSA: "",
+                      hasULIP: false, ulipSA: "", hasSinglePremium: false, singlePremiumSA: "",
+                      hasPersonalHealth: false, personalHealthSA: "", hasEmployerHealth: false, employerHealthSA: "",
+                      hasPMAY: false, hasSuperTopUp: false, superTopUpSA: "",
+                      hasStandalonePA: false, standalonePASA: "", hasPMSBY: false,
+                      hasAccidentRider: false, accidentRiderSA: "", hasCriticalIllness: false,
+                    }); }}
+                    style={{ padding: "10px 24px", borderRadius: 8, border: `1px solid ${t.btnSecondaryBorder}`, background: t.btnSecondaryBg, color: t.btnSecondaryColor, fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "all 0.3s" }}>
+                    ↻ Start New Analysis
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<InsuranceAnalyzer />);
+  </script>
+</body>
+</html>
