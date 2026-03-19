@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>15 Puzzle</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ── Themes ── */
+  :root[data-theme="dark"] {
+    --bg:      #0d0d0f;
+    --surface: #17171b;
+    --tile:    #1e1e24;
+    --tile-active: #2a2a34;
+    --accent:  #e8c547;
+    --text:    #f0eee8;
+    --muted:   #5a5a6a;
+    --border:  #2e2e38;
+    --btn-bg:  transparent;
+    --btn-color: #5a5a6a;
+  }
+
+  :root[data-theme="light"] {
+    --bg:      #f4f2ec;
+    --surface: #ffffff;
+    --tile:    #eceae3;
+    --tile-active: #dddbd3;
+    --accent:  #c9a820;
+    --text:    #1a1a1f;
+    --muted:   #888880;
+    --border:  #d8d6ce;
+    --btn-bg:  transparent;
+    --btn-color: #888880;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 16px 20px;
+    gap: 10px;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* ── Top bar: theme toggle ── */
+  .topbar {
+    width: 100%;
+    max-width: 440px;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .theme-toggle {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: background 0.3s, border-color 0.3s;
+    touch-action: manipulation;
+  }
+
+  .theme-toggle:active { transform: scale(0.95); }
+
+  .toggle-track {
+    width: 34px;
+    height: 18px;
+    border-radius: 9px;
+    background: var(--border);
+    position: relative;
+    transition: background 0.3s;
+  }
+
+  [data-theme="dark"] .toggle-track  { background: var(--accent); }
+
+  .toggle-thumb {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #fff;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  [data-theme="dark"] .toggle-thumb  { transform: translateX(16px); }
+
+  .toggle-icon {
+    font-size: 0.75rem;
+    line-height: 1;
+    user-select: none;
+  }
+
+  /* ── Header ── */
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2rem, 9vw, 4rem);
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    line-height: 1;
+    text-align: center;
+    transition: color 0.3s;
+  }
+
+  .subtitle {
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-align: center;
+    margin-top: -6px;
+    transition: color 0.3s;
+  }
+
+  /* ── Stats ── */
+  .stats { display: flex; gap: 32px; }
+  .stat  { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+  .stat-value { font-size: 1.4rem; font-weight: 500; min-width: 52px; text-align: center; }
+  .stat-label { font-size: 0.56rem; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; transition: color 0.3s; }
+
+  /* ── Board ── */
+  .board-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 10px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.2);
+    flex-shrink: 0;
+    transition: background 0.3s, border-color 0.3s;
+  }
+
+  .board {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 6px;
+  }
+
+  .tile {
+    aspect-ratio: 1;
+    background: var(--tile);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(1.2rem, 5vw, 2rem);
+    color: var(--text);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.1s, transform 0.1s, color 0.3s, border-color 0.3s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .tile.empty {
+    background: transparent;
+    border: 1px dashed rgba(128,128,128,0.15);
+    cursor: default;
+    pointer-events: none;
+  }
+
+  /* correct tiles get accent color */
+  .tile.correct { color: var(--accent); }
+
+  .tile:not(.empty):active {
+    transform: scale(0.90);
+    background: var(--tile-active);
+  }
+
+  /* ── Controls ── */
+  .controls { display: flex; gap: 10px; }
+
+  button {
+    border: 1px solid var(--border);
+    background: var(--btn-bg);
+    color: var(--btn-color);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button:hover  { border-color: var(--accent); color: var(--accent); }
+  button:active { transform: scale(0.95); }
+
+  button.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #0d0d0f;
+    font-weight: 500;
+  }
+  button.primary:hover  { opacity: 0.9; color: #0d0d0f; }
+  button.primary:active { opacity: 0.8; color: #0d0d0f; }
+
+  /* ── Win overlay ── */
+  .win-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(13,13,15,0.92);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+    z-index: 99;
+    backdrop-filter: blur(6px);
+  }
+  .win-overlay.show { opacity: 1; pointer-events: all; }
+
+  .win-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 12vw, 5rem);
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    animation: glow 1.4s ease-in-out infinite;
+  }
+  .win-sub {
+    font-size: 0.68rem;
+    color: #888;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .win-btn {
+    background: var(--accent);
+    border: none;
+    color: #0d0d0f;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 12px 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  @keyframes glow {
+    0%,100% { text-shadow: 0 0 20px rgba(232,197,71,0.3); }
+    50%      { text-shadow: 0 0 60px rgba(232,197,71,0.8); }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="theme-toggle" id="themeToggle" role="button" aria-label="Toggle theme">
+    <span class="toggle-icon">☀️</span>
+    <div class="toggle-track"><div class="toggle-thumb"></div></div>
+    <span class="toggle-icon">🌙</span>
+  </div>
+</div>
+
+<h1>15 PUZZLE</h1>
+<p class="subtitle">Slide tiles — order 1 to 15</p>
+
+<div class="stats">
+  <div class="stat">
+    <span class="stat-value" id="movesEl">0</span>
+    <span class="stat-label">Moves</span>
+  </div>
+  <div class="stat">
+    <span class="stat-value" id="timerEl">0:00</span>
+    <span class="stat-label">Time</span>
+  </div>
+</div>
+
+<div class="board-wrap" id="boardWrap">
+  <div class="board" id="board"></div>
+</div>
+
+<div class="controls">
+  <button class="primary" id="newGameBtn">New Game</button>
+  <button id="hintBtn">Hint</button>
+</div>
+
+<div class="win-overlay" id="winOverlay">
+  <div class="win-title">SOLVED!</div>
+  <div class="win-sub" id="winStats"></div>
+  <button class="win-btn" id="winNewBtn">Play Again</button>
+</div>
+
+<script>
+const GOAL = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0];
+
+let tiles = [], moves = 0, seconds = 0, timerID = null, started = false, locked = false;
+
+const boardEl    = document.getElementById('board');
+const boardWrap  = document.getElementById('boardWrap');
+const movesEl    = document.getElementById('movesEl');
+const timerEl    = document.getElementById('timerEl');
+const winOverlay = document.getElementById('winOverlay');
+const winStats   = document.getElementById('winStats');
+
+// ── Theme toggle ──────────────────────────────────────────────────────────────
+const html = document.documentElement;
+document.getElementById('themeToggle').addEventListener('pointerdown', e => {
+  e.preventDefault();
+  html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
+});
+
+// ── Size board ────────────────────────────────────────────────────────────────
+function sizeBoard() {
+  const availW = Math.min(window.innerWidth  - 32, 440);
+  const availH = Math.min(window.innerHeight - 230, 440);
+  const size   = Math.floor(Math.min(availW, availH));
+  boardWrap.style.width  = size + 'px';
+  boardEl.style.width    = (size - 20) + 'px';
+  boardEl.style.height   = (size - 20) + 'px';
+}
+
+// ── Render board ──────────────────────────────────────────────────────────────
+function renderBoard() {
+  boardEl.innerHTML = '';
+  tiles.forEach((v, idx) => {
+    const el = document.createElement('div');
+    el.className = 'tile'
+      + (v === 0 ? ' empty' : '')
+      + (v !== 0 && v === GOAL[idx] ? ' correct' : '');
+    if (v !== 0) el.textContent = v;
+    if (v !== 0) {
+      el.addEventListener('pointerdown', e => {
+        e.preventDefault();
+        tryMove(idx);
+      });
+    }
+    boardEl.appendChild(el);
+  });
+}
+
+// ── Move logic ────────────────────────────────────────────────────────────────
+function getMovable(emptyIdx) {
+  const r = Math.floor(emptyIdx / 4), c = emptyIdx % 4, m = [];
+  if (r > 0) m.push(emptyIdx - 4);
+  if (r < 3) m.push(emptyIdx + 4);
+  if (c > 0) m.push(emptyIdx - 1);
+  if (c < 3) m.push(emptyIdx + 1);
+  return m;
+}
+
+function tryMove(idx) {
+  if (locked) return;
+  const emptyIdx = tiles.indexOf(0);
+  if (!getMovable(emptyIdx).includes(idx)) return;
+
+  if (!started) { started = true; startTimer(); }
+
+  locked = true;
+  [tiles[idx], tiles[emptyIdx]] = [tiles[emptyIdx], tiles[idx]];
+  moves++;
+  movesEl.textContent = moves;
+  renderBoard();
+
+  setTimeout(() => {
+    locked = false;
+    if (isGoal()) showWin();
+  }, 160);
+}
+
+function isGoal() { return tiles.every((v, i) => v === GOAL[i]); }
+
+function isSolvable(arr) {
+  let inv = 0;
+  for (let i = 0; i < 15; i++)
+    for (let j = i + 1; j < 16; j++)
+      if (arr[i] && arr[j] && arr[i] > arr[j]) inv++;
+  return (inv + Math.floor(arr.indexOf(0) / 4)) % 2 === 0;
+}
+
+function shuffle() {
+  let arr;
+  do { arr = [...GOAL].sort(() => Math.random() - 0.5); }
+  while (!isSolvable(arr) || arr.every((v, i) => v === GOAL[i]));
+  return arr;
+}
+
+// ── Timer ─────────────────────────────────────────────────────────────────────
+function startTimer() {
+  clearInterval(timerID);
+  timerID = setInterval(() => {
+    seconds++;
+    const m = Math.floor(seconds / 60), s = seconds % 60;
+    timerEl.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+  }, 1000);
+}
+function stopTimer() { clearInterval(timerID); }
+
+// ── Win ───────────────────────────────────────────────────────────────────────
+function showWin() {
+  stopTimer();
+  const m = Math.floor(seconds / 60), s = seconds % 60;
+  winStats.textContent = `${moves} moves · ${m}:${s.toString().padStart(2, '0')}`;
+  winOverlay.classList.add('show');
+}
+
+// ── New game ──────────────────────────────────────────────────────────────────
+function newGame() {
+  stopTimer();
+  started = false; locked = false;
+  moves = 0; seconds = 0;
+  movesEl.textContent = '0';
+  timerEl.textContent = '0:00';
+  winOverlay.classList.remove('show');
+  tiles = shuffle();
+  sizeBoard();
+  renderBoard();
+}
+
+// ── Hint ──────────────────────────────────────────────────────────────────────
+document.getElementById('hintBtn').addEventListener('click', () => {
+  if (locked) return;
+  const emptyIdx = tiles.indexOf(0);
+  const movable  = getMovable(emptyIdx);
+  const best = movable.find(i => tiles[i] !== GOAL[i]) ?? movable[0];
+  const tileEls = boardEl.querySelectorAll('.tile');
+  const el = tileEls[best];
+  if (el) {
+    el.style.boxShadow   = '0 0 0 3px #e8c547, 0 0 20px rgba(232,197,71,0.4)';
+    el.style.borderColor = '#e8c547';
+    setTimeout(() => { el.style.boxShadow = ''; el.style.borderColor = ''; }, 700);
+  }
+});
+
+// ── Keyboard ──────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  const emptyIdx = tiles.indexOf(0);
+  const r = Math.floor(emptyIdx / 4), c = emptyIdx % 4;
+  let target = -1;
+  if (e.key === 'ArrowUp'    && r < 3) target = emptyIdx + 4;
+  if (e.key === 'ArrowDown'  && r > 0) target = emptyIdx - 4;
+  if (e.key === 'ArrowLeft'  && c < 3) target = emptyIdx + 1;
+  if (e.key === 'ArrowRight' && c > 0) target = emptyIdx - 1;
+  if (target !== -1) { e.preventDefault(); tryMove(target); }
+});
+
+// ── Resize ────────────────────────────────────────────────────────────────────
+window.addEventListener('resize', () => { sizeBoard(); });
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+document.getElementById('newGameBtn').addEventListener('click', newGame);
+document.getElementById('winNewBtn').addEventListener('click', newGame);
+newGame();
+</script>
+</body>
+</html>

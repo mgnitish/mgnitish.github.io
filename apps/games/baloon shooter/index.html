@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Balloon Pop!</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { overflow: hidden; background: #0a0a1a; }
+    .game-area { cursor: none; }
+    @keyframes float-up { 0%{transform:translateY(0);opacity:1} 100%{transform:translateY(-60px);opacity:0} }
+    @keyframes combo-pulse { 0%{transform:translateX(-50%) scale(0.5) rotate(-10deg);opacity:0} 50%{transform:translateX(-50%) scale(1.3) rotate(5deg);opacity:1} 100%{transform:translateX(-50%) scale(1) rotate(0deg);opacity:1} }
+    @keyframes star-twinkle { 0%,100%{opacity:0.3;transform:scale(0.8)} 50%{opacity:1;transform:scale(1.2)} }
+    @keyframes menu-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+    @keyframes pop-particle { 0% { transform: rotate(var(--angle)) translateX(0); opacity: 1; } 100% { transform: rotate(var(--angle)) translateX(40px); opacity: 0; } }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+const BALLOON_COLORS = ["#FF4757","#FF6B35","#FFD700","#2ED573","#1E90FF","#FF69B4","#A855F7"];
+const BALLOON_SCORES = { small: 30, medium: 20, large: 10 };
+const BALLOON_SIZES = { small: 28, medium: 42, large: 58 };
+
+function createBalloon(id) {
+  const typeRoll = Math.random();
+  const type = typeRoll < 0.3 ? "small" : typeRoll < 0.65 ? "medium" : "large";
+  return {
+    id, x: Math.random() * 70 + 10, y: 110,
+    color: BALLOON_COLORS[Math.floor(Math.random() * BALLOON_COLORS.length)],
+    speed: (Math.random() * 0.4 + 0.25) * (type === "small" ? 0.85 : type === "medium" ? 1 : 0.7),
+    sway: (Math.random() - 0.5) * 0.15,
+    swayOffset: Math.random() * Math.PI * 2,
+    type, size: BALLOON_SIZES[type], popped: false, popAnim: 0,
+  };
+}
+
+function BalloonSVG({ color, size }) {
+  const w = size, h = size * 1.25;
+  const gid = "g" + color.replace("#","");
+  return (
+    <svg width={w} height={h + 10} viewBox={`0 0 ${w} ${h + 10}`} style={{filter:"drop-shadow(0 4px 8px rgba(0,0,0,0.3))"}}>
+      <defs>
+        <radialGradient id={gid} cx="35%" cy="30%">
+          <stop offset="0%" stopColor="white" stopOpacity="0.6"/>
+          <stop offset="60%" stopColor={color} stopOpacity="0.9"/>
+          <stop offset="100%" stopColor={color} stopOpacity="1"/>
+        </radialGradient>
+      </defs>
+      <ellipse cx={w/2} cy={h/2} rx={w/2-2} ry={h/2-2} fill={`url(#${gid})`}/>
+      <polygon points={`${w/2-5},${h-2} ${w/2+5},${h-2} ${w/2},${h+2}`} fill={color}/>
+      <path d={`M${w/2},${h+2} Q${w/2+8},${h+8} ${w/2},${h+10}`} stroke={color} strokeWidth="1.5" fill="none"/>
+    </svg>
+  );
+}
+
+function PopEffect({ x, y, color }) {
+  return (
+    <div style={{position:"absolute",left:`${x}%`,top:`${y}%`,transform:"translate(-50%,-50%)",pointerEvents:"none",zIndex:20}}>
+      {[...Array(8)].map((_,i) => (
+        <div key={i} style={{
+          position:"absolute",width:8,height:8,borderRadius:"50%",background:color,
+          animation:`pop-particle 0.5s ease-out forwards`,
+          "--angle":`${i*45}deg`,
+          transform:`rotate(${i*45}deg) translateX(0)`,
+        }}/>
+      ))}
+    </div>
+  );
+}
+
+function App() {
+  const [phase, setPhase] = useState("menu");
+  const [balloons, setBalloons] = useState([]);
+  const [pops, setPops] = useState([]);
+  const [score, setScore] = useState(0);
+  const [lives, setLives] = useState(5);
+  const [level, setLevel] = useState(1);
+  const [combo, setCombo] = useState(0);
+  const [comboDisplay, setComboDisplay] = useState(null);
+  const [scorePopups, setScorePopups] = useState([]);
+  const [crosshair, setCrosshair] = useState({ x: 50, y: 50 });
+  const [shooting, setShooting] = useState(false);
+  const gameRef = useRef(null);
+  const tickRef = useRef(null);
+  const balloonIdRef = useRef(0);
+  const spawnTimerRef = useRef(0);
+  const livesRef = useRef(lives);
+  const levelRef = useRef(level);
+  const comboRef = useRef(combo);
+  livesRef.current = lives;
+  levelRef.current = level;
+  comboRef.current = combo;
+
+  const spawnInterval = useCallback(() => Math.max(600, 1400 - levelRef.current * 80), []);
+
+  useEffect(() => {
+    if (phase !== "playing") return;
+    let last = performance.now();
+    const tick = (now) => {
+      const dt = now - last; last = now;
+      spawnTimerRef.current += dt;
+      if (spawnTimerRef.current > spawnInterval()) {
+        spawnTimerRef.current = 0;
+        setBalloons(prev => [...prev, createBalloon(balloonIdRef.current++)].slice(-25));
+      }
+      setBalloons(prev => {
+        const updated = prev
+          .map(b => {
+            if (b.popped) return { ...b, popAnim: b.popAnim + dt * 0.005 };
+            const halfW = (b.size / 2 / 700) * 100 + 2;
+            return { ...b, y: b.y - b.speed * (dt/16), x: Math.max(halfW, Math.min(100 - halfW, b.x + Math.sin(now/800 + b.swayOffset) * b.sway)) };
+          })
+          .filter(b => !(b.popped && b.popAnim > 1));
+        const escaped = updated.filter(b => !b.popped && b.y < -15).length;
+        if (escaped > 0) {
+          setLives(l => { const nl = l - escaped; if (nl <= 0) setPhase("gameover"); return Math.max(0, nl); });
+          setCombo(0);
+          return updated.filter(b => b.popped || b.y >= -15);
+        }
+        return updated;
+      });
+      setScore(s => { const nl = Math.floor(s / 300) + 1; if (nl !== levelRef.current) setLevel(nl); return s; });
+      tickRef.current = requestAnimationFrame(tick);
+    };
+    tickRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(tickRef.current);
+  }, [phase, spawnInterval]);
+
+  const shoot = useCallback((e) => {
+    if (phase !== "playing") return;
+    const rect = gameRef.current.getBoundingClientRect();
+    const clickX = ((e.clientX - rect.left) / rect.width) * 100;
+    const clickY = ((e.clientY - rect.top) / rect.height) * 100;
+    setShooting(true);
+    setTimeout(() => setShooting(false), 120);
+    let hit = false;
+    setBalloons(prev => prev.map(b => {
+      if (b.popped || hit) return b;
+      const radius = (b.size / 2 / rect.width) * 100 * (b.type === "small" ? 2.2 : 1.4);
+      const dist = Math.sqrt((clickX - b.x)**2 + (clickY - b.y)**2);
+      if (dist < radius) {
+        hit = true;
+        const nc = comboRef.current + 1;
+        setCombo(nc);
+        const pts = BALLOON_SCORES[b.type] * (nc >= 3 ? Math.floor(nc/3)+1 : 1);
+        setScore(s => s + pts);
+        const pid = Date.now() + Math.random();
+        setPops(p => [...p, { id: pid, x: b.x, y: b.y, color: b.color }]);
+        setTimeout(() => setPops(p => p.filter(pop => pop.id !== pid)), 600);
+        const spid = Date.now() + Math.random();
+        setScorePopups(sp => [...sp, { id: spid, x: clickX, y: clickY, pts, combo: nc }]);
+        setTimeout(() => setScorePopups(sp => sp.filter(s => s.id !== spid)), 1000);
+        if (nc >= 3) { setComboDisplay(nc); setTimeout(() => setComboDisplay(null), 800); }
+        return { ...b, popped: true, popAnim: 0 };
+      }
+      return b;
+    }));
+    if (!hit) setCombo(0);
+  }, [phase]);
+
+  const startGame = () => {
+    setBalloons([]); setPops([]); setScore(0); setLives(5); setLevel(1); setCombo(0);
+    spawnTimerRef.current = 0; balloonIdRef.current = 0;
+    setPhase("playing");
+  };
+
+  const mouseMove = useCallback((e) => {
+    if (!gameRef.current) return;
+    const rect = gameRef.current.getBoundingClientRect();
+    setCrosshair({ x: ((e.clientX - rect.left) / rect.width)*100, y: ((e.clientY - rect.top) / rect.height)*100 });
+  }, []);
+
+  const stars = useRef([...Array(40)].map(() => ({
+    w: Math.random()*3+1, left: Math.random()*100, top: Math.random()*70,
+    dur: Math.random()*3+2, delay: Math.random()*3,
+  }))).current;
+
+  return (
+    <div style={{width:"100vw",height:"100vh",background:"linear-gradient(180deg,#0a0a1a 0%,#1a0533 40%,#2d1b4e 100%)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Fredoka One','Comic Sans MS',cursive",userSelect:"none"}}>
+      <div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:0}}>
+        {stars.map((s,i) => (
+          <div key={i} style={{position:"absolute",width:s.w,height:s.w,borderRadius:"50%",background:"white",left:`${s.left}%`,top:`${s.top}%`,animation:`star-twinkle ${s.dur}s ease-in-out infinite`,animationDelay:`${s.delay}s`}}/>
+        ))}
+      </div>
+
+      {phase === "menu" && (
+        <div style={{textAlign:"center",position:"relative",zIndex:10}}>
+          <div style={{animation:"menu-float 3s ease-in-out infinite",marginBottom:20}}>
+            {["🎈","🎈","🎈"].map((b,i) => <span key={i} style={{fontSize:60,margin:"0 8px"}}>{b}</span>)}
+          </div>
+          <h1 style={{fontSize:64,color:"#FFD700",textShadow:"0 0 30px #FF6B35, 4px 4px 0 #cc0000",letterSpacing:2,marginBottom:8}}>BALLOON POP!</h1>
+          <p style={{color:"#ff9ecd",fontSize:20,marginBottom:40,textShadow:"0 0 10px rgba(255,158,205,0.5)"}}>Click balloons before they escape! Don't let 5 slip past!</p>
+          <div style={{background:"rgba(255,255,255,0.08)",borderRadius:20,padding:"20px 40px",marginBottom:36,border:"1px solid rgba(255,255,255,0.15)",backdropFilter:"blur(10px)"}}>
+            <p style={{color:"white",fontSize:16,lineHeight:2.2}}>
+              🔴 Small = <span style={{color:"#FFD700"}}>30 pts</span> &nbsp;|&nbsp;
+              🟡 Medium = <span style={{color:"#FFD700"}}>20 pts</span> &nbsp;|&nbsp;
+              🟢 Large = <span style={{color:"#FFD700"}}>10 pts</span><br/>
+              🔥 Combo multiplier activates at 3+ hits in a row!
+            </p>
+          </div>
+          <button onClick={startGame} style={{background:"linear-gradient(135deg,#FF4757,#FF6B35)",border:"none",borderRadius:50,padding:"18px 60px",fontSize:28,color:"white",cursor:"pointer",boxShadow:"0 8px 30px rgba(255,71,87,0.5), 0 0 0 4px rgba(255,107,53,0.3)",fontFamily:"inherit",letterSpacing:1}}
+            onMouseEnter={e=>e.target.style.transform="scale(1.06)"} onMouseLeave={e=>e.target.style.transform="scale(1)"}>
+            🎯 PLAY NOW
+          </button>
+        </div>
+      )}
+
+      {phase === "gameover" && (
+        <div style={{textAlign:"center",position:"relative",zIndex:10}}>
+          <div style={{fontSize:80,marginBottom:16}}>💥</div>
+          <h1 style={{fontSize:56,color:"#FF4757",textShadow:"0 0 30px #FF4757, 4px 4px 0 #990000",marginBottom:8}}>GAME OVER</h1>
+          <p style={{color:"#aaa",fontSize:20,marginBottom:30}}>Too many balloons escaped!</p>
+          <div style={{background:"rgba(255,215,0,0.1)",border:"2px solid #FFD700",borderRadius:20,padding:"24px 56px",marginBottom:36}}>
+            <div style={{color:"#FFD700",fontSize:48,fontWeight:"bold",textShadow:"0 0 20px #FFD700"}}>{score.toLocaleString()}</div>
+            <div style={{color:"#aaa",fontSize:16,marginTop:4}}>FINAL SCORE · Level {level}</div>
+          </div>
+          <button onClick={startGame} style={{background:"linear-gradient(135deg,#2ED573,#1abc9c)",border:"none",borderRadius:50,padding:"16px 52px",fontSize:24,color:"white",cursor:"pointer",boxShadow:"0 8px 24px rgba(46,213,115,0.4)",fontFamily:"inherit",display:"block",margin:"0 auto 12px"}}>🔄 PLAY AGAIN</button>
+          <button onClick={()=>setPhase("menu")} style={{background:"transparent",border:"none",color:"#888",fontSize:16,cursor:"pointer",fontFamily:"inherit",textDecoration:"underline"}}>Back to Menu</button>
+        </div>
+      )}
+
+      {phase === "playing" && (
+        <div ref={gameRef} className="game-area" onClick={shoot} onMouseMove={mouseMove}
+          style={{width:"min(100vw,700px)",height:"min(100vh,600px)",position:"relative",overflow:"hidden",borderRadius:24,
+            background:"linear-gradient(180deg,#0d1b3e 0%,#1a0a2e 50%,#0a1628 100%)",
+            border:"2px solid rgba(255,255,255,0.1)",
+            boxShadow:"0 0 60px rgba(100,0,200,0.3), inset 0 0 60px rgba(0,0,100,0.2)"}}>
+
+          <div style={{position:"absolute",bottom:0,left:0,right:0,height:60,background:"linear-gradient(180deg,transparent,rgba(46,213,115,0.15) 50%,rgba(46,213,115,0.3))",borderTop:"2px solid rgba(46,213,115,0.4)"}}/>
+
+          <div style={{position:"absolute",top:12,left:0,right:0,display:"flex",justifyContent:"space-between",alignItems:"center",padding:"0 16px",zIndex:15}}>
+            <div style={{background:"rgba(0,0,0,0.5)",borderRadius:12,padding:"8px 16px",backdropFilter:"blur(8px)",border:"1px solid rgba(255,215,0,0.3)"}}>
+              <div style={{color:"#FFD700",fontSize:22,fontWeight:"bold",textShadow:"0 0 10px #FFD700"}}>{score.toLocaleString()}</div>
+              <div style={{color:"#888",fontSize:11,textAlign:"center"}}>SCORE</div>
+            </div>
+            <div style={{background:"rgba(0,0,0,0.5)",borderRadius:12,padding:"8px 16px",backdropFilter:"blur(8px)",border:"1px solid rgba(100,200,255,0.3)"}}>
+              <div style={{color:"#60c8ff",fontSize:20,textAlign:"center",fontWeight:"bold"}}>LVL {level}</div>
+              <div style={{color:"#888",fontSize:11,textAlign:"center"}}>LEVEL</div>
+            </div>
+            <div style={{background:"rgba(0,0,0,0.5)",borderRadius:12,padding:"8px 16px",backdropFilter:"blur(8px)",border:"1px solid rgba(255,71,87,0.3)"}}>
+              <div style={{fontSize:20,textAlign:"center"}}>{[...Array(5)].map((_,i)=><span key={i} style={{opacity:i<lives?1:0.2}}>❤️</span>)}</div>
+              <div style={{color:"#888",fontSize:11,textAlign:"center"}}>LIVES</div>
+            </div>
+          </div>
+
+          {balloons.map(b => !b.popped && (
+            <div key={b.id} style={{position:"absolute",left:`${b.x}%`,top:`${b.y}%`,transform:"translate(-50%,-50%)",zIndex:10}}>
+              <BalloonSVG color={b.color} size={b.size}/>
+            </div>
+          ))}
+
+          {pops.map(p => <PopEffect key={p.id} x={p.x} y={p.y} color={p.color}/>)}
+
+          {scorePopups.map(sp => (
+            <div key={sp.id} style={{position:"absolute",left:`${sp.x}%`,top:`${sp.y}%`,transform:"translate(-50%,-50%)",
+              color:sp.combo>=3?"#FFD700":"white",fontSize:sp.combo>=3?26:20,fontWeight:"bold",
+              textShadow:sp.combo>=3?"0 0 20px #FFD700":"0 0 10px rgba(0,0,0,0.8)",
+              animation:"float-up 1s ease-out forwards",pointerEvents:"none",zIndex:25}}>
+              +{sp.pts}{sp.combo>=3?` 🔥×${sp.combo}`:""}
+            </div>
+          ))}
+
+          {comboDisplay && (
+            <div style={{position:"absolute",top:"35%",left:"50%",transform:"translateX(-50%)",
+              fontSize:52,color:"#FFD700",textShadow:"0 0 40px #FF6B35",
+              animation:"combo-pulse 0.4s ease-out forwards",pointerEvents:"none",zIndex:30}}>
+              🔥 COMBO ×{comboDisplay}!
+            </div>
+          )}
+
+          <div style={{position:"absolute",left:`${crosshair.x}%`,top:`${crosshair.y}%`,transform:"translate(-50%,-50%)",width:40,height:40,pointerEvents:"none",zIndex:50}}>
+            <svg width="40" height="40" viewBox="0 0 40 40">
+              <circle cx="20" cy="20" r="12" fill="none" stroke={shooting?"#FF4757":"rgba(255,255,255,0.9)"} strokeWidth="2"/>
+              <circle cx="20" cy="20" r="2" fill={shooting?"#FF4757":"white"}/>
+              <line x1="20" y1="2" x2="20" y2="10" stroke={shooting?"#FF4757":"white"} strokeWidth="2"/>
+              <line x1="20" y1="30" x2="20" y2="38" stroke={shooting?"#FF4757":"white"} strokeWidth="2"/>
+              <line x1="2" y1="20" x2="10" y2="20" stroke={shooting?"#FF4757":"white"} strokeWidth="2"/>
+              <line x1="30" y1="20" x2="38" y2="20" stroke={shooting?"#FF4757":"white"} strokeWidth="2"/>
+            </svg>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
