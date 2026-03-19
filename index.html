@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
   <title>nitish mg — App Developer & AI Builder</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link
@@ -56,9 +56,7 @@
     }
 
     [data-theme="light"] .stat-card,
-    [data-theme="light"] .app-card {
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-    }
+    [data-theme="light"]
 
     [data-theme="light"] .ai-section::before {
       background: radial-gradient(circle, rgba(17, 122, 67, 0.05) 0%, transparent 70%);
@@ -87,6 +85,14 @@
       line-height: 1.6;
       overflow-x: hidden;
       transition: background 0.4s ease, color 0.4s ease;
+      min-width: 320px;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      max-width: 100%;
     }
 
     ::selection {
@@ -94,12 +100,30 @@
       color: var(--bg);
     }
 
-    /* ── Grain Overlay ── */
+    /* ── Cyberpunk Grid + Noise Background ── */
+    body {
+      background-image:
+        linear-gradient(rgba(124,58,237,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,58,237,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% 0%, rgba(124,58,237,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(6,214,160,0.08) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
     body::after {
       content: '';
       position: fixed;
       inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
       pointer-events: none;
       z-index: 9999;
     }
@@ -108,6 +132,8 @@
     nav {
       position: fixed;
       top: 0;
+      left: 0;
+      right: 0;
       width: 100%;
       z-index: 100;
       padding: 1.25rem 2.5rem;
@@ -115,9 +141,10 @@
       justify-content: space-between;
       align-items: center;
       backdrop-filter: blur(20px);
-      background: color-mix(in srgb, var(--bg) 70%, transparent);
+      background: color-mix(in srgb, var(--bg) 92%, transparent);
       border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
-      transition: all 0.3s ease;
+      transition: background 0.3s ease, border-color 0.3s ease;
+      box-sizing: border-box;
     }
 
     .nav-logo {
@@ -126,6 +153,10 @@
       color: var(--text);
       text-decoration: none;
       letter-spacing: -0.02em;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+      white-space: nowrap;
     }
 
     .nav-logo span {
@@ -548,8 +579,8 @@
 
     .cert-badge {
       position: absolute;
-      top: 1rem;
-      right: 1rem;
+      top: 0.6rem;
+      right: 0.75rem;
       font-family: var(--mono);
       font-size: 0.6rem;
       letter-spacing: 0.08em;
@@ -594,108 +625,6 @@
       font-weight: 600;
     }
 
-    .app-card.hidden {
-      display: none;
-    }
-
-    /* ── App Portfolio ── */
-    .apps-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 1.25rem;
-    }
-
-    .app-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow: hidden;
-      transition: all 0.4s ease;
-      position: relative;
-    }
-
-    .app-card:hover {
-      border-color: var(--accent-glow);
-      transform: translateY(-6px);
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-    }
-
-    .app-preview {
-      height: 120px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .app-preview-bg {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2.5rem;
-      position: relative;
-    }
-
-    .app-preview-bg::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      height: 50%;
-      background: linear-gradient(to top, var(--bg-card), transparent);
-    }
-
-    .app-body {
-      padding: 1.25rem;
-    }
-
-    .app-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .app-tag {
-      font-family: var(--mono);
-      font-size: 0.65rem;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      padding: 0.3rem 0.7rem;
-      border-radius: 100px;
-      background: var(--accent-dim);
-      color: var(--accent);
-      border: 1px solid var(--accent-dim);
-    }
-
-    .app-card h3 {
-      font-size: 1.05rem;
-      font-weight: 600;
-      margin-bottom: 0.4rem;
-      letter-spacing: -0.01em;
-    }
-
-    .app-card p {
-      color: var(--text-muted);
-      font-size: 0.82rem;
-      line-height: 1.55;
-    }
-
-    .app-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      margin-top: 1rem;
-      color: var(--accent);
-      font-weight: 500;
-      font-size: 0.82rem;
-      text-decoration: none;
-      transition: gap 0.2s;
-    }
-
-    .app-link:hover {
-      gap: 0.7rem;
-    }
 
     /* ── AI Philosophy ── */
     .ai-section {
@@ -1112,8 +1041,8 @@
 
     .upi-close {
       position: absolute;
-      top: 1rem;
-      right: 1rem;
+      top: 0.6rem;
+      right: 0.75rem;
       background: none;
       border: none;
       color: var(--text-muted);
@@ -1186,8 +1115,8 @@
     }
 
     .reveal {
-      opacity: 0;
-      transform: translateY(30px);
+      opacity: 1;
+      transform: translateY(0);
       transition: opacity 0.7s ease, transform 0.7s ease;
     }
 
@@ -1202,19 +1131,16 @@
       .about-grid,
       .ai-grid {
         grid-template-columns: 1fr;
-        gap: 2.5rem;
-      }
-
-      .apps-grid {
-        grid-template-columns: 1fr;
+        gap: 2rem;
       }
 
       .ai-section {
-        padding: 2.5rem 1.5rem;
+        padding: 2.5rem 1.25rem;
+        margin: 0 1.25rem;
       }
 
       nav {
-        padding: 1rem 1.25rem;
+        padding: 0.85rem 1.25rem;
       }
 
       .nav-links {
@@ -1222,17 +1148,112 @@
       }
 
       section {
-        padding: 4rem 1.25rem;
+        padding: 3.5rem 1.25rem;
       }
 
       .hero {
-        padding: 7rem 1.25rem 3rem;
+        padding: 6rem 1.25rem 3rem;
+        min-height: 100svh;
+      }
+
+      .hero h1 {
+        font-size: clamp(2.6rem, 10vw, 4.5rem);
+      }
+
+      .hero-sub {
+        font-size: 1rem;
       }
 
       footer {
         flex-direction: column;
         gap: 0.75rem;
         text-align: center;
+      }
+
+      .category-layer-header {
+        padding: 1rem 1.25rem;
+      }
+
+      .cat-header-title {
+        font-size: 1.1rem;
+      }
+
+      .cat-header-count {
+        display: none;
+      }
+
+      .about-stats {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .certs-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .section-title {
+        font-size: clamp(1.9rem, 6vw, 3rem);
+      }
+
+      .ai-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      nav {
+        padding: 0.75rem 1rem;
+      }
+
+      .nav-logo {
+        font-size: 1.25rem;
+      }
+
+      .hero {
+        padding: 5.5rem 1rem 2.5rem;
+      }
+
+      .hero h1 {
+        font-size: clamp(2.2rem, 11vw, 3.5rem);
+      }
+
+      section {
+        padding: 3rem 1rem;
+      }
+
+      .ai-section {
+        margin: 0 1rem;
+        padding: 2rem 1rem;
+      }
+
+      .about-stats {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+      }
+
+      .stat-card {
+        padding: 1rem;
+      }
+
+      .stat-number {
+        font-size: 2rem;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .btn-primary, .btn-secondary {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .portfolio-cat-title {
+        font-size: 1.1rem;
+      }
+
+      .timeline {
+        padding-left: 1.5rem;
       }
     }
 
@@ -1243,20 +1264,25 @@
       border: none;
       cursor: pointer;
       padding: 0.5rem;
+      z-index: 1000;
+      position: relative;
     }
 
     .menu-toggle span {
       display: block;
-      width: 22px;
+      width: 24px;
       height: 2px;
       background: var(--text);
-      margin: 5px 0;
-      transition: 0.3s;
+      border-radius: 2px;
+      transition: transform 0.3s ease, opacity 0.3s ease;
     }
 
     @media (max-width: 900px) {
       .menu-toggle {
-        display: block;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 5px;
       }
     }
 
@@ -1305,8 +1331,427 @@
     .nav-right {
       display: flex;
       align-items: center;
+      gap: 0.75rem;
+      flex-shrink: 0;
+    }
+
+
+
+    /* ═══════════════════════════════════════
+       APP PORTFOLIO — CATEGORY LAYERS
+    ═══════════════════════════════════════ */
+
+    .category-layer {
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .category-layer[data-layer="finance"] { border-top: 3px solid #1a8c4e; }
+    .category-layer[data-layer="games"]   { border-top: 3px solid #7c3aed; }
+    .category-layer[data-layer="sports"]  { border-top: 3px solid #65a30d; }
+
+    .category-layer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 1.75rem;
+      background: var(--surface);
+      cursor: pointer;
+      user-select: none;
+      gap: 1rem;
+    }
+
+    .cat-header-left {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+    }
+
+    .cat-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+    .cat-icon.finance { background: linear-gradient(135deg,#0a1f0a,#143d14); }
+    .cat-icon.games   { background: linear-gradient(135deg,#1a0d2e,#3a0f4f); }
+    .cat-icon.sports  { background: linear-gradient(135deg,#142a06,#2a4f0a); }
+
+    .cat-header-title {
+      font-family: var(--serif);
+      font-size: 1.2rem;
+      color: var(--text);
+    }
+
+    .cat-header-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .category-layer[data-layer="games"]
+    .category-layer[data-layer="sports"]
+
+    .cat-arrow {
+      color: var(--text-muted);
+      font-size: 1rem;
+      transition: transform 0.3s ease;
+      line-height: 1;
+    }
+    .category-layer.open .cat-arrow { transform: rotate(180deg); }
+
+    .category-layer-body {
+      display: none;
+      background: var(--bg-card);
+    }
+    .category-layer.open .category-layer-body {
+      display: block;
+    }
+    [data-theme="light"]
+
+    @media (max-width: 900px) {
+    }
+
+
+    /* ══════════════════════════════
+       PORTFOLIO SECTION
+    ══════════════════════════════ */
+    #apps {
+      padding: 6rem 2.5rem;
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    .portfolio-category { margin-bottom: 3.5rem; }
+
+    .portfolio-cat-header {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .portfolio-cat-icon {
+      font-size: 1.6rem;
+      width: 48px; height: 48px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 12px;
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+
+    .portfolio-cat-title {
+      font-family: var(--serif);
+      font-size: 1.8rem;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      flex: 1;
+    }
+
+    .portfolio-cat-badge {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.8rem;
+      border-radius: 100px;
+      background: var(--accent-dim);
+      color: var(--accent);
+      border: 1px solid var(--accent-mid);
+    }
+    .games-badge  { background: var(--accent-dim); color: var(--accent); border-color: var(--accent-mid); }
+    .sports-badge { background: var(--accent-dim); color: var(--accent); border-color: var(--accent-mid); }
+
+    .portfolio-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
       gap: 1.25rem;
     }
+
+    .pcard {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+    .pcard:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+      border-color: var(--accent);
+    }
+
+    /* ── Neon icon banners (kept) ── */
+    .neon-top {
+      height: 120px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3.2rem;
+      position: relative; overflow: hidden;
+    }
+    .neon-top::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(0,0,0,0.18) 2px, rgba(0,0,0,0.18) 4px
+      );
+      pointer-events: none; z-index: 1;
+    }
+    .neon-top::after {
+      content: '';
+      position: absolute;
+      width: 160px; height: 160px; border-radius: 50%;
+      top: 50%; left: 50%; transform: translate(-50%,-50%);
+      opacity: 0.35; pointer-events: none; z-index: 0;
+      transition: opacity 0.3s ease;
+    }
+    .pcard:hover .neon-top::after { opacity: 0.65; }
+    .neon-top > * { position: relative; z-index: 2; }
+    .pcard:hover .neon-top { filter: brightness(1.15); }
+
+    .neon-green::after  { background: radial-gradient(circle, #00ff88, transparent 70%); }
+    .neon-cyan::after   { background: radial-gradient(circle, #00e5ff, transparent 70%); }
+    .neon-violet::after { background: radial-gradient(circle, #bf00ff, transparent 70%); }
+    .neon-orange::after { background: radial-gradient(circle, #ff6600, transparent 70%); }
+    .neon-lime::after   { background: radial-gradient(circle, #aaff00, transparent 70%); }
+    .neon-yellow::after { background: radial-gradient(circle, #ffe600, transparent 70%); }
+    .neon-red::after    { background: radial-gradient(circle, #ff003c, transparent 70%); }
+    .neon-blue::after   { background: radial-gradient(circle, #0066ff, transparent 70%); }
+    .neon-pink::after   { background: radial-gradient(circle, #ff00aa, transparent 70%); }
+    .neon-purple::after { background: radial-gradient(circle, #9900ff, transparent 70%); }
+    .neon-teal::after   { background: radial-gradient(circle, #00ffcc, transparent 70%); }
+
+    .neon-green  { box-shadow: inset 0 -2px 0 #00ff88; }
+    .neon-cyan   { box-shadow: inset 0 -2px 0 #00e5ff; }
+    .neon-violet { box-shadow: inset 0 -2px 0 #bf00ff; }
+    .neon-orange { box-shadow: inset 0 -2px 0 #ff6600; }
+    .neon-lime   { box-shadow: inset 0 -2px 0 #aaff00; }
+    .neon-yellow { box-shadow: inset 0 -2px 0 #ffe600; }
+    .neon-red    { box-shadow: inset 0 -2px 0 #ff003c; }
+    .neon-blue   { box-shadow: inset 0 -2px 0 #0066ff; }
+    .neon-pink   { box-shadow: inset 0 -2px 0 #ff00aa; }
+    .neon-purple { box-shadow: inset 0 -2px 0 #9900ff; }
+    .neon-teal   { box-shadow: inset 0 -2px 0 #00ffcc; }
+
+    .pcard:has(.neon-green):hover  { border-color: #00ff88; box-shadow: 0 20px 50px rgba(0,255,136,0.15); }
+    .pcard:has(.neon-cyan):hover   { border-color: #00e5ff; box-shadow: 0 20px 50px rgba(0,229,255,0.15); }
+    .pcard:has(.neon-violet):hover { border-color: #bf00ff; box-shadow: 0 20px 50px rgba(191,0,255,0.15); }
+    .pcard:has(.neon-orange):hover { border-color: #ff6600; box-shadow: 0 20px 50px rgba(255,102,0,0.15); }
+    .pcard:has(.neon-lime):hover   { border-color: #aaff00; box-shadow: 0 20px 50px rgba(170,255,0,0.15); }
+    .pcard:has(.neon-yellow):hover { border-color: #ffe600; box-shadow: 0 20px 50px rgba(255,230,0,0.15); }
+    .pcard:has(.neon-red):hover    { border-color: #ff003c; box-shadow: 0 20px 50px rgba(255,0,60,0.15); }
+    .pcard:has(.neon-blue):hover   { border-color: #0066ff; box-shadow: 0 20px 50px rgba(0,102,255,0.15); }
+    .pcard:has(.neon-pink):hover   { border-color: #ff00aa; box-shadow: 0 20px 50px rgba(255,0,170,0.15); }
+    .pcard:has(.neon-purple):hover { border-color: #9900ff; box-shadow: 0 20px 50px rgba(153,0,255,0.15); }
+    .pcard:has(.neon-teal):hover   { border-color: #00ffcc; box-shadow: 0 20px 50px rgba(0,255,204,0.15); }
+
+    .pcard-body {
+      padding: 1.25rem;
+      display: flex; flex-direction: column; flex: 1;
+    }
+    .pcard-body h3 {
+      font-size: 1rem; font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+    .pcard-body p {
+      font-size: 0.83rem;
+      color: var(--text-muted);
+      line-height: 1.6; flex: 1;
+    }
+    .pcard-link {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      margin-top: 1rem;
+      color: var(--accent);
+      font-size: 0.83rem; font-weight: 600;
+      text-decoration: none;
+      transition: gap 0.2s;
+    }
+    .pcard-link:hover { gap: 0.6rem; }
+
+    @media (max-width: 900px) {
+      #apps { padding: 4rem 1.25rem; }
+      .portfolio-grid { grid-template-columns: 1fr 1fr; gap: 1rem; }
+      .portfolio-cat-title { font-size: 1.4rem; }
+    }
+    @media (max-width: 560px) {
+      .portfolio-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── Card Body ── */
+    .pcard-body {
+      padding: 1.1rem 1.25rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      background: #0e0e1a;
+    }
+
+    .pcard-body h3 {
+      font-size: 0.97rem;
+      font-weight: 600;
+      color: #e8e6ff;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.01em;
+    }
+
+    .pcard-body p {
+      font-size: 0.8rem;
+      color: #6666a0;
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    .pcard-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-top: 1rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      font-family: var(--mono);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      transition: gap 0.2s, opacity 0.2s;
+      opacity: 0.85;
+    }
+    .pcard:has(.neon-green)  .pcard-link { color: #00ff88; }
+    .pcard:has(.neon-cyan)   .pcard-link { color: #00e5ff; }
+    .pcard:has(.neon-violet) .pcard-link { color: #dd88ff; }
+    .pcard:has(.neon-orange) .pcard-link { color: #ff8833; }
+    .pcard:has(.neon-lime)   .pcard-link { color: #aaff00; }
+    .pcard:has(.neon-yellow) .pcard-link { color: #ffe600; }
+    .pcard:has(.neon-red)    .pcard-link { color: #ff5577; }
+    .pcard:has(.neon-blue)   .pcard-link { color: #4499ff; }
+    .pcard:has(.neon-pink)   .pcard-link { color: #ff55cc; }
+    .pcard:has(.neon-purple) .pcard-link { color: #cc55ff; }
+    .pcard:has(.neon-teal)   .pcard-link { color: #00ffcc; }
+    .pcard-link:hover { gap: 0.65rem; opacity: 1; }
+
+    @media (max-width: 900px) {
+      .portfolio-grid { grid-template-columns: 1fr 1fr; gap: 0.85rem; }
+      .portfolio-cat-title { font-size: 1.15rem; }
+    }
+    @media (max-width: 560px) {
+      .portfolio-grid { grid-template-columns: 1fr; }
+    }
+
+
+
+
+
+    /* ══════════════════════════════
+       MOBILE NAV MENU
+    ══════════════════════════════ */
+    .mobile-menu {
+      display: flex;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 9999;
+      background: var(--bg);
+      backdrop-filter: blur(24px);
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 0;
+      padding: 2rem;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-16px);
+      transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+      pointer-events: none;
+    }
+
+    .mobile-menu.open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+      pointer-events: all;
+    }
+
+    .mobile-menu a.mobile-cta {
+      margin-top: 2rem;
+      background: var(--accent);
+      color: var(--bg) !important;
+      border-radius: 100px;
+      border: none;
+      padding: 0.85rem 2.5rem;
+      font-family: var(--sans);
+      font-size: 1rem;
+      font-weight: 600;
+      width: auto;
+      letter-spacing: 0.01em;
+    }
+
+    .mobile-menu a.mobile-cta:hover {
+      box-shadow: 0 8px 30px var(--accent-glow);
+      color: var(--bg) !important;
+    }
+
+
+    .mobile-menu-logo {
+      font-family: var(--serif);
+      font-size: 2rem;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      margin-bottom: 2.5rem;
+    }
+    .mobile-menu-logo span { color: var(--accent); }
+
+    .mobile-nav-links {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      margin-bottom: 2rem;
+    }
+
+    .mobile-nav-links a {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 8vw, 2.8rem);
+      font-weight: 400;
+      color: var(--text);
+      text-decoration: none;
+      padding: 0.65rem 0;
+      letter-spacing: -0.02em;
+      width: 100%;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+      transition: color 0.2s;
+    }
+    .mobile-nav-links a:first-child { border-top: 1px solid var(--border); }
+    .mobile-nav-links a:hover { color: var(--accent); }
+
+    .mobile-menu-close {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.8rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0.25rem;
+      transition: color 0.2s;
+    }
+    .mobile-menu-close:hover { color: var(--text); }
+
+    /* hamburger open state — X */
+    .menu-toggle.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+    .menu-toggle.active span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .menu-toggle.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+    .menu-toggle span { transition: transform 0.3s ease, opacity 0.3s ease; }
+
   </style>
 </head>
 
@@ -1328,11 +1773,26 @@
         <span class="toggle-icon">☀️</span>
         <span class="toggle-knob"></span>
       </button>
-      <button class="menu-toggle" aria-label="Menu">
-        <span></span><span></span><span></span>
+      <button class="menu-toggle" aria-label="Menu" onclick="openMobileMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
       </button>
     </div>
   </nav>
+
+  <!-- ─── Mobile Menu ─── -->
+  <div class="mobile-menu" id="mobileMenu">
+    <button class="mobile-menu-close" id="mobileClose" aria-label="Close menu" onclick="closeMobileMenu()">✕</button>
+    <div class="mobile-menu-logo">nitish<span>.</span></div>
+    <nav class="mobile-nav-links">
+      <a href="#about"      onclick="closeMobileMenu()">About</a>
+      <a href="#apps"       onclick="closeMobileMenu()">Apps</a>
+      <a href="#experience" onclick="closeMobileMenu()">Experience</a>
+      <a href="#support"    onclick="closeMobileMenu()">Support</a>
+    </nav>
+    <a href="#contact" class="mobile-cta" onclick="closeMobileMenu()">Get in Touch →</a>
+  </div>
 
   <!-- ─── Hero ─── -->
   <section class="hero">
@@ -1381,7 +1841,7 @@
           <p>
             While my peers went into accounting and audit, I taught myself to code and started
             building <strong>applications</strong> — financial tools, games, sports apps, and more.
-            In just one month, I've shipped 10 apps and I'm only getting started.
+            In just one month, I've shipped 13 apps and I'm only getting started.
           </p>
           <p>
             I don't just use AI as a feature — I build <em>with</em> AI as a core development partner,
@@ -1391,7 +1851,7 @@
           </p>
           <div class="about-stats">
             <div class="stat-card">
-              <div class="stat-number">10</div>
+              <div class="stat-number">13</div>
               <div class="stat-label">Apps Built</div>
             </div>
             <div class="stat-card">
@@ -1477,6 +1937,16 @@
           <span class="cert-badge">Verified</span>
         </div>
 
+        <a href="https://coursera.org/verify/professional-cert/9Y4JCPMDWUSM" target="_blank" class="cert-card">
+          <div class="cert-logo" style="background: linear-gradient(135deg, #4285F4, #EA4335, #FBBC04, #34A853);">🤖</div>
+          <div class="cert-info">
+            <h3>Google AI Professional Certificate</h3>
+            <div class="cert-issuer">Google · Coursera — Mar 2026</div>
+            <p>7-course professional certificate covering AI fundamentals, brainstorming, research, writing, content creation, data analysis, and app building. Built 20+ AI artifacts and vibe coded a custom AI solution.</p>
+          </div>
+          <span class="cert-badge">Verified</span>
+        </a>
+
       </div>
     </div>
   </section>
@@ -1534,214 +2004,167 @@
 
   <!-- ─── App Portfolio ─── -->
   <section id="apps">
-    <div class="reveal">
-      <div class="section-label">App Portfolio</div>
-      <div class="section-title">Things I've built.</div>
-      <div class="section-desc">AI-powered apps across finance, games, and sports — all built with Claude and hosted on
-        GitHub.</div>
+    <div class="section-label">App Portfolio</div>
+    <div class="section-title">Things I've built.</div>
+    <div class="section-desc">AI-powered apps across finance, games, and sports — all built with Claude and hosted on GitHub.</div>
 
-      <!-- Category Filter Tabs -->
-      <div class="category-tabs">
-        <button class="cat-tab active" data-cat="all">All</button>
-        <button class="cat-tab" data-cat="finance">💰 Finance</button>
-        <button class="cat-tab" data-cat="games">🎮 Games</button>
-        <button class="cat-tab" data-cat="sports">🏏 Sports</button>
+    <!-- ── FINANCE ── -->
+    <div class="portfolio-category">
+      <div class="portfolio-cat-header">
+        <span class="portfolio-cat-icon">💰</span>
+        <h2 class="portfolio-cat-title">Finance Apps</h2>
+        <span class="portfolio-cat-badge">8 apps</span>
       </div>
+      <div class="portfolio-grid">
 
-      <div class="apps-grid">
-
-        <!-- ╔═══════════════════════════════════════╗ -->
-        <!-- ║        FINANCE APPS                   ║ -->
-        <!-- ╚═══════════════════════════════════════╝ -->
-
-        <!--
-        HOW TO ADD AN APP:
-        1. Copy one <div class="app-card" data-category="finance"> block below
-        2. Change the <h3> to your app name
-        3. Change the <p> to your app description
-        4. Update the <a href="..."> to your live app URL
-           e.g. https://mgnitish.github.io/REPO-NAME
-        5. Change data-category to "finance", "games", or "sports"
-      -->
-
-        <div class="app-card" data-category="finance">
-          <div class="app-preview">
-            <div class="app-preview-bg" style="background: linear-gradient(135deg, #0d1a0d, #1a2e1a, #0f3a1f);">💰</div>
-          </div>
-          <div class="app-body">
+        <div class="pcard">
+          <div class="pcard-top neon-top neon-green" style="background:#030d06">🏦</div>
+          <div class="pcard-body">
             <h3>PPF Calculator</h3>
-            <p>"A simple PPF returns Calculator to plan your long-term savings. Customize your yearly investment,
-              interest rate, and tenure to instantly estimate your maturity value, interest earned, and year-by-year
-              growth."</p>
-            <a href="https://mgnitish.github.io/apps/finance/ppf calculator/" target="_blank" class="app-link">Open App
-              →</a>
+            <p>Plan long-term savings — customize yearly investment, interest rate &amp; tenure to estimate maturity value and year-by-year growth.</p>
+            <a href="https://mgnitish.github.io/apps/finance/ppf calculator/" target="_blank" class="pcard-link">Open App →</a>
           </div>
         </div>
 
-        <div class="app-card" data-category="finance">
-          <div class="app-preview">
-            <div class="app-preview-bg" style="background: linear-gradient(135deg, #0d1a0d, #1a2e1a, #0f3a1f);">💰</div>
-          </div>
-          <div class="app-body">
+        <div class="pcard">
+          <div class="pcard-top neon-top neon-cyan" style="background:#020a10">🏠</div>
+          <div class="pcard-body">
             <h3>EMI Calculator</h3>
-            <p>"A comprehensive EMI Calculator that computes monthly loan payments using the standard amortization
-              formula, featuring interactive charts (doughnut and stacked bar) to visualize principal vs. interest
-              breakdown. Includes optional pre-payment analysis showing time and interest savings, plus a detailed
-              month-by-month amortization schedule in a modern, responsive interface."</p>
-            <a href="https://mgnitish.github.io/apps/finance/emi calculator/" target="_blank" class="app-link">Open App
-              →</a>
+            <p>Compute monthly loan payments with doughnut &amp; bar charts for principal vs. interest, plus a full amortization schedule.</p>
+            <a href="https://mgnitish.github.io/apps/finance/emi calculator/" target="_blank" class="pcard-link">Open App →</a>
           </div>
         </div>
 
-        <div class="app-card" data-category="finance">
-          <div class="app-preview">
-            <div class="app-preview-bg" style="background: linear-gradient(135deg, #0d1a0d, #1a2e1a, #0f3a1f);">💰</div>
-          </div>
-          <div class="app-body">
+        <div class="pcard">
+          <div class="pcard-top neon-top neon-violet" style="background:#080312">📈</div>
+          <div class="pcard-body">
             <h3>FD/RD Calculator</h3>
-            <p>"Effortlessly project your savings growth with precision tools designed for calculating Fixed and
-              Recurring Deposit returns. Gain instant clarity on your wealth with real-time interest breakdowns and
-              interactive visualization of your compounding journey."</p>
-            <a href="https://mgnitish.github.io/apps/finance/fdrd calculator/" target="_blank" class="app-link">Open App
-              →</a>
+            <p>Project Fixed &amp; Recurring Deposit growth with real-time interest breakdowns and interactive compounding visualizations.</p>
+            <a href="https://mgnitish.github.io/apps/finance/fdrd calculator/" target="_blank" class="pcard-link">Open App →</a>
           </div>
         </div>
 
-        <div class="app-card" data-category="finance">
-          <div class="app-preview">
-            <div class="app-preview-bg" style="background: linear-gradient(135deg, #0d1a0d, #1a2e1a, #0f3a1f);">💰</div>
-          </div>
-          <div class="app-body">
-            <h3>Indian Financial Dashboard </h3>
-            <p>"Track India's financial pulse in real time — Nifty, Sensex, gold, forex, Bitcoin, and more — all on one
-              page. Compare bank FD rates, government savings schemes, and RBI policy rates alongside live market data,
-              no login or API keys required."</p>
-            <a href="https://mgnitish.github.io/apps/finance/indian findb/" target="_blank" class="app-link">Open App
-              →</a>
+        <div class="pcard">
+          <div class="pcard-top neon-top neon-orange" style="background:#0d0400">🇮🇳</div>
+          <div class="pcard-body">
+            <h3>Indian Financial Dashboard</h3>
+            <p>Live Nifty, Sensex, gold, forex &amp; Bitcoin on one page. Compare FD rates, savings schemes &amp; RBI policy rates — no login needed.</p>
+            <a href="https://mgnitish.github.io/apps/finance/indian findb/" target="_blank" class="pcard-link">Open App →</a>
           </div>
         </div>
 
-        <div class="app-card" data-category="finance">
-          <div class="app-preview">
-            <div class="app-preview-bg" style="background: linear-gradient(135deg, #0d1a0d, #1a2e1a, #0f3a1f);">💰</div>
-          </div>
-          <div class="app-body">
-            <h3> Wealth Path </h3>
-            <p>"WealthPath is an interactive financial dashboard that visualizes how your investments grow over time
-              while revealing the hidden cost of inflation on your wealth. Input your SIP details, growth rate, and
-              inflation rate to see a side-by-side projection of nominal returns vs. real purchasing power � complete
-              with everyday examples showing how the cost of milk, petrol, and movie tickets will rise over your
-              investment horizon."</p>
-            <a href="https://mgnitish.github.io/apps/finance/wealth path/" target="_blank" class="app-link">Open App
-              →</a>
+        <div class="pcard">
+          <div class="pcard-top neon-top neon-lime" style="background:#030d00">🌱</div>
+          <div class="pcard-body">
+            <h3>Wealth Path</h3>
+            <p>See nominal returns vs. real purchasing power side-by-side. Input SIP details to watch inflation eat into your wealth over time.</p>
+            <a href="https://mgnitish.github.io/apps/finance/wealth path/" target="_blank" class="pcard-link">Open App →</a>
           </div>
         </div>
 
-        <div class="app-card" data-category="finance">
-          <div class="app-preview">
-            <div class="app-preview-bg" style="background: linear-gradient(135deg, #0d1a0d, #1a2e1a, #0f3a1f);">💰</div>
-          </div>
-          <div class="app-body">
-            <h3> Credit Calculator </h3>
-            <p> "A comprehensive financial tool that estimates your credit score (300-850) based on payment history,
-              credit utilization, and other factors, then calculates your eligibility for personal loans, home loans,
-              and auto loans based on realistic income multiples and DTI ratios. Features real-time calculations,
-              interactive charts and a pleasing dark mode"</p>
-            <a href="https://mgnitish.github.io/apps/finance/credit calculator/" target="_blank" class="app-link">Open
-              App →</a>
+        <div class="pcard">
+          <div class="pcard-top neon-top neon-yellow" style="background:#0a0a00">💳</div>
+          <div class="pcard-body">
+            <h3>Credit Calculator</h3>
+            <p>Estimate your credit score (300–850) and check eligibility for personal, home &amp; auto loans — with interactive charts.</p>
+            <a href="https://mgnitish.github.io/apps/finance/credit calculator/" target="_blank" class="pcard-link">Open App →</a>
           </div>
         </div>
 
-        <div class="app-card" data-category="finance">
-          <div class="app-preview">
-            <div class="app-preview-bg" style="background: linear-gradient(135deg, #0d1a0d, #1a2e1a, #0f3a1f);">💰</div>
-          </div>
-          <div class="app-body">
-            <h3> Fin-Risk Analyzer </h3>
-            <p>This Risk-o-Meter serves as a financial diagnostic tool that evaluates your fiscal health by weighing
-              income and assets against expenditures and liabilities. Beyond just calculation, it identifies specific
-              vulnerabilities in your portfolio, provides tailored remedial actions to mitigate debt, and suggests
-              appropriate investment options aligned with your calculated risk capacity. </p>
-            <a href="https://mgnitish.github.io/apps/finance/finrisk analyzer/" target="_blank" class="app-link">Open
-              App →</a>
+        <div class="pcard">
+          <div class="pcard-top neon-top neon-red" style="background:#0d0000">⚠️</div>
+          <div class="pcard-body">
+            <h3>Fin-Risk Analyzer</h3>
+            <p>Diagnose your fiscal health — weighs income &amp; assets against liabilities, identifies vulnerabilities, and suggests investments.</p>
+            <a href="https://mgnitish.github.io/apps/finance/finrisk analyzer/" target="_blank" class="pcard-link">Open App →</a>
           </div>
         </div>
 
-        <div class="app-card" data-category="finance">
-          <div class="app-preview">
-            <div class="app-preview-bg" style="background: linear-gradient(135deg, #0d1a0d, #1a2e1a, #0f3a1f);">💰</div>
-          </div>
-          <div class="app-body">
-            <h3> Insure IQ </h3>
-            <p>InsureIQ analyses your life, health, and accident insurance holdings against your income, liabilities,
-              and family profile — then scores your coverage and tells you exactly where the gaps are. </p>
-            <a href="https://mgnitish.github.io/apps/finance/insure iq/" target="_blank" class="app-link">Open App →</a>
+        <div class="pcard">
+          <div class="pcard-top neon-top neon-blue" style="background:#000a14">🛡️</div>
+          <div class="pcard-body">
+            <h3>Insure IQ</h3>
+            <p>Analyse life, health &amp; accident insurance against your income and family profile — scores your coverage and shows the gaps.</p>
+            <a href="https://mgnitish.github.io/apps/finance/insure iq/" target="_blank" class="pcard-link">Open App →</a>
           </div>
         </div>
-
-        <!-- Add more finance apps by copying the block above -->
-
-
-        <!-- ╔═══════════════════════════════════════╗ -->
-        <!-- ║        GAMES                          ║ -->
-        <!-- ╚═══════════════════════════════════════╝ -->
-
-        <div class="app-card" data-category="games">
-          <div class="app-preview">
-            <div class="app-preview-bg" style="background: linear-gradient(135deg, #1a0d2e, #2e1a3e, #3a0f4f);">🎮</div>
-          </div>
-          <div class="app-body">
-            <h3>Tic Tac Toe</h3>
-            <p> A beautifully designed Tic-Tac-Toe game featuring both single-player AI mode and two-player mode. Play
-              against an unbeatable computer opponent or challenge a friend, with automatic match progression, score
-              tracking, and a stunning glassmorphism interface on a warm pale gold background.</p>
-            <a href="https://mgnitish.github.io/apps/games/tic-tac-toe/" target="_blank" class="app-link">Open App →</a>
-          </div>
-        </div>
-
-        <div class="app-card" data-category="games">
-          <div class="app-preview">
-            <div class="app-preview-bg" style="background: linear-gradient(135deg, #1a0d2e, #2e1a3e, #3a0f4f);">🎮</div>
-          </div>
-          <div class="app-body">
-            <h3> Memory Matching</h3>
-            <p> NEON MATCH is a solo cyberpunk-themed memory card matching game playable across 8 categories (Animals,
-              Fruits, Games, Currency, Emojis, Space, Food, Nature) with 3 difficulty levels (Easy, Medium, Hard). Built
-              as a single self-contained HTML file with a neon glow aesthetic, 3D card flip animations, move counter,
-              best-score tracking, and a compact device-frame layout fully optimized for mobile screens.</p>
-            <a href="https://mgnitish.github.io/apps/games/memory matching/" target="_blank" class="app-link">Open App
-              →</a>
-          </div>
-        </div>
-
-        <!-- Add more game apps by copying the block above -->
-
-
-        <!-- ╔═══════════════════════════════════════╗ -->
-        <!-- ║        SPORTS                         ║ -->
-        <!-- ╚═══════════════════════════════════════╝ -->
-
-        <div class="app-card" data-category="sports">
-          <div class="app-preview">
-            <div class="app-preview-bg" style="background: linear-gradient(135deg, #1a2a0d, #2e3a1a, #3a4f0f);">🏏</div>
-          </div>
-          <div class="app-body">
-            <h3>Cricket Scorer</h3>
-            <p>Score any cricket match live — from gully cricket to proper tournaments. Track every ball, wicket, extra,
-              and free hit with a full batting and bowling scorecard built in. Includes a DLS calculator for the second
-              innings to keep things fair when rain or interruptions cut play short.",.</p>
-            <a href="https://mgnitish.github.io/apps/sports/cricket scorer" target="_blank" class="app-link">Open App
-              →</a>
-          </div>
-        </div>
-
-        <!-- Add more sports apps by copying the block above -->
 
       </div>
     </div>
+
+    <!-- ── GAMES ── -->
+    <div class="portfolio-category">
+      <div class="portfolio-cat-header">
+        <span class="portfolio-cat-icon">🎮</span>
+        <h2 class="portfolio-cat-title">Games</h2>
+        <span class="portfolio-cat-badge games-badge">4 apps</span>
+      </div>
+      <div class="portfolio-grid">
+
+        <div class="pcard">
+          <div class="pcard-top neon-top neon-pink" style="background:#0d0010">⭕</div>
+          <div class="pcard-body">
+            <h3>Tic Tac Toe</h3>
+            <p>Single-player AI mode and two-player mode. Play against an unbeatable computer or a friend, with score tracking and a glassmorphism interface.</p>
+            <a href="https://mgnitish.github.io/apps/games/tic-tac-toe/" target="_blank" class="pcard-link">Open App →</a>
+          </div>
+        </div>
+
+        <div class="pcard">
+          <div class="pcard-top neon-top neon-purple" style="background:#04000f">🧠</div>
+          <div class="pcard-body">
+            <h3>Memory Matching</h3>
+            <p>NEON MATCH — cyberpunk memory game across 8 categories &amp; 3 difficulty levels. Neon glow, 3D card flips, move counter &amp; best-score tracking.</p>
+            <a href="https://mgnitish.github.io/apps/games/memory matching/" target="_blank" class="pcard-link">Open App →</a>
+          </div>
+        </div>
+
+        <div class="pcard">
+          <div class="pcard-top neon-top neon-pink" style="background:#0d0008">🎈</div>
+          <div class="pcard-body">
+            <h3>Balloon Pop!</h3>
+            <p>Fast-paced balloon shooting game — pop as many balloons as you can before they escape. Features score tracking, lives system, and progressively harder waves.</p>
+            <a href="https://mgnitish.github.io/apps/games/baloon shooter/" target="_blank" class="pcard-link">Open App →</a>
+          </div>
+        </div>
+
+        <div class="pcard">
+          <div class="pcard-top neon-top neon-yellow" style="background:#0d0a00">🧩</div>
+          <div class="pcard-body">
+            <h3>15 Puzzle</h3>
+            <p>Slide tiles to arrange numbers 1–15 in order. Features move counter, timer, hint system, keyboard support, and a clean dark/light theme. Fully mobile optimised.</p>
+            <a href="https://mgnitish.github.io/apps/games/puzzle 15/" target="_blank" class="pcard-link">Open App →</a>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ── SPORTS ── -->
+    <div class="portfolio-category">
+      <div class="portfolio-cat-header">
+        <span class="portfolio-cat-icon">🎯</span>
+        <h2 class="portfolio-cat-title">Sports</h2>
+        <span class="portfolio-cat-badge sports-badge">1 app</span>
+      </div>
+      <div class="portfolio-grid">
+
+        <div class="pcard">
+          <div class="pcard-top neon-top neon-teal" style="background:#001208">🏏</div>
+          <div class="pcard-body">
+            <h3>Cricket Scorer</h3>
+            <p>Score any match live — track every ball, wicket, extra and free hit with full batting &amp; bowling scorecards. DLS calculator included.</p>
+            <a href="https://mgnitish.github.io/apps/sports/cricket scorer" target="_blank" class="pcard-link">Open App →</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
   </section>
 
-  <!-- ─── Experience ─── -->
+    <!-- ─── Experience ─── -->
   <section id="experience">
     <div class="reveal">
       <div class="section-label">Experience</div>
@@ -1751,7 +2174,7 @@
           <div class="timeline-date">Jan 2026 — Present</div>
           <h3>AI App Developer</h3>
           <h4>Self-Taught · Building in Public</h4>
-          <p>Started building AI-powered apps with Claude just a month ago — and already shipped 10 projects across
+          <p>Started building AI-powered apps with Claude just a month ago — and already shipped 13 projects across
             finance, games, and sports. Learning by building, shipping fast, and improving with every app.</p>
         </div>
         <div class="timeline-item">
@@ -1826,7 +2249,7 @@
       <div class="contact-links">
         <a href="https://github.com/mgnitish" class="contact-link" target="_blank">🐙 GitHub</a>
         <a href="https://twitter.com/mgnitish_builds" class="contact-link" target="_blank">𝕏 Twitter</a>
-        <a href="mailto:mgnitishbuilds@gmail.com" class="contact-link">✉️ Email</a>
+        <a href="/cdn-cgi/l/email-protection#29444e47405d405a414b5c40454d5a694e44484045074a4644" class="contact-link">✉️ Email</a>
       </div>
     </div>
   </section>
@@ -1838,7 +2261,7 @@
   </footer>
 
   <!-- ─── Scroll Reveal ─── -->
-  <script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     const reveals = document.querySelectorAll('.reveal');
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -1846,31 +2269,46 @@
           entry.target.classList.add('visible');
         }
       });
-    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+    }, { threshold: 0, rootMargin: '0px 0px 0px 0px' });
 
     reveals.forEach(el => observer.observe(el));
 
-    // Category filter tabs
-    const tabs = document.querySelectorAll('.cat-tab');
-    const cards = document.querySelectorAll('.app-card');
+    // Also trigger any already-visible reveals on page load
+    window.addEventListener('load', () => {
+      reveals.forEach(el => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight) {
+          el.classList.add('visible');
+        }
+      });
+    });
 
-    tabs.forEach(tab => {
+    // ── Category layer tabs ──
+    document.querySelectorAll('.cat-tab').forEach(tab => {
       tab.addEventListener('click', () => {
-        tabs.forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         const cat = tab.dataset.cat;
-
-        cards.forEach(card => {
-          if (cat === 'all' || card.dataset.category === cat) {
-            card.classList.remove('hidden');
-          } else {
-            card.classList.add('hidden');
-          }
+        document.querySelectorAll('.category-layer').forEach(layer => {
+          layer.style.display = (cat === 'all' || layer.dataset.layer === cat) ? '' : 'none';
         });
       });
     });
 
-    // Theme toggle
+    // ── Toggle a layer open/closed ──
+    function toggleLayer(layer) {
+      layer.classList.toggle('open');
+    }
+
+    // ── Expand / Collapse all ──
+    function toggleAllLayers(expand) {
+      document.querySelectorAll('.category-layer').forEach(layer => {
+        if (layer.style.display === 'none') return;
+        layer.classList.toggle('open', expand);
+      });
+    }
+
+        // Theme toggle
     const toggle = document.getElementById('themeToggle');
     const html = document.documentElement;
 
@@ -1889,15 +2327,45 @@
       localStorage.setItem('theme', next);
     });
 
-    // Smooth nav background on scroll
+    // Mobile menu handled in separate script below
+
+    // ── Smooth nav background on scroll
     window.addEventListener('scroll', () => {
       const nav = document.querySelector('nav');
-      nav.style.borderBottomColor = window.scrollY > 50
-        ? 'var(--border)'
-        : 'color-mix(in srgb, var(--border) 50%, transparent)';
+      nav.style.borderBottom      nav.style.borderBottom = window.scrollY > 10
+        ? '1px solid color-mix(in srgb, var(--border) 80%, transparent)'
+        : '1px solid color-mix(in srgb, var(--border) 50%, transparent)';
+    });
+
+    // Also trigger any already-visible reveals on page load
+    window.addEventListener('load', () => {
+      reveals.forEach(el => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight) {
+          el.classList.add('visible');
+        }
+      });
+    });
+
+  </script>
+
+  <script>
+    function openMobileMenu() {
+      document.getElementById('mobileMenu').classList.add('open');
+      document.querySelector('.menu-toggle').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeMobileMenu() {
+      document.getElementById('mobileMenu').classList.remove('open');
+      document.querySelector('.menu-toggle').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+    document.querySelector('.menu-toggle').addEventListener('click', openMobileMenu);
+    document.getElementById('mobileClose').addEventListener('click', closeMobileMenu);
+    document.getElementById('mobileMenu').addEventListener('click', function(e) {
+      if (e.target === this) closeMobileMenu();
     });
   </script>
 
 </body>
-
 </html>
