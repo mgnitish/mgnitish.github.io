@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Cursed Rows</title>
+<link href="https://fonts.googleapis.com/css2?family=Creepster&family=VT323&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #0c0a06;
+  --surface: #141008;
+  --card:    #1a140a;
+  --border:  #2e2416;
+  --text:    #c8b87a;
+  --muted:   #5c4e2e;
+  --dim:     #3a2e18;
+  --gore:    #8b1a1a;
+  --bone:    #d4c47a;
+  --moss:    #4a6a2a;
+  --amber:   #c87820;
+  --glow-gore:  0 0 6px #8b1a1a, 0 0 18px #8b1a1a66;
+  --glow-bone:  0 0 6px #d4c47a, 0 0 18px #d4c47a55;
+  --glow-amber: 0 0 6px #c87820, 0 0 18px #c8782055;
+  --glow-moss:  0 0 6px #4a6a2a, 0 0 18px #4a6a2a55;
+  --gap: 5px;
+}
+
+html, body {
+  width: 100%; min-height: 100svh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Special Elite', serif;
+  overflow-x: hidden;
+}
+
+/* scanlines — z-index -1 so they NEVER block clicks */
+.scanlines {
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 3px,
+    rgba(0,0,0,0.15) 3px, rgba(0,0,0,0.15) 4px
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* vignette — also behind everything */
+.vignette {
+  position: fixed; inset: 0;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.75) 100%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* blood drip — purely decorative, no pointer events */
+.drip-bar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 22px; pointer-events: none; z-index: 999;
+  background: var(--gore);
+  clip-path: polygon(
+    0% 0%, 2% 0%, 2% 60%, 1.5% 100%, 1% 60%, 1% 0%,
+    6% 0%, 6% 75%, 5.5% 100%, 5% 75%, 5% 0%,
+    11% 0%, 11% 45%, 10.5% 85%, 10% 45%, 10% 0%,
+    16% 0%, 16% 65%, 15.5% 100%, 15% 65%, 15% 0%,
+    22% 0%, 22% 50%, 21.5% 90%, 21% 50%, 21% 0%,
+    28% 0%, 28% 72%, 27.5% 100%, 27% 72%, 27% 0%,
+    34% 0%, 34% 42%, 33.5% 78%, 33% 42%, 33% 0%,
+    40% 0%, 40% 80%, 39.5% 100%, 39% 80%, 39% 0%,
+    46% 0%, 46% 55%, 45.5% 92%, 45% 55%, 45% 0%,
+    52% 0%, 52% 68%, 51.5% 100%, 51% 68%, 51% 0%,
+    58% 0%, 58% 48%, 57.5% 82%, 57% 48%, 57% 0%,
+    64% 0%, 64% 70%, 63.5% 100%, 63% 70%, 63% 0%,
+    70% 0%, 70% 52%, 69.5% 88%, 69% 52%, 69% 0%,
+    76% 0%, 76% 62%, 75.5% 100%, 75% 62%, 75% 0%,
+    82% 0%, 82% 44%, 81.5% 80%, 81% 44%, 81% 0%,
+    88% 0%, 88% 70%, 87.5% 100%, 87% 70%, 87% 0%,
+    94% 0%, 94% 58%, 93.5% 94%, 93% 58%, 93% 0%,
+    100% 0%
+  );
+}
+
+/* ── Pages — high z-index so nothing overlaps ── */
+.page {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 28px 16px 20px;
+  z-index: 10;
+  transition: opacity 0.35s, transform 0.35s;
+  overflow-y: auto;
+}
+.page.hidden { opacity: 0; pointer-events: none; transform: scale(0.97); }
+
+/* ── Title ── */
+.horror-title {
+  font-family: 'Creepster', cursive;
+  font-size: clamp(2.8rem, 12vw, 5rem);
+  color: var(--bone);
+  text-shadow: var(--glow-bone), 3px 3px 0 var(--gore);
+  letter-spacing: 0.06em; line-height: 1.05;
+  text-align: center;
+  animation: flicker 8s infinite;
+}
+@keyframes flicker {
+  0%,88%,92%,96%,100% { opacity:1; }
+  89%,95% { opacity:0.55; }
+  91%,97% { opacity:0.85; }
+}
+.horror-sub {
+  font-family: 'VT323', monospace; font-size: 1rem;
+  color: var(--gore); letter-spacing: 0.3em;
+  text-transform: uppercase; text-align: center;
+  margin-top: 3px; text-shadow: var(--glow-gore);
+}
+
+/* ── Section label ── */
+.section-lbl {
+  font-family: 'VT323', monospace; font-size: 1.15rem;
+  letter-spacing: 0.2em; color: var(--amber);
+  text-shadow: var(--glow-amber);
+  width: 100%; max-width: 440px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 3px; margin-bottom: 4px;
+}
+
+/* ── Cat grid ── */
+.cat-grid {
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: 8px; width: 100%; max-width: 440px;
+}
+.cat-card {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 5px;
+  padding: 12px 8px; border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer; transition: all 0.18s;
+  touch-action: manipulation;
+  /* NO position:relative, NO ::before/::after — they caused the click blocking */
+}
+.cat-card:active { transform: scale(0.92); }
+.cat-card.active {
+  border-color: var(--bone);
+  background: #201a0e;
+  box-shadow: var(--glow-bone);
+}
+.cat-card .big-emoji { font-size: 1.9rem; line-height: 1; }
+.cat-card .cat-n {
+  font-family: 'VT323', monospace; font-size: 0.95rem;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+}
+.cat-card.active .cat-n { color: var(--bone); text-shadow: var(--glow-bone); }
+
+/* ── Level buttons ── */
+.level-row { display: flex; gap: 8px; width: 100%; max-width: 440px; }
+.level-btn {
+  flex: 1; padding: 12px 6px; border-radius: 6px;
+  border: 1px solid var(--border); background: var(--surface);
+  cursor: pointer; display: flex; flex-direction: column;
+  align-items: center; gap: 4px;
+  transition: all 0.18s; touch-action: manipulation;
+}
+.level-btn:active { transform: scale(0.92); }
+.level-btn .lvl-icon { font-size: 1.4rem; }
+.level-btn .lvl-name {
+  font-family: 'Creepster', cursive; font-size: 1.05rem;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+}
+.level-btn .lvl-desc {
+  font-family: 'VT323', monospace; font-size: 0.85rem;
+  color: var(--dim); letter-spacing: 0.08em;
+}
+.level-btn[data-level="easy"].active   { border-color:var(--moss);  box-shadow:var(--glow-moss);  }
+.level-btn[data-level="medium"].active { border-color:var(--amber); box-shadow:var(--glow-amber); }
+.level-btn[data-level="hard"].active   { border-color:var(--gore);  box-shadow:var(--glow-gore);  }
+.level-btn[data-level="easy"].active   .lvl-name { color:var(--moss);  text-shadow:var(--glow-moss);  }
+.level-btn[data-level="medium"].active .lvl-name { color:var(--amber); text-shadow:var(--glow-amber); }
+.level-btn[data-level="hard"].active   .lvl-name { color:var(--gore);  text-shadow:var(--glow-gore);  }
+
+/* ── Start button ── */
+.start-btn {
+  width:100%; max-width:440px; padding:14px; border-radius:6px;
+  border:1px solid var(--gore); background:var(--surface);
+  color:var(--gore); font-family:'Creepster',cursive;
+  font-size:1.35rem; letter-spacing:0.25em; text-transform:uppercase;
+  cursor:pointer; text-shadow:var(--glow-gore); box-shadow:var(--glow-gore);
+  transition:all 0.18s; touch-action:manipulation;
+}
+.start-btn:hover { background:rgba(139,26,26,0.12); color:var(--bone); border-color:var(--bone); }
+.start-btn:active { transform:scale(0.97); }
+
+/* ── Game page ── */
+#gamePage { justify-content:flex-start; padding-top:28px; gap:9px; }
+
+.topbar { width:100%; max-width:440px; display:flex; align-items:center; gap:8px; }
+.home-btn {
+  border:1px solid var(--border); background:var(--surface);
+  color:var(--amber); font-family:'VT323',monospace;
+  font-size:1rem; letter-spacing:0.1em;
+  padding:7px 12px; border-radius:5px;
+  cursor:pointer; transition:all 0.15s;
+  touch-action:manipulation; white-space:nowrap;
+  text-shadow:var(--glow-amber);
+}
+.home-btn:hover { box-shadow:var(--glow-amber); }
+
+.game-title {
+  flex:1; font-family:'Creepster',cursive;
+  font-size:clamp(1.1rem,4.5vw,1.6rem);
+  color:var(--bone); text-shadow:var(--glow-bone), 2px 2px 0 var(--gore);
+  text-align:center; letter-spacing:0.08em;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+.level-badge {
+  font-family:'VT323',monospace; font-size:0.9rem;
+  letter-spacing:0.08em; padding:5px 10px;
+  border-radius:5px; border:1px solid; white-space:nowrap;
+}
+.level-badge.easy   { color:var(--moss);  border-color:var(--moss);  text-shadow:var(--glow-moss);  }
+.level-badge.medium { color:var(--amber); border-color:var(--amber); text-shadow:var(--glow-amber); }
+.level-badge.hard   { color:var(--gore);  border-color:var(--gore);  text-shadow:var(--glow-gore);  }
+
+/* ── Stats ── */
+.statsbar {
+  width:100%; max-width:440px;
+  display:grid; grid-template-columns:repeat(3,1fr);
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:6px; overflow:hidden;
+}
+.stat {
+  display:flex; flex-direction:column;
+  align-items:center; padding:6px 4px;
+  border-right:1px solid var(--border); gap:1px;
+}
+.stat:last-child { border-right:none; }
+.stat-val {
+  font-family:'VT323',monospace; font-size:1.5rem;
+  color:var(--amber); text-shadow:var(--glow-amber); line-height:1;
+}
+.stat-lbl {
+  font-family:'VT323',monospace; font-size:0.7rem;
+  color:var(--muted); letter-spacing:0.15em; text-transform:uppercase;
+}
+
+/* ── Board ── */
+.board-frame {
+  width:100%; max-width:440px;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:8px; padding:8px;
+  box-shadow:0 4px 24px rgba(0,0,0,0.6);
+}
+.board { display:flex; flex-direction:column; gap:var(--gap); width:100%; }
+
+.tile-row { display:grid; gap:var(--gap); }
+
+.tile {
+  aspect-ratio:1; border-radius:5px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:clamp(1.1rem,5.5vw,2rem);
+  cursor:pointer; user-select:none;
+  border:1px solid var(--border); background:var(--card);
+  transition:transform 0.1s, box-shadow 0.15s, border-color 0.2s;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+  box-shadow:2px 2px 0 rgba(0,0,0,0.6);
+}
+.tile:not(.empty):active { transform:scale(0.86) translateY(1px); box-shadow:0 0 0; }
+.tile.in-row {
+  border-color:var(--moss); background:#1a1e10;
+  box-shadow:2px 2px 0 rgba(0,0,0,0.5), var(--glow-moss);
+}
+.tile.empty {
+  background:transparent; border:1px dashed var(--gore);
+  cursor:default; pointer-events:none;
+  box-shadow:inset 0 0 10px rgba(139,26,26,0.2);
+  opacity:0.55;
+}
+.tile.hinted {
+  border-color:var(--bone) !important;
+  box-shadow:2px 2px 0 rgba(0,0,0,0.4), var(--glow-bone) !important;
+  animation:hintPulse 0.45s ease-in-out 2;
+}
+@keyframes hintPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+
+@keyframes tileIn {
+  from { transform:scale(0.3) rotate(-10deg); opacity:0; }
+  to   { transform:scale(1) rotate(0deg); opacity:1; }
+}
+.tile.anim { animation:tileIn 0.3s cubic-bezier(0.175,0.885,0.32,1.275) both; }
+
+/* ── Controls ── */
+.controls { width:100%; max-width:440px; display:flex; gap:8px; }
+.btn {
+  flex:1; border:1px solid var(--border);
+  background:var(--surface); color:var(--muted);
+  font-family:'Creepster',cursive; font-size:1rem;
+  letter-spacing:0.1em; text-transform:uppercase;
+  padding:10px 8px; border-radius:5px;
+  cursor:pointer; transition:all 0.15s; touch-action:manipulation;
+  box-shadow:2px 2px 0 rgba(0,0,0,0.5);
+}
+.btn:hover { border-color:var(--amber); color:var(--amber); text-shadow:var(--glow-amber); }
+.btn:active { transform:translateY(2px); box-shadow:0 0 0; }
+.btn.primary { border-color:var(--gore); color:var(--gore); text-shadow:var(--glow-gore); }
+.btn.primary:hover { background:rgba(139,26,26,0.1); border-color:var(--bone); color:var(--bone); }
+
+/* ── Win overlay ── */
+.win-overlay {
+  position:fixed; inset:0; z-index:100;
+  background:rgba(8,6,3,0.96);
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:12px; opacity:0; pointer-events:none;
+  transition:opacity 0.35s;
+}
+.win-overlay.show { opacity:1; pointer-events:all; }
+.win-skull { font-size:4rem; filter:drop-shadow(0 0 16px rgba(212,196,122,0.7));
+  animation:skullPop 0.5s cubic-bezier(0.175,0.885,0.32,1.275) both; }
+@keyframes skullPop { from{transform:scale(0) rotate(-15deg);opacity:0} to{transform:scale(1) rotate(0);opacity:1} }
+.win-title {
+  font-family:'Creepster',cursive; font-size:clamp(3rem,12vw,5rem);
+  color:var(--bone); text-shadow:var(--glow-bone), 4px 4px 0 var(--gore);
+  letter-spacing:0.1em;
+}
+.win-emojis { font-size:2rem; letter-spacing:8px; animation:popIn 0.4s 0.2s both; }
+@keyframes popIn { from{transform:scale(0.4);opacity:0} to{transform:scale(1);opacity:1} }
+.win-sub { font-family:'VT323',monospace; font-size:1rem; color:var(--muted);
+  letter-spacing:0.18em; text-transform:uppercase; }
+.win-countdown {
+  font-family:'VT323',monospace; font-size:0.95rem;
+  color:var(--gore); letter-spacing:0.2em; text-transform:uppercase;
+  text-shadow:var(--glow-gore); margin-top:4px;
+}
+.win-countdown span {
+  font-size:1.4rem; color:var(--bone);
+  text-shadow:var(--glow-bone);
+}
+</style>
+</head>
+<body>
+
+<!-- decorative layers — behind everything via z-index:-1 -->
+<div class="scanlines"></div>
+<div class="vignette"></div>
+<div class="drip-bar"></div>
+
+<!-- ══ HOME PAGE ══ -->
+<div class="page" id="homePage">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;max-width:440px;">
+
+    <div style="text-align:center;margin-bottom:2px;">
+      <div class="horror-title">☠ CURSED<br>ROWS ☠</div>
+      <div class="horror-sub">>> SORT THE DAMNED TILES <<</div>
+    </div>
+
+    <div class="section-lbl">> CHOOSE YOUR CURSE</div>
+    <div class="cat-grid" id="catGrid"></div>
+
+    <div class="section-lbl">> CHOOSE DIFFICULTY</div>
+    <div class="level-row">
+      <div class="level-btn active" data-level="easy">
+        <span class="lvl-icon">🕯️</span>
+        <span class="lvl-name">Haunted</span>
+        <span class="lvl-desc">4×4 grid</span>
+      </div>
+      <div class="level-btn" data-level="medium">
+        <span class="lvl-icon">🦇</span>
+        <span class="lvl-name">Cursed</span>
+        <span class="lvl-desc">5×5 grid</span>
+      </div>
+      <div class="level-btn" data-level="hard">
+        <span class="lvl-icon">💀</span>
+        <span class="lvl-name">Damned</span>
+        <span class="lvl-desc">6×5 grid</span>
+      </div>
+    </div>
+
+    <button class="start-btn" id="startBtn">☠ ENTER THE TOMB ☠</button>
+  </div>
+</div>
+
+<!-- ══ GAME PAGE ══ -->
+<div class="page hidden" id="gamePage">
+  <div class="topbar">
+    <button class="home-btn" id="homeBtn">⬅ FLEE</button>
+    <div class="game-title" id="gameTitle">CURSED ROWS</div>
+    <div class="level-badge easy" id="levelBadge">HAUNTED</div>
+  </div>
+  <div class="statsbar">
+    <div class="stat"><span class="stat-val" id="movesEl">0</span><span class="stat-lbl">Moves</span></div>
+    <div class="stat"><span class="stat-val" id="timerEl">0:00</span><span class="stat-lbl">Time</span></div>
+    <div class="stat"><span class="stat-val" id="rowsEl">0/4</span><span class="stat-lbl">Rows</span></div>
+  </div>
+  <div class="board-frame">
+    <div class="board" id="board"></div>
+  </div>
+  <div class="controls">
+    <button class="btn primary" id="newGameBtn">⚰ RESTART</button>
+    <button class="btn" id="hintBtn">🕯 HINT</button>
+  </div>
+</div>
+
+<!-- ══ WIN OVERLAY ══ -->
+<div class="win-overlay" id="winOverlay">
+  <div class="win-skull">💀</div>
+  <div class="win-title">ESCAPED!</div>
+  <div class="win-emojis" id="winEmojis"></div>
+  <div class="win-sub" id="winStats"></div>
+  <div class="win-countdown">returning in <span id="winCountdown">7</span>...</div>
+</div>
+
+<script>
+// ── Categories ───────────────────────────────────────────────
+const CATEGORIES = [
+  { id:'undead',  name:'Undead',  icon:'🧟', rowEmojis:['🧟','💀','👻','🦴','🪦'] },
+  { id:'demons',  name:'Demons',  icon:'😈', rowEmojis:['😈','👿','🤡','👹','💢'] },
+  { id:'cursed',  name:'Cursed',  icon:'🧿', rowEmojis:['🧿','🕯️','⚰️','🩸','🔮'] },
+  { id:'beasts',  name:'Beasts',  icon:'🐺', rowEmojis:['🐺','🦇','🕷️','🐍','🦂'] },
+  { id:'dark',    name:'Dark',    icon:'🌑', rowEmojis:['🌑','⚡','🌩️','🌪️','🔥'] },
+  { id:'potions', name:'Potions', icon:'🧪', rowEmojis:['🧪','☠️','🩻','🧠','🫀'] },
+];
+
+// ── Levels ───────────────────────────────────────────────────
+// Single empty in LAST cell of LAST row.
+// rowSizes[r] = how many emoji tiles in row r (excl. empty).
+// EASY:   4×4, groups=4, rowSizes=[4,4,4,3]  → last row: 3 tiles + 1 empty
+// MEDIUM: 5×5, groups=5, rowSizes=[5,5,5,5,4] → last row: 4 tiles + 1 empty
+// HARD:   6×5, groups=5, rowSizes=[6,6,6,6,5] → last row: 5 tiles + 1 empty
+const LEVELS = {
+  easy:   { cols:4, rows:4, groups:4, rowSizes:[4,4,4,3],     steps:600  },
+  medium: { cols:5, rows:5, groups:5, rowSizes:[5,5,5,5,4],   steps:1000 },
+  hard:   { cols:6, rows:5, groups:5, rowSizes:[6,6,6,6,5],   steps:1400 },
+};
+
+// ── State ────────────────────────────────────────────────────
+let selCat = CATEGORIES[0], selLevel = 'easy';
+let curCat, curLevel, COLS, ROWS, TOTAL, NUM_GROUPS, ROW_SIZES;
+let board = [], moves = 0, seconds = 0;
+let timerID = null, started = false, locked = false, hintIdx = -1;
+
+// ── DOM refs ─────────────────────────────────────────────────
+const homePage   = document.getElementById('homePage');
+const gamePage   = document.getElementById('gamePage');
+const boardEl    = document.getElementById('board');
+const movesEl    = document.getElementById('movesEl');
+const timerEl    = document.getElementById('timerEl');
+const rowsEl     = document.getElementById('rowsEl');
+const winOverlay = document.getElementById('winOverlay');
+const winStats   = document.getElementById('winStats');
+const winEmojis  = document.getElementById('winEmojis');
+const gameTitle  = document.getElementById('gameTitle');
+const levelBadge = document.getElementById('levelBadge');
+
+// ── Build home category cards ─────────────────────────────────
+const catGrid = document.getElementById('catGrid');
+CATEGORIES.forEach((cat, i) => {
+  const card = document.createElement('div');
+  card.className = 'cat-card' + (i === 0 ? ' active' : '');
+  card.innerHTML = `<span class="big-emoji">${cat.icon}</span><span class="cat-n">${cat.name}</span>`;
+  card.addEventListener('click', () => {
+    selCat = cat;
+    document.querySelectorAll('.cat-card').forEach(c => c.classList.remove('active'));
+    card.classList.add('active');
+  });
+  catGrid.appendChild(card);
+});
+
+// ── Level buttons ─────────────────────────────────────────────
+document.querySelectorAll('.level-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    selLevel = btn.dataset.level;
+    document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+// ── Navigation ────────────────────────────────────────────────
+function showHome() {
+  stopTimer();
+  winOverlay.classList.remove('show');
+  homePage.classList.remove('hidden');
+  gamePage.classList.add('hidden');
+}
+
+function showGame() {
+  homePage.classList.add('hidden');
+  gamePage.classList.remove('hidden');
+}
+
+document.getElementById('startBtn').addEventListener('click', () => {
+  curCat     = selCat;
+  curLevel   = selLevel;
+  const cfg  = LEVELS[curLevel];
+  COLS       = cfg.cols;
+  ROWS       = cfg.rows;
+  TOTAL      = COLS * ROWS;
+  NUM_GROUPS = cfg.groups;
+  ROW_SIZES  = cfg.rowSizes;
+
+  const labels = { easy:'Haunted', medium:'Cursed', hard:'Damned' };
+  gameTitle.textContent  = curCat.name.toUpperCase() + ' ROWS';
+  levelBadge.textContent = labels[curLevel];
+  levelBadge.className   = 'level-badge ' + curLevel;
+  rowsEl.textContent     = '0/' + NUM_GROUPS;
+  showGame();
+  newGame();
+});
+
+document.getElementById('homeBtn').addEventListener('click', showHome);
+
+// ── Neighbours (2D sliding) ───────────────────────────────────
+function getMovable(emptyIdx) {
+  const r = Math.floor(emptyIdx / COLS), c = emptyIdx % COLS, out = [];
+  if (r > 0)        out.push(emptyIdx - COLS);
+  if (r < ROWS - 1) out.push(emptyIdx + COLS);
+  if (c > 0)        out.push(emptyIdx - 1);
+  if (c < COLS - 1) out.push(emptyIdx + 1);
+  return out;
+}
+
+// ── Row win check ─────────────────────────────────────────────
+function getRowDone(r) {
+  const start  = r * COLS;
+  const cells  = board.slice(start, start + COLS);
+  const filled = cells.filter(v => v !== -1);
+  return filled.length === ROW_SIZES[r] && filled.every(v => v === r);
+}
+function isGoal() {
+  for (let r = 0; r < ROWS; r++) if (!getRowDone(r)) return false;
+  return true;
+}
+
+// ── Shuffle ───────────────────────────────────────────────────
+function buildGoal() {
+  const arr = new Array(TOTAL).fill(-1);
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c < ROW_SIZES[r]; c++)
+      arr[r * COLS + c] = r;
+  // single empty at very last cell
+  arr[TOTAL - 1] = -1;
+  return arr;
+}
+
+function shuffle() {
+  const arr      = buildGoal();
+  const cfg      = LEVELS[curLevel];
+  let   emptyPos = TOTAL - 1;
+  const steps    = cfg.steps + Math.floor(Math.random() * 300);
+  let   prev     = -1;
+  for (let s = 0; s < steps; s++) {
+    const mv   = getMovable(emptyPos).filter(i => i !== prev);
+    const pick = mv[Math.floor(Math.random() * mv.length)];
+    arr[emptyPos] = arr[pick];
+    arr[pick]     = -1;
+    prev          = emptyPos;
+    emptyPos      = pick;
+  }
+  return arr;
+}
+
+// ── Render ────────────────────────────────────────────────────
+function renderBoard(animate = false) {
+  const frameEl = document.querySelector('.board-frame');
+  const maxW    = frameEl ? frameEl.clientWidth - 16 : 320;
+  const maxH    = window.innerHeight - 290;
+  const size    = Math.floor(Math.min(maxW, maxH, 440));
+  boardEl.style.width = size + 'px';
+
+  let doneCount = 0;
+  for (let r = 0; r < ROWS; r++) if (getRowDone(r)) doneCount++;
+  rowsEl.textContent = doneCount + '/' + NUM_GROUPS;
+
+  boardEl.innerHTML = '';
+  for (let r = 0; r < ROWS; r++) {
+    const rowEl = document.createElement('div');
+    rowEl.className = 'tile-row';
+    rowEl.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
+    for (let c = 0; c < COLS; c++) {
+      const idx = r * COLS + c;
+      const v   = board[idx];
+      const el  = document.createElement('div');
+      if (v === -1) {
+        el.className = 'tile empty';
+      } else {
+        const inRow  = (v === r);
+        const isHint = (idx === hintIdx);
+        el.className = 'tile'
+          + (inRow   ? ' in-row' : '')
+          + (isHint  ? ' hinted' : '')
+          + (animate ? ' anim'   : '');
+        if (animate) el.style.animationDelay = (idx * 0.016) + 's';
+        el.textContent = curCat.rowEmojis[v] ?? '❓';
+        el.addEventListener('pointerdown', e => { e.preventDefault(); tryMove(idx); });
+      }
+      rowEl.appendChild(el);
+    }
+    boardEl.appendChild(rowEl);
+  }
+}
+
+// ── Move ──────────────────────────────────────────────────────
+function tryMove(idx) {
+  if (locked) return;
+  const emptyIdx = board.indexOf(-1);
+  if (!getMovable(emptyIdx).includes(idx)) return;
+  if (!started) { started = true; startTimer(); }
+  hintIdx = -1; locked = true;
+  [board[idx], board[emptyIdx]] = [board[emptyIdx], board[idx]];
+  moves++; movesEl.textContent = moves;
+  renderBoard();
+  setTimeout(() => { locked = false; if (isGoal()) showWin(); }, 120);
+}
+
+// ── Timer ─────────────────────────────────────────────────────
+function startTimer() {
+  clearInterval(timerID);
+  timerID = setInterval(() => {
+    seconds++;
+    const m = Math.floor(seconds / 60), s = seconds % 60;
+    timerEl.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+  }, 1000);
+}
+function stopTimer() { clearInterval(timerID); }
+
+// ── Win ───────────────────────────────────────────────────────
+function showWin() {
+  stopTimer();
+  const m = Math.floor(seconds / 60), s = seconds % 60;
+  winStats.textContent   = `${moves} MOVES · ${m}:${s.toString().padStart(2,'0')} · ${curLevel.toUpperCase()}`;
+  winEmojis.textContent  = curCat.rowEmojis.slice(0, NUM_GROUPS).join('  ');
+  winOverlay.classList.add('show');
+  let countdown = 7;
+  const cdEl = document.getElementById('winCountdown');
+  cdEl.textContent = countdown;
+  const cdInterval = setInterval(() => {
+    countdown--;
+    cdEl.textContent = countdown;
+    if (countdown <= 0) clearInterval(cdInterval);
+  }, 1000);
+  setTimeout(() => { clearInterval(cdInterval); winOverlay.classList.remove('show'); showHome(); }, 7000);
+}
+
+// ── New game ──────────────────────────────────────────────────
+function newGame() {
+  stopTimer();
+  started = false; locked = false; hintIdx = -1;
+  moves = 0; seconds = 0;
+  movesEl.textContent = '0';
+  timerEl.textContent = '0:00';
+  rowsEl.textContent  = '0/' + NUM_GROUPS;
+  winOverlay.classList.remove('show');
+  board = shuffle();
+  renderBoard(true);
+}
+
+// ── Hint ──────────────────────────────────────────────────────
+document.getElementById('hintBtn').addEventListener('click', () => {
+  if (locked) return;
+  const emptyIdx = board.indexOf(-1);
+  const movable  = getMovable(emptyIdx);
+  let best = null, bestScore = -Infinity;
+  for (const idx of movable) {
+    const v     = board[idx];
+    const r     = Math.floor(idx / COLS);
+    const score = (v !== r ? 1 : 0) + Math.random() * 0.1;
+    if (score > bestScore) { bestScore = score; best = idx; }
+  }
+  hintIdx = best ?? movable[0];
+  renderBoard();
+  setTimeout(() => { hintIdx = -1; renderBoard(); }, 900);
+});
+
+// ── Keyboard ──────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (gamePage.classList.contains('hidden')) return;
+  const emptyIdx = board.indexOf(-1);
+  if (emptyIdx < 0) return;
+  const r = Math.floor(emptyIdx / COLS), c = emptyIdx % COLS;
+  let t = -1;
+  if (e.key === 'ArrowUp'    && r < ROWS - 1) t = emptyIdx + COLS;
+  if (e.key === 'ArrowDown'  && r > 0)        t = emptyIdx - COLS;
+  if (e.key === 'ArrowLeft'  && c < COLS - 1) t = emptyIdx + 1;
+  if (e.key === 'ArrowRight' && c > 0)        t = emptyIdx - 1;
+  if (t !== -1) { e.preventDefault(); tryMove(t); }
+});
+
+// ── Resize ────────────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  if (!gamePage.classList.contains('hidden')) renderBoard();
+});
+
+// ── Buttons ───────────────────────────────────────────────────
+document.getElementById('newGameBtn').addEventListener('click', newGame);
+</script>
+</body>
+</html>
