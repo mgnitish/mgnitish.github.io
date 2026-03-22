@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Snake & Ladders — Ancient Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --parch:#f5e6c8;--parch-dk:#e8d0a0;--parch-dp:#d4b87a;
+  --stone:#8b7355;--stone-dk:#5c4a2a;--stone-dp:#3d2e14;
+  --ink:#2c1a0e;--ink-lt:#4a3020;
+  --torch:#c8621a;--glow:#e8941a;
+  --gold:#c9962a;--gold-br:#f0c040;
+  --grn:#5a7a2a;--grn-br:#7ab030;
+  --ld:#8b5e2a;--ld-br:#c08040;
+  --bg:#1a0e04;--text-mid:#5c3a18;--text-mu:#9a7a50;
+}
+html,body{height:100%;font-family:'Crimson Text',Georgia,serif;background:var(--bg);color:var(--ink);overflow-x:hidden}
+.screen{display:none;width:100%;min-height:100vh;animation:fadeIn .3s ease}
+.screen.active{display:flex}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* BG */
+.bg-layer{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 80% 60% at 20% 80%,rgba(200,98,26,.18) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 20%,rgba(232,148,26,.12) 0%,transparent 55%),
+    radial-gradient(ellipse 100% 100% at 50% 50%,#2a1a08 0%,#1a0e04 100%)}
+.torch-el{position:fixed;pointer-events:none;z-index:1;display:flex;flex-direction:column;align-items:center}
+.torch-tl{top:10px;left:14px}.torch-tr{top:10px;right:14px}
+.torch-fire{font-size:20px;animation:flicker 1.5s ease-in-out infinite}
+.torch-pole{width:4px;height:36px;background:linear-gradient(to bottom,var(--stone-dk),var(--stone-dp));border-radius:2px}
+@keyframes flicker{0%,100%{transform:scale(1);filter:brightness(1)}35%{transform:scale(.92) rotate(-3deg);filter:brightness(.8)}65%{transform:scale(1.08) rotate(3deg);filter:brightness(1.2)}}
+
+/* ===== HOME ===== */
+#home{flex-direction:column;align-items:center;justify-content:center;position:relative;padding:40px 16px}
+.home-inner{position:relative;z-index:2;width:100%;max-width:540px;text-align:center}
+.scroll-top{background:linear-gradient(135deg,#c9962a,#f0c040,#c9962a,#a07820);border-radius:4px 4px 0 0;padding:5px 20px 2px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:4px;color:var(--ink);text-transform:uppercase;margin-bottom:-2px;position:relative;z-index:1}
+.scroll-body{background:var(--parch);border:3px solid var(--gold);padding:28px 32px;position:relative;box-shadow:0 0 40px rgba(200,98,26,.4),inset 0 0 50px rgba(180,130,60,.15)}
+.scroll-body::before,.scroll-body::after{content:'';position:absolute;left:-10px;right:-10px;height:20px;background:linear-gradient(to right,var(--stone-dk),var(--parch-dk) 12%,var(--parch-dk) 88%,var(--stone-dk));border-radius:3px;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.scroll-body::before{top:-10px}.scroll-body::after{bottom:-10px}
+.scroll-bot{background:linear-gradient(135deg,#a07820,#c9962a,#a07820);border-radius:0 0 4px 4px;padding:2px 20px 5px;font-family:'Cinzel',serif;font-size:8px;letter-spacing:3px;color:var(--ink);margin-top:-2px;position:relative;z-index:1}
+.logo-row{font-size:clamp(26px,5vw,42px);margin-bottom:10px;display:flex;gap:10px;justify-content:center}
+.li{display:inline-block;animation:bounce 3s ease-in-out infinite}
+.li:nth-child(2){animation-delay:.35s;font-size:.6em}
+.li:nth-child(3){animation-delay:.7s}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.game-logo{font-family:'Cinzel',serif;font-weight:700;font-size:clamp(26px,6vw,48px);line-height:1.1;margin-bottom:4px;color:var(--ink);text-shadow:2px 2px 0 var(--parch-dp),0 0 18px rgba(200,98,26,.25)}
+.game-sub{font-family:'Cinzel',serif;font-size:11px;letter-spacing:4px;color:var(--torch);text-transform:uppercase;margin-bottom:22px}
+.divider{display:flex;align-items:center;gap:8px;margin:14px 0;color:var(--stone);font-size:12px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--parch-dp)}
+.mode-cards{display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
+.mode-card{background:linear-gradient(135deg,rgba(180,130,60,.15),rgba(140,100,40,.08));border:1.5px solid var(--parch-dp);border-radius:4px;padding:16px 20px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:all .28s ease;text-align:left;position:relative;overflow:hidden}
+.mode-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(200,98,26,.1),rgba(232,148,26,.06));opacity:0;transition:opacity .28s}
+.mode-card:hover{transform:translateY(-3px);border-color:var(--gold);box-shadow:0 8px 24px rgba(200,98,26,.28)}
+.mode-card:hover::after{opacity:1}
+.mode-card:hover .mc-icon{transform:scale(1.15) rotate(-5deg)}
+.mc-icon{font-size:38px;flex-shrink:0;transition:transform .28s;position:relative;z-index:1}
+.mc-info{position:relative;z-index:1}
+.mc-title{font-family:'Cinzel',serif;font-size:17px;margin-bottom:2px}
+.mode-card.solo .mc-title{color:var(--torch)}.mode-card.duo .mc-title{color:var(--stone-dk)}
+.mc-desc{font-size:12px;color:var(--text-mid);line-height:1.4;font-style:italic}
+.mc-badge{position:absolute;right:10px;top:10px;font-family:'Cinzel',serif;font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:2px 8px;border-radius:2px}
+.mode-card.solo .mc-badge{background:rgba(200,98,26,.22);color:var(--torch);border:1px solid var(--torch)}
+.mode-card.duo  .mc-badge{background:rgba(92,74,42,.18);color:var(--stone-dk);border:1px solid var(--stone)}
+.home-foot{font-size:11px;color:var(--text-mu);font-style:italic;margin-top:6px}
+/* Win counter on home */
+.win-counter{display:flex;gap:12px;justify-content:center;margin-bottom:14px;flex-wrap:wrap}
+.wc-pill{background:rgba(200,98,26,.12);border:1px solid rgba(200,98,26,.3);border-radius:20px;padding:4px 14px;font-family:'Cinzel',serif;font-size:11px;color:var(--torch);display:flex;align-items:center;gap:6px}
+.wc-num{font-size:16px;font-weight:700;color:var(--gold-br)}
+
+/* ===== DIFFICULTY ===== */
+#difficulty{flex-direction:column;align-items:center;justify-content:center;position:relative;padding:40px 16px}
+.sub-inner{position:relative;z-index:2;width:100%;max-width:440px;text-align:center}
+.back-btn{position:absolute;top:20px;left:20px;z-index:10;background:var(--parch-dk);border:1.5px solid var(--stone);border-radius:3px;padding:7px 13px;font-family:'Cinzel',serif;font-size:10px;font-weight:600;letter-spacing:1px;color:var(--ink);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:4px}
+.back-btn:hover{background:var(--parch);border-color:var(--gold)}
+.sc-title{font-family:'Cinzel',serif;font-size:28px;font-weight:700;color:var(--parch);margin-bottom:4px;text-shadow:0 0 20px rgba(200,98,26,.5)}
+.sc-sub{font-size:13px;color:var(--text-mu);margin-bottom:24px;font-style:italic}
+.diff-cards{display:flex;flex-direction:column;gap:10px}
+.diff-card{background:linear-gradient(135deg,rgba(245,230,200,.1),rgba(200,150,80,.06));border:1.5px solid rgba(180,130,60,.45);border-radius:4px;padding:14px 18px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:all .22s ease;text-align:left}
+.diff-card:hover{transform:translateX(8px);border-color:var(--gold-br);background:rgba(245,230,200,.15)}
+.diff-icon{font-size:32px;flex-shrink:0}
+.diff-title{font-family:'Cinzel',serif;font-size:16px;margin-bottom:2px;font-weight:600}
+.diff-easy .diff-title{color:var(--grn-br)}.diff-medium .diff-title{color:var(--gold-br)}.diff-hard .diff-title{color:var(--torch)}
+.diff-info{font-size:11px;color:var(--text-mu);line-height:1.4;font-style:italic}
+
+/* ===== GAME ===== */
+#game{flex-direction:column;align-items:stretch}
+.game-hdr{background:linear-gradient(to right,var(--stone-dp),var(--ink-lt),var(--stone-dp));border-bottom:2px solid var(--gold);padding:11px 20px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:5;flex-shrink:0}
+.game-hdr::before,.game-hdr::after{content:'⚜';position:absolute;top:50%;transform:translateY(-50%);font-size:16px;color:var(--gold);opacity:.55}
+.game-hdr::before{left:56px}.game-hdr::after{right:56px}
+.hdr-logo{font-family:'Cinzel',serif;font-size:16px;font-weight:700;color:var(--gold-br);letter-spacing:1px}
+.hdr-tag{font-family:'Cinzel',serif;font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:3px 9px;border-radius:2px;background:rgba(201,150,42,.18);color:var(--gold-br);border:1px solid var(--gold)}
+.hdr-back{background:none;border:1px solid rgba(180,130,60,.45);border-radius:3px;padding:5px 11px;font-family:'Cinzel',serif;color:var(--text-mu);font-size:10px;font-weight:600;letter-spacing:1px;cursor:pointer;transition:all .15s}
+.hdr-back:hover{background:rgba(180,130,60,.18);color:var(--parch)}
+.game-body{display:flex;gap:16px;padding:16px;align-items:flex-start;justify-content:center;flex-wrap:wrap;flex:1}
+
+/* BOARD */
+#board-outer{position:relative;flex-shrink:0}
+.bframe{position:absolute;inset:-12px;border:3px solid var(--gold);border-radius:2px;pointer-events:none;z-index:3;box-shadow:0 0 0 5px var(--stone-dp),0 0 28px rgba(201,150,42,.38)}
+.bframe::before,.bframe::after{content:'✦';position:absolute;font-size:13px;color:var(--gold-br);background:var(--stone-dp);padding:2px 3px;line-height:1}
+.bframe::before{top:-9px;left:-9px}.bframe::after{bottom:-9px;right:-9px}
+#board-wrap{position:relative;overflow:hidden;border-radius:1px}
+canvas{display:block;position:absolute;top:0;left:0}
+
+/* SIDEBAR */
+.sidebar{display:flex;flex-direction:column;gap:10px;width:244px;min-width:200px}
+.panel{background:linear-gradient(145deg,rgba(245,230,200,.08),rgba(200,150,80,.04));border:1px solid rgba(180,130,60,.38);border-radius:4px;padding:11px 13px;position:relative}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(to right,transparent,var(--gold),transparent);opacity:.4}
+.ptitle{font-family:'Cinzel',serif;font-size:11px;font-weight:600;color:var(--gold-br);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+
+/* DICE PANEL */
+#dice-panel{text-align:center;background:linear-gradient(145deg,rgba(60,40,15,.85),rgba(40,25,8,.95));border:1px solid var(--gold)}
+#dice-wrap{display:flex;align-items:center;justify-content:center;margin:4px auto 3px}
+#dice-canvas{border-radius:10px;box-shadow:0 3px 14px rgba(0,0,0,.55),0 0 0 2px var(--gold),0 0 10px rgba(200,150,42,.35)}
+#dice-canvas.shake{animation:dshake .5s ease}
+@keyframes dshake{0%,100%{transform:rotate(0)}20%{transform:rotate(-18deg) scale(1.2)}40%{transform:rotate(18deg) scale(1.2)}65%{transform:rotate(-10deg)}82%{transform:rotate(8deg)}}
+/* Roll-again badge */
+#bonus-badge{display:none;font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;color:var(--gold-br);background:rgba(201,150,42,.2);border:1px solid var(--gold);border-radius:2px;padding:2px 8px;margin-bottom:4px;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+#status-txt{font-size:11px;color:var(--text-mu);min-height:15px;margin-bottom:8px;font-style:italic;line-height:1.3}
+#status-txt.hl{color:var(--gold-br);font-weight:600;font-style:normal}
+.roll-btn{width:100%;padding:11px;font-family:'Cinzel',serif;font-size:14px;font-weight:700;letter-spacing:2px;background:linear-gradient(135deg,var(--torch),var(--glow),var(--torch));color:var(--ink);border:none;border-radius:3px;cursor:pointer;box-shadow:0 4px 14px rgba(200,98,26,.45),inset 0 1px 0 rgba(255,255,255,.18);transition:transform .12s,box-shadow .12s;text-transform:uppercase}
+.roll-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 7px 22px rgba(200,98,26,.55)}
+.roll-btn:active:not(:disabled){transform:scale(.97)}
+.roll-btn:disabled{opacity:.3;cursor:not-allowed}
+.ai-msg{font-family:'Cinzel',serif;font-size:10px;color:var(--gold);letter-spacing:1px;text-align:center;min-height:13px;margin-top:4px;animation:blink 1.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+.new-btn{width:100%;padding:7px;font-family:'Cinzel',serif;font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;background:transparent;color:var(--text-mu);border:1px solid rgba(180,130,60,.38);border-radius:3px;cursor:pointer;transition:all .15s;margin-top:6px}
+.new-btn:hover{background:rgba(180,130,60,.14);color:var(--parch)}
+
+/* PLAYERS */
+.player-card{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:3px;border:1px solid transparent;transition:all .2s;margin-bottom:4px}
+.player-card:last-child{margin-bottom:0}
+.player-card.active{border-color:var(--gold);background:rgba(201,150,42,.09)}
+.player-card.winner{border-color:var(--gold-br);background:rgba(201,150,42,.15);animation:winGlow .8s ease infinite alternate}
+@keyframes winGlow{from{box-shadow:0 0 4px rgba(240,192,64,.3)}to{box-shadow:0 0 12px rgba(240,192,64,.7)}}
+.ptoken{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-weight:700;font-size:11px;color:var(--ink);flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.pname{flex:1;font-family:'Cinzel',serif;font-weight:600;font-size:11px;display:flex;align-items:center;gap:4px;color:var(--parch)}
+.pai{font-size:7px;font-weight:700;letter-spacing:1px;background:rgba(200,98,26,.22);color:var(--torch);padding:1px 5px;border-radius:2px;border:1px solid var(--torch)}
+.psq{font-size:10px;color:var(--text-mu)}
+.pwins{font-size:10px;color:var(--gold-br);margin-left:auto;font-family:'Cinzel',serif}
+.ptdot{width:6px;height:6px;border-radius:50%;background:var(--gold-br);animation:pdot 1.4s infinite;flex-shrink:0;margin-left:2px}
+@keyframes pdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.25;transform:scale(.55)}}
+
+/* LOG */
+#log{max-height:118px;overflow-y:auto;display:flex;flex-direction:column;gap:3px}
+#log::-webkit-scrollbar{width:3px}
+#log::-webkit-scrollbar-thumb{background:var(--stone);border-radius:2px}
+.le{font-size:10px;color:var(--text-mu);padding:3px 6px;border-radius:2px;background:rgba(60,46,20,.45);line-height:1.35;font-style:italic}
+.le.snake{color:#d4a060;background:rgba(90,122,42,.18);font-style:normal}
+.le.ladder{color:var(--gold);background:rgba(139,94,42,.18);font-style:normal}
+.le.win{color:var(--gold-br);background:rgba(201,150,42,.14);font-weight:600;font-style:normal;font-family:'Cinzel',serif}
+.le.bonus{color:#a8d080;background:rgba(100,150,40,.18);font-style:normal}
+
+/* LEGEND */
+.legend{display:flex;flex-wrap:wrap;gap:6px}
+.leg{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text-mu);font-style:italic}
+.ldot{width:7px;height:7px;border-radius:50%}
+
+/* SCORES panel */
+.score-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(180,130,60,.2);font-size:11px}
+.score-row:last-child{border-bottom:none}
+.score-name{font-family:'Cinzel',serif;font-size:11px;color:var(--parch)}
+.score-val{font-family:'Cinzel',serif;font-size:13px;color:var(--gold-br);font-weight:700}
+
+/* CONFETTI */
+.confetti-piece{position:fixed;width:8px;height:8px;pointer-events:none;z-index:500;border-radius:2px;animation:confFall linear forwards}
+@keyframes confFall{0%{opacity:1;transform:translateY(0) rotate(0)}100%{opacity:0;transform:translateY(100vh) rotate(720deg)}}
+
+/* WIN OVERLAY */
+#win-overlay{display:none;position:fixed;inset:0;background:rgba(20,10,2,.86);z-index:300;align-items:center;justify-content:center}
+#win-overlay.show{display:flex}
+.win-box{background:var(--parch);border:3px solid var(--gold);border-radius:4px;padding:36px 44px;text-align:center;box-shadow:0 0 70px rgba(200,98,26,.4);animation:popIn .45s cubic-bezier(.34,1.56,.64,1);max-width:400px;width:90%;position:relative}
+.win-box::before,.win-box::after{content:'';position:absolute;left:0;right:0;height:18px;background:linear-gradient(to right,var(--stone-dk),var(--parch-dk),var(--stone-dk));border-radius:3px}
+.win-box::before{top:-9px}.win-box::after{bottom:-9px}
+@keyframes popIn{from{transform:scale(.45);opacity:0}to{transform:scale(1);opacity:1}}
+.wemoji{font-size:50px;display:block;margin-bottom:8px;animation:wspin 1.4s ease-in-out infinite alternate}
+@keyframes wspin{from{transform:rotate(-8deg) scale(1)}to{transform:rotate(8deg) scale(1.1)}}
+.wtitle{font-family:'Cinzel',serif;font-size:30px;font-weight:700;color:var(--torch);margin-bottom:4px;text-shadow:1px 1px 0 var(--parch-dp)}
+.wsub{color:var(--text-mid);font-size:13px;margin-bottom:20px;font-style:italic}
+.wbtns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.wbtn{padding:10px 22px;font-family:'Cinzel',serif;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;border:none;border-radius:3px;cursor:pointer;transition:transform .1s}
+.wbtn:hover{transform:scale(1.05)}
+.wbtn.pri{background:linear-gradient(135deg,var(--torch),var(--glow));color:var(--ink);box-shadow:0 4px 14px rgba(200,98,26,.38)}
+.wbtn.sec{background:transparent;color:var(--stone-dk);border:1.5px solid var(--stone)}
+
+@media(max-width:620px){
+  .sidebar{width:100%}
+  .game-body{gap:10px;padding:10px}
+  .scroll-body{padding:20px 16px}
+  .bframe{inset:-6px}
+}
+</style>
+</head>
+<body>
+<div class="bg-layer"></div>
+<div class="torch-el torch-tl"><div class="torch-fire">🔥</div><div class="torch-pole"></div></div>
+<div class="torch-el torch-tr"><div class="torch-fire">🔥</div><div class="torch-pole"></div></div>
+
+<!-- ===== HOME ===== -->
+<div class="screen active" id="home">
+  <div class="home-inner">
+    <div class="scroll-top">✦ &nbsp; Royal Proclamation &nbsp; ✦</div>
+    <div class="scroll-body">
+      <div class="logo-row"><span class="li">🐍</span><span class="li">🎲</span><span class="li">🪜</span></div>
+      <div class="game-logo">Snake &amp; Ladders</div>
+      <div class="game-sub">✦ Ancient Edition ✦</div>
+      <!-- Win counters shown after at least one game -->
+      <div class="win-counter" id="home-scores" style="display:none"></div>
+      <div class="divider">⚜ Choose Thy Path ⚜</div>
+      <div class="mode-cards">
+        <div class="mode-card solo" onclick="goSingle()">
+          <span class="mc-badge">VS Oracle</span>
+          <div class="mc-icon">🏺</div>
+          <div class="mc-info">
+            <div class="mc-title">Single Player</div>
+            <div class="mc-desc">Challenge the ancient oracle! Pit thy fortune against the wisdom of the ages.</div>
+          </div>
+        </div>
+        <div class="mode-card duo" onclick="startGame(2,null)">
+          <span class="mc-badge">Two Souls</span>
+          <div class="mc-icon">⚔️</div>
+          <div class="mc-info">
+            <div class="mc-title">Two Players</div>
+            <div class="mc-desc">Compete with a fellow traveller. Race to the throne upon square one hundred!</div>
+          </div>
+        </div>
+      </div>
+      <div class="home-foot">~ Let the dice of fate decide thy destiny ~</div>
+    </div>
+    <div class="scroll-bot">✦ &nbsp; Anno Domini &nbsp; ✦</div>
+  </div>
+</div>
+
+<!-- ===== DIFFICULTY ===== -->
+<div class="screen" id="difficulty">
+  <button class="back-btn" onclick="showScreen('home')">&#8592; Retreat</button>
+  <div class="sub-inner">
+    <div style="font-size:48px;margin-bottom:8px">🏺</div>
+    <div class="sc-title">Choose Thy Challenge</div>
+    <div class="sc-sub">How mighty is the Oracle thou wouldst face?</div>
+    <div class="diff-cards">
+      <div class="diff-card diff-easy" onclick="startGame(1,'easy')">
+        <div class="diff-icon">🌿</div>
+        <div><div class="diff-title">Apprentice</div><div class="diff-info">Oracle rolls as fate decrees — a fair, honourable contest for the newcomer.</div></div>
+      </div>
+      <div class="diff-card diff-medium" onclick="startGame(1,'medium')">
+        <div class="diff-icon">⚔️</div>
+        <div><div class="diff-title">Warrior</div><div class="diff-info">Oracle holds ancient knowledge — it shall not be easily bested.</div></div>
+      </div>
+      <div class="diff-card diff-hard" onclick="startGame(1,'hard')">
+        <div class="diff-icon">💀</div>
+        <div><div class="diff-title">Sorcerer</div><div class="diff-info">Oracle commands the serpents and ladders alike. Tread most carefully!</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== GAME ===== -->
+<div class="screen" id="game">
+  <div class="game-hdr">
+    <button class="hdr-back" onclick="showScreen('home')">&#8592; Home</button>
+    <span class="hdr-logo">⚜ Snake &amp; Ladders ⚜</span>
+    <span class="hdr-tag" id="mode-tag">Two Players</span>
+  </div>
+  <div class="game-body">
+    <div id="board-outer">
+      <div class="bframe"></div>
+      <div id="board-wrap">
+        <canvas id="board"></canvas>
+        <canvas id="pieces"></canvas>
+      </div>
+    </div>
+    <div class="sidebar">
+      <!-- DICE -->
+      <div class="panel" id="dice-panel">
+        <div class="ptitle" style="text-align:center">⚄ Cast The Dice ⚄</div>
+        <div id="bonus-badge">⚄ Roll Again! Rolled a Six!</div>
+        <div id="dice-wrap"><canvas id="dice-canvas" width="54" height="54"></canvas></div>
+        <div id="status-txt">Press Roll to begin!</div>
+        <button class="roll-btn" id="rollBtn">Roll The Dice</button>
+        <div class="ai-msg" id="ai-msg" style="display:none">🏺 Oracle consults the fates…</div>
+        <button class="new-btn" id="newBtn">↺ New Game</button>
+      </div>
+      <!-- PLAYERS -->
+      <div class="panel">
+        <div class="ptitle">⚔ Combatants</div>
+        <div id="players-list"></div>
+      </div>
+      <!-- SCORES -->
+      <div class="panel">
+        <div class="ptitle">🏆 Victories</div>
+        <div id="score-list"></div>
+      </div>
+      <!-- LEGEND -->
+      <div class="panel">
+        <div class="ptitle">📜 Ancient Lore</div>
+        <div class="legend">
+          <div class="leg"><div class="ldot" style="background:#7ab030"></div>Serpent — descend in shame</div>
+          <div class="leg"><div class="ldot" style="background:#c08040"></div>Ladder — ascend in glory</div>
+          <div class="leg"><div class="ldot" style="background:var(--gold-br)"></div>Roll 6 → roll again!</div>
+        </div>
+      </div>
+      <!-- LOG -->
+      <div class="panel">
+        <div class="ptitle">📜 Chronicles</div>
+        <div id="log"><div class="le">The ancient game begins!</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WIN OVERLAY -->
+<div id="win-overlay">
+  <div class="win-box">
+    <span class="wemoji" id="wemoji">🏆</span>
+    <div class="wtitle" id="wtitle">Victory!</div>
+    <div class="wsub" id="wsub">The gods smile upon thee!</div>
+    <div class="wbtns">
+      <button class="wbtn pri" id="wreplay">Play Again</button>
+      <button class="wbtn sec" onclick="showScreen('home')">Return Home</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CONSTANTS
+   ============================================================ */
+const N = 10;
+// No square appears as both a snake endpoint AND ladder endpoint
+const SNAKES  = {98:78, 95:72, 87:24, 64:18, 54:34, 43:17, 36:6, 99:8};
+const LADDERS = {4:14, 13:46, 20:38, 28:84, 40:59, 51:67, 63:81, 71:91};
+const PCOLORS = ['#c8621a','#4a7a2a','#8b5e2a','#5a3a8a'];
+
+// Dice dot positions per face value [cx,cy] in 0–1 space
+const DOT_POS = {
+  1:[[.5,.5]],
+  2:[[.3,.3],[.7,.7]],
+  3:[[.3,.3],[.5,.5],[.7,.7]],
+  4:[[.3,.3],[.7,.3],[.3,.7],[.7,.7]],
+  5:[[.3,.3],[.7,.3],[.5,.5],[.3,.7],[.7,.7]],
+  6:[[.3,.25],[.7,.25],[.3,.5],[.7,.5],[.3,.75],[.7,.75]]
+};
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let CELL = 54;
+let players = [], current = 0, rolling = false, gameOver = false;
+let gameMode = 2, aiDiff = 'easy';
+// Persistent win counters across games (keyed by player name)
+const winRecord = {};
+
+/* ============================================================
+   CANVAS REFS
+   ============================================================ */
+const boardCanvas  = document.getElementById('board');
+const piecesCanvas = document.getElementById('pieces');
+const bx = boardCanvas.getContext('2d');
+const px = piecesCanvas.getContext('2d');
+const diceCanvas   = document.getElementById('dice-canvas');
+const dctx         = diceCanvas.getContext('2d');
+
+/* ============================================================
+   NAVIGATION — always clean state on screen change
+   ============================================================ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('win-overlay').classList.remove('show');
+  if (id === 'home' || id === 'difficulty') {
+    gameOver = false;
+    rolling  = false;
+    players  = [];
+    document.getElementById('rollBtn').disabled = false;
+    refreshHomeScores();
+  }
+}
+function goSingle() { showScreen('difficulty'); }
+
+function refreshHomeScores() {
+  const keys = Object.keys(winRecord).filter(k => winRecord[k] > 0);
+  const el = document.getElementById('home-scores');
+  if (keys.length === 0) { el.style.display = 'none'; return; }
+  el.style.display = 'flex';
+  el.innerHTML = keys.map(k =>
+    `<div class="wc-pill">${k} <span class="wc-num">${winRecord[k]}🏆</span></div>`
+  ).join('');
+}
+
+/* ============================================================
+   START GAME
+   ============================================================ */
+function startGame(mode, diff) {
+  gameMode  = mode;
+  aiDiff    = diff;
+  current   = 0;
+  rolling   = false;
+  gameOver  = false;
+
+  if (mode === 1) {
+    players = [
+      {name:'You',    pos:0, color:PCOLORS[0], ai:false},
+      {name:'Oracle', pos:0, color:PCOLORS[1], ai:true}
+    ];
+    document.getElementById('mode-tag').textContent = `vs Oracle (${diff})`;
+  } else {
+    players = [
+      {name:'Player I',  pos:0, color:PCOLORS[0], ai:false},
+      {name:'Player II', pos:0, color:PCOLORS[1], ai:false}
+    ];
+    document.getElementById('mode-tag').textContent = 'Two Players';
+  }
+
+  // Ensure win record has entries for these players
+  players.forEach(p => { if (winRecord[p.name] === undefined) winRecord[p.name] = 0; });
+
+  document.getElementById('rollBtn').disabled = false;
+  document.getElementById('ai-msg').style.display = 'none';
+  document.getElementById('bonus-badge').style.display = 'none';
+  document.getElementById('log').innerHTML = '<div class="le">The ancient game begins! May fortune favour thee.</div>';
+  document.getElementById('win-overlay').classList.remove('show');
+  document.getElementById('wreplay').onclick = () => startGame(mode, diff);
+  document.getElementById('newBtn').onclick  = () => startGame(mode, diff);
+
+  setStatus(`${players[0].name}'s turn — Roll the dice!`);
+  drawDice(5);   // show face 5 as default
+
+  resize();
+  drawBoard();
+  drawPieces();
+  updateUI();
+  refreshScorePanel();
+  showScreen('game');
+}
+
+/* ============================================================
+   RESIZE
+   ============================================================ */
+function resize() {
+  const vw = window.innerWidth;
+  CELL = vw < 480 ? 30 : vw < 680 ? 40 : 54;
+  const S = N * CELL;
+  boardCanvas.width  = piecesCanvas.width  = S;
+  boardCanvas.height = piecesCanvas.height = S;
+  const w = document.getElementById('board-wrap');
+  w.style.width = w.style.height = S + 'px';
+  document.getElementById('board-outer').style.height = S + 'px';
+}
+
+/* ============================================================
+   BOARD COORDINATE
+   1 = bottom-left  →  100 = top-left
+   Even logical rows: left→right   Odd: right→left
+   ============================================================ */
+function cellCenter(n) {
+  if (n < 1 || n > 100) return {x:-999, y:-999};
+  const logRow   = Math.floor((n - 1) / N);      // 0=bottom
+  const canvasRow = N - 1 - logRow;               // 0=canvas top
+  const canvasCol = logRow % 2 === 0
+    ? (n - 1) % N                                  // even: left→right
+    : N - 1 - (n - 1) % N;                        // odd:  right→left
+  return {x: canvasCol * CELL + CELL / 2, y: canvasRow * CELL + CELL / 2};
+}
+
+/* ============================================================
+   DRAW BOARD
+   ============================================================ */
+function drawBoard() {
+  bx.clearRect(0, 0, N * CELL, N * CELL);
+  // Parchment base
+  bx.fillStyle = '#d4b878';
+  bx.fillRect(0, 0, N * CELL, N * CELL);
+
+  for (let cRow = 0; cRow < N; cRow++) {
+    for (let cCol = 0; cCol < N; cCol++) {
+      const logRow = N - 1 - cRow;
+      const num    = logRow % 2 === 0
+        ? logRow * N + cCol + 1
+        : logRow * N + (N - 1 - cCol) + 1;
+      bx.fillStyle = (cRow + cCol) % 2 === 0 ? '#ead09c' : '#d4b878';
+      bx.fillRect(cCol * CELL, cRow * CELL, CELL, CELL);
+      bx.strokeStyle = 'rgba(90,60,20,.16)';
+      bx.lineWidth = 0.5;
+      bx.strokeRect(cCol * CELL + .5, cRow * CELL + .5, CELL - 1, CELL - 1);
+      // Number
+      bx.fillStyle = 'rgba(44,26,14,.5)';
+      bx.font = `${CELL < 34 ? 7 : CELL < 44 ? 9 : 10}px Cinzel,serif`;
+      bx.textAlign = 'center';
+      bx.fillText(num, cCol * CELL + CELL / 2, cRow * CELL + 13);
+    }
+  }
+  // Highlight square 1 (green) and 100 (gold)
+  [[1,'rgba(90,122,42,.32)'],[100,'rgba(200,152,42,.38)']].forEach(([n, col]) => {
+    const {x, y} = cellCenter(n);
+    bx.fillStyle = col;
+    bx.fillRect(x - CELL/2, y - CELL/2, CELL, CELL);
+    bx.fillStyle = 'rgba(44,26,14,.62)';
+    bx.font = `bold ${CELL < 34 ? 6 : 8}px Cinzel,serif`;
+    bx.textAlign = 'center';
+    bx.fillText(n === 1 ? 'START' : 'FINISH', x, y + CELL/2 - 4);
+  });
+  drawOverlays();
+}
+
+/* ============================================================
+   DRAW SNAKES & LADDERS
+   ============================================================ */
+function drawOverlays() {
+  // Build occupancy map to handle any endpoint sharing
+  const occ = {};
+  const mark = (sq, t) => { occ[sq] = occ[sq] || []; occ[sq].push(t); };
+  Object.entries(SNAKES).forEach(([f,t])  => { mark(+f,'sh'); mark(+t,'st'); });
+  Object.entries(LADDERS).forEach(([f,t]) => { mark(+f,'lb'); mark(+t,'lt'); });
+
+  function getOff(sq, t) {
+    const list = occ[sq] || [];
+    if (list.length <= 1) return {ox:0, oy:0};
+    const a = [0, Math.PI, Math.PI/2, -Math.PI/2][list.indexOf(t) % 4];
+    const r = CELL * 0.2;
+    return {ox: Math.cos(a)*r, oy: Math.sin(a)*r};
+  }
+
+  // SNAKES
+  Object.entries(SNAKES).forEach(([f, t]) => {
+    const fc = cellCenter(+f), tc = cellCenter(+t);
+    const fo = getOff(+f,'sh'), to2 = getOff(+t,'st');
+    const sx = fc.x+fo.ox, sy = fc.y+fo.oy;
+    const ex = tc.x+to2.ox, ey = tc.y+to2.oy;
+    const cpx = sx+(ex-sx)*.25+(ey-sy)*.38, cpy = sy+(ey-sy)*.25-(ex-sx)*.38;
+    const lw = CELL < 34 ? 3 : 4;
+    // Shadow
+    bx.beginPath(); bx.moveTo(sx,sy); bx.quadraticCurveTo(cpx,cpy,ex,ey);
+    bx.strokeStyle = 'rgba(20,50,10,.45)'; bx.lineWidth = lw+2; bx.lineCap='round'; bx.setLineDash([]); bx.stroke();
+    // Body
+    bx.beginPath(); bx.moveTo(sx,sy); bx.quadraticCurveTo(cpx,cpy,ex,ey);
+    bx.strokeStyle = '#4a6820'; bx.lineWidth = lw; bx.stroke();
+    // Shimmer
+    bx.beginPath(); bx.moveTo(sx,sy); bx.quadraticCurveTo(cpx,cpy,ex,ey);
+    bx.strokeStyle = 'rgba(160,220,80,.35)'; bx.lineWidth = 1.5; bx.stroke();
+    // Head
+    const hr = CELL < 34 ? 6 : 8;
+    bx.beginPath(); bx.arc(sx,sy,hr,0,Math.PI*2); bx.fillStyle='#3d5818'; bx.fill();
+    bx.strokeStyle='rgba(20,50,10,.5)'; bx.lineWidth=1.5; bx.stroke();
+    bx.beginPath(); bx.arc(sx,sy,hr-2,0,Math.PI*2); bx.strokeStyle='rgba(160,220,80,.25)'; bx.lineWidth=1; bx.stroke();
+    [[sx-3,sy-2],[sx+3,sy-2]].forEach(([ex2,ey2]) => {
+      bx.beginPath(); bx.arc(ex2,ey2,CELL<34?1.5:2,0,Math.PI*2); bx.fillStyle='#f0e040'; bx.fill();
+      bx.beginPath(); bx.arc(ex2,ey2,CELL<34?.8:1,0,Math.PI*2); bx.fillStyle='#111'; bx.fill();
+    });
+    // Forked tongue
+    bx.beginPath(); bx.moveTo(sx,sy+hr); bx.lineTo(sx-3,sy+hr+5); bx.moveTo(sx,sy+hr); bx.lineTo(sx+3,sy+hr+5);
+    bx.strokeStyle='#c03030'; bx.lineWidth=1; bx.stroke();
+    // Tail
+    bx.beginPath(); bx.arc(ex,ey,CELL<34?3:4,0,Math.PI*2); bx.fillStyle='#2e4010'; bx.fill();
+  });
+
+  // LADDERS
+  Object.entries(LADDERS).forEach(([f, t]) => {
+    const fc = cellCenter(+f), tc = cellCenter(+t);
+    const fo = getOff(+f,'lb'), to2 = getOff(+t,'lt');
+    const sx = fc.x+fo.ox, sy = fc.y+fo.oy;
+    const ex = tc.x+to2.ox, ey = tc.y+to2.oy;
+    const dx = ex-sx, dy = ey-sy, len = Math.sqrt(dx*dx+dy*dy);
+    if (len === 0) return;
+    const rw = CELL < 34 ? 3 : 5;
+    const nx = -dy/len*rw, ny = dx/len*rw;
+    // Rail shadows
+    [[sx+nx,sy+ny,ex+nx,ey+ny],[sx-nx,sy-ny,ex-nx,ey-ny]].forEach(([x1,y1,x2,y2]) => {
+      bx.beginPath(); bx.moveTo(x1+1,y1+1); bx.lineTo(x2+1,y2+1);
+      bx.strokeStyle='rgba(40,20,5,.38)'; bx.lineWidth=CELL<34?3:4; bx.stroke();
+    });
+    // Rails
+    [[sx+nx,sy+ny,ex+nx,ey+ny],[sx-nx,sy-ny,ex-nx,ey-ny]].forEach(([x1,y1,x2,y2]) => {
+      bx.beginPath(); bx.moveTo(x1,y1); bx.lineTo(x2,y2);
+      bx.strokeStyle='#8b5e2a'; bx.lineWidth=CELL<34?2:3; bx.stroke();
+      bx.beginPath(); bx.moveTo(x1,y1); bx.lineTo(x2,y2);
+      bx.strokeStyle='rgba(200,160,80,.28)'; bx.lineWidth=1; bx.stroke();
+    });
+    // Rungs
+    const rgs = Math.max(3, Math.floor(len / (CELL < 34 ? 14 : 18)));
+    for (let i = 1; i < rgs; i++) {
+      const tt = i/rgs, rx = sx+dx*tt, ry = sy+dy*tt;
+      bx.beginPath(); bx.moveTo(rx+nx*1.8,ry+ny*1.8); bx.lineTo(rx-nx*1.8,ry-ny*1.8);
+      bx.strokeStyle='rgba(40,20,5,.28)'; bx.lineWidth=CELL<34?2:3; bx.stroke();
+      bx.beginPath(); bx.moveTo(rx+nx*1.8,ry+ny*1.8); bx.lineTo(rx-nx*1.8,ry-ny*1.8);
+      bx.strokeStyle='#a07030'; bx.lineWidth=CELL<34?1.5:2.5; bx.stroke();
+    }
+    // End-caps
+    [[sx,sy,'#c08040'],[ex,ey,'#8b5e2a']].forEach(([cx2,cy2,col]) => {
+      bx.beginPath(); bx.arc(cx2,cy2,CELL<34?4:6,0,Math.PI*2);
+      bx.fillStyle=col; bx.fill();
+      bx.strokeStyle='rgba(40,20,5,.35)'; bx.lineWidth=1.5; bx.stroke();
+    });
+  });
+}
+
+/* ============================================================
+   DRAW DICE (canvas — always visible)
+   ============================================================ */
+function drawDice(value) {
+  const S = diceCanvas.width, pad = 5, r = 8;
+  dctx.clearRect(0, 0, S, S);
+  dctx.beginPath();
+  dctx.roundRect(pad, pad, S-pad*2, S-pad*2, r);
+  const g = dctx.createLinearGradient(pad,pad,S-pad,S-pad);
+  g.addColorStop(0,'#f8f0d8'); g.addColorStop(.5,'#f0e4b4'); g.addColorStop(1,'#e4d098');
+  dctx.fillStyle = g; dctx.fill();
+  dctx.strokeStyle = '#c9962a'; dctx.lineWidth = 2; dctx.stroke();
+  if (!value) return;
+  const area = S - pad*2;
+  (DOT_POS[value]||[]).forEach(([cx,cy]) => {
+    const x = pad+cx*area, y = pad+cy*area, dr = 3.5;
+    dctx.beginPath(); dctx.arc(x+.7,y+.7,dr,0,Math.PI*2); dctx.fillStyle='rgba(60,30,10,.22)'; dctx.fill();
+    dctx.beginPath(); dctx.arc(x,y,dr,0,Math.PI*2); dctx.fillStyle='#3d2008'; dctx.fill();
+    dctx.beginPath(); dctx.arc(x-.7,y-.7,dr*.34,0,Math.PI*2); dctx.fillStyle='rgba(255,255,255,.32)'; dctx.fill();
+  });
+}
+
+/* ============================================================
+   DRAW PIECES — ancient coin tokens
+   ============================================================ */
+function drawPieces() {
+  px.clearRect(0, 0, N*CELL, N*CELL);
+  players.forEach((p, i) => {
+    if (p.pos === 0) return;
+    const c = cellCenter(p.pos);
+    if (!c || c.x === -999) return;
+    // Offset if two players share a square
+    const shared = players.some((pp, ii) => ii !== i && pp.pos === p.pos);
+    const off = shared ? (i === 0 ? -11 : 11) : 0;
+    // Pulse ring for active player
+    if (i === current && !gameOver) {
+      const t = (Date.now() % 1000) / 1000;
+      const pr = 13 + Math.sin(t * Math.PI * 2) * 3;
+      px.beginPath(); px.arc(c.x+off, c.y, pr, 0, Math.PI*2);
+      px.strokeStyle = 'rgba(240,192,64,.5)'; px.lineWidth = 2; px.stroke();
+    }
+    // Shadow
+    px.beginPath(); px.arc(c.x+off+2, c.y+2, 12, 0, Math.PI*2);
+    px.fillStyle = 'rgba(0,0,0,.4)'; px.fill();
+    // Token
+    px.beginPath(); px.arc(c.x+off, c.y, 12, 0, Math.PI*2);
+    px.fillStyle = p.color; px.fill();
+    px.strokeStyle = 'rgba(240,192,64,.8)'; px.lineWidth = 2.5; px.stroke();
+    px.beginPath(); px.arc(c.x+off, c.y, 8, 0, Math.PI*2);
+    px.strokeStyle = 'rgba(255,255,255,.22)'; px.lineWidth = 1; px.stroke();
+    // Label
+    px.fillStyle = 'rgba(255,240,200,.95)';
+    px.font = `bold ${CELL<34?8:10}px Cinzel,serif`;
+    px.textAlign = 'center'; px.textBaseline = 'middle';
+    px.fillText(p.ai ? 'AI' : ['I','II','III','IV'][i], c.x+off, c.y);
+    px.textBaseline = 'alphabetic';
+  });
+}
+
+// Pulse animation loop for active token
+let pulseRAF = null;
+function startPulse() {
+  if (pulseRAF) cancelAnimationFrame(pulseRAF);
+  function loop() { drawPieces(); pulseRAF = requestAnimationFrame(loop); }
+  loop();
+}
+function stopPulse() { if (pulseRAF) { cancelAnimationFrame(pulseRAF); pulseRAF = null; } }
+
+/* ============================================================
+   UI HELPERS
+   ============================================================ */
+function updateUI() {
+  if (!players.length) return;
+  document.getElementById('players-list').innerHTML = players.map((p, i) => `
+    <div class="player-card ${i===current&&!gameOver?'active':''} ${gameOver&&p.pos===100?'winner':''}">
+      <div class="ptoken" style="background:${p.color};color:rgba(255,240,200,.92)">${p.ai?'⚱':['I','II'][i]}</div>
+      <div class="pname">${p.name}${p.ai?'<span class="pai">AI</span>':''}</div>
+      <div class="psq">${p.pos ? `Sq. ${p.pos}` : 'Start'}</div>
+      <div class="pwins">${(winRecord[p.name]||0) > 0 ? '🏆'.repeat(Math.min(winRecord[p.name],3)) : ''}</div>
+      ${i===current&&!gameOver ? '<div class="ptdot"></div>' : ''}
+    </div>`).join('');
+}
+
+function refreshScorePanel() {
+  if (!players.length) return;
+  document.getElementById('score-list').innerHTML = players.map(p => `
+    <div class="score-row">
+      <span class="score-name" style="color:${p.color}">${p.name}</span>
+      <span class="score-val">${winRecord[p.name]||0} win${(winRecord[p.name]||0)!==1?'s':''}</span>
+    </div>`).join('');
+}
+
+function setStatus(msg, hl=false) {
+  const e = document.getElementById('status-txt');
+  e.textContent = msg; e.className = hl ? 'hl' : '';
+}
+
+function addLog(msg, t='') {
+  const l = document.getElementById('log'), d = document.createElement('div');
+  d.className = 'le ' + t; d.textContent = msg; l.insertBefore(d, l.firstChild);
+  // Keep log from growing too large
+  while (l.children.length > 40) l.removeChild(l.lastChild);
+}
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* ============================================================
+   CONFETTI
+   ============================================================ */
+function launchConfetti() {
+  const colors = ['#f0c040','#c8621a','#7ab030','#c08040','#e8941a','#f5e6c8'];
+  for (let i = 0; i < 60; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.cssText = `
+      left:${Math.random()*100}vw;
+      top:-10px;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      width:${6+Math.random()*6}px;
+      height:${6+Math.random()*6}px;
+      border-radius:${Math.random()>0.5?'50%':'2px'};
+      animation-duration:${1.5+Math.random()*2}s;
+      animation-delay:${Math.random()*.8}s;
+    `;
+    document.body.appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
+  }
+}
+
+/* ============================================================
+   SOUND (Web Audio API — no files needed)
+   ============================================================ */
+let audioCtx = null;
+function getAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+function playTone(freq, type, duration, vol=0.18, delay=0) {
+  try {
+    const ctx = getAudio();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = type; osc.frequency.setValueAtTime(freq, ctx.currentTime+delay);
+    gain.gain.setValueAtTime(vol, ctx.currentTime+delay);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+delay+duration);
+    osc.start(ctx.currentTime+delay);
+    osc.stop(ctx.currentTime+delay+duration);
+  } catch(e){}
+}
+function soundDiceRoll()  { playTone(220,'square',.05,.12); playTone(180,'square',.05,.12,.06); playTone(260,'square',.05,.12,.12); }
+function soundMove()      { playTone(440,'sine',.06,.08); }
+function soundSnake()     { [200,180,160,140].forEach((f,i) => playTone(f,'sawtooth',.12,.15,i*.1)); }
+function soundLadder()    { [300,380,460,540].forEach((f,i) => playTone(f,'sine',.1,.15,i*.08)); }
+function soundWin()       { [523,659,784,1047].forEach((f,i) => playTone(f,'sine',.4,.2,i*.18)); }
+function soundBounce()    { playTone(300,'square',.08,.1); playTone(200,'square',.08,.1,.1); }
+function soundBonus()     { playTone(880,'sine',.15,.18); playTone(1100,'sine',.15,.18,.12); }
+
+/* ============================================================
+   AI ROLL
+   ============================================================ */
+function aiPickRoll(pos) {
+  if (aiDiff === 'easy') return Math.floor(Math.random()*6)+1;
+  const tries = aiDiff === 'hard' ? 12 : 5;
+  const rolls  = Array.from({length:tries}, () => Math.floor(Math.random()*6)+1);
+  const score  = r => {
+    const np = pos + r;
+    if (np > 100)      return -20;
+    if (np === 100)    return 200;
+    if (LADDERS[np])   return 60 + LADDERS[np];
+    if (SNAKES[np])    return -45;
+    return np;
+  };
+  return rolls.reduce((b, r) => score(r) > score(b) ? r : b, rolls[0]);
+}
+
+/* ============================================================
+   STEP-BY-STEP MOVE — exactly |toPos-fromPos| steps
+   ============================================================ */
+async function animateMove(playerIdx, fromPos, toPos) {
+  const p     = players[playerIdx];
+  const steps = Math.abs(toPos - fromPos);
+  const dir   = toPos > fromPos ? 1 : -1;
+  for (let s = 1; s <= steps; s++) {
+    p.pos = fromPos + dir * s;
+    soundMove();
+    drawPieces();
+    await sleep(260);
+  }
+  p.pos = toPos;   // hard guarantee
+  drawPieces();
+  updateUI();
+}
+
+/* ============================================================
+   MAIN TURN LOGIC
+   ============================================================ */
+async function doTurn() {
+  if (gameOver || rolling) return;
+  const p = players[current];
+  rolling = true;
+  stopPulse();
+  document.getElementById('rollBtn').disabled = true;
+  document.getElementById('bonus-badge').style.display = 'none';
+
+  // AI thinking
+  if (p.ai) {
+    document.getElementById('ai-msg').style.display = 'block';
+    await sleep(900 + Math.random()*700);
+    document.getElementById('ai-msg').style.display = 'none';
+  }
+
+  // ── 1. Roll die FIRST ──
+  const die = p.ai ? aiPickRoll(p.pos) : Math.floor(Math.random()*6)+1;
+
+  // ── 2. Animate dice ending on the real value ──
+  const dc = document.getElementById('dice-canvas');
+  dc.classList.add('shake');
+  soundDiceRoll();
+  let fc = 0;
+  await new Promise(resolve => {
+    const fi = setInterval(() => {
+      fc++;
+      if (fc < 10) {
+        drawDice(Math.floor(Math.random()*6)+1);
+      } else {
+        clearInterval(fi);
+        drawDice(die);   // ← always ends on real result
+        resolve();
+      }
+    }, 65);
+  });
+  dc.classList.remove('shake');
+  setStatus(`${p.name} rolled ${die}!`);
+  await sleep(650);
+
+  // ── 3. Snapshot current position BEFORE any move ──
+  const startPos = p.pos;
+  const newPos   = startPos + die;
+
+  if (newPos > 100) {
+    // ── Bounce back rule ──
+    const bounce = 100 - (newPos - 100);
+    addLog(`${p.name} rolled ${die} — bounces back to ${bounce}!`);
+    setStatus(`Bounced back to ${bounce}!`, true);
+    soundBounce();
+    await animateMove(current, startPos, 100);
+    await sleep(280);
+    await animateMove(current, 100, bounce);
+    // p.pos is now bounce (set by animateMove)
+
+  } else {
+    // ── Normal move: exactly `die` steps ──
+    await animateMove(current, startPos, newPos);
+    addLog(`${p.name} advanced to square ${p.pos}`);
+    await sleep(350);
+
+    // ── Check snake or ladder using p.pos (authoritative) ──
+    if (SNAKES[p.pos]) {
+      const dest = SNAKES[p.pos];
+      const land = p.pos;
+      setStatus(`🐍 A serpent strikes! ${land} → ${dest}`, true);
+      soundSnake();
+      await sleep(750);
+      p.pos = dest;
+      drawPieces(); updateUI();
+      addLog(`🐍 ${p.name} bitten by a serpent! ${land} → ${dest}`, 'snake');
+      await sleep(450);
+    } else if (LADDERS[p.pos]) {
+      const dest = LADDERS[p.pos];
+      const land = p.pos;
+      setStatus(`🪜 A ladder! Ascending to glory! ${land} → ${dest}`, true);
+      soundLadder();
+      await sleep(750);
+      p.pos = dest;
+      drawPieces(); updateUI();
+      addLog(`🪜 ${p.name} ascended a ladder! ${land} → ${dest}`, 'ladder');
+      await sleep(450);
+    }
+  }
+
+  drawPieces(); updateUI();
+
+  // ── 4. Win check ──
+  if (p.pos === 100) {
+    gameOver = true;
+    drawPieces();
+    winRecord[p.name] = (winRecord[p.name]||0) + 1;
+    refreshScorePanel();
+    addLog(`🏆 ${p.name} hath won the ancient game!`, 'win');
+    setStatus(`${p.name} is victorious!`, true);
+    soundWin();
+    await sleep(400);
+    launchConfetti();
+    document.getElementById('wemoji').textContent = p.ai ? '🏺' : '🏆';
+    document.getElementById('wtitle').textContent = p.ai
+      ? 'The Oracle Prevails!'
+      : (gameMode===1 ? 'Thou Art Victorious!' : `${p.name} Wins!`);
+    document.getElementById('wsub').textContent = p.ai
+      ? `The oracle's wisdom proved unmatched! (${winRecord[p.name]} win${winRecord[p.name]!==1?'s':''})`
+      : `Congratulations! ${winRecord[p.name]} win${winRecord[p.name]!==1?'s':''} total.`;
+    await sleep(700);
+    document.getElementById('win-overlay').classList.add('show');
+    rolling = false;
+    return;
+  }
+
+  // ── 5. Roll-again on 6 ──
+  if (die === 6 && !gameOver) {
+    soundBonus();
+    document.getElementById('bonus-badge').style.display = 'block';
+    addLog(`${p.name} rolled a 6 — rolls again!`, 'bonus');
+    setStatus(`${p.name} rolled 6 — Roll Again!`, true);
+    rolling = false;
+    // If it's AI's bonus turn, auto-trigger after a short delay
+    if (p.ai) {
+      await sleep(800);
+      doTurn();
+    } else {
+      document.getElementById('rollBtn').disabled = false;
+      startPulse();
+    }
+    return;
+  }
+
+  // ── 6. Next player ──
+  current = (current + 1) % players.length;
+  updateUI();
+  setStatus(`${players[current].name}'s turn`);
+  rolling = false;
+
+  if (players[current].ai && !gameOver) {
+    await sleep(450);
+    doTurn();
+  } else {
+    document.getElementById('rollBtn').disabled = false;
+    startPulse();
+  }
+}
+
+/* ============================================================
+   EVENT LISTENERS
+   ============================================================ */
+document.getElementById('rollBtn').addEventListener('click', doTurn);
+
+window.addEventListener('resize', () => {
+  if (document.getElementById('game').classList.contains('active')) {
+    resize(); drawBoard(); drawPieces();
+  }
+});
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+drawDice(5);
+</script>
+</body>
+</html>
