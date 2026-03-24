@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMART MFD — Asset Allocator</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=IBM+Plex+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --gold: #c8930a;
+  --gold2: #e8a80e;
+  --gold3: #f5c842;
+  --gold-dim: rgba(200,147,10,0.12);
+  --gold-faint: rgba(200,147,10,0.06);
+  --gold-border: rgba(200,147,10,0.28);
+  --dark: #1a0e00;
+  --dark2: #2e1e00;
+  --text: #1a1200;
+  --text2: #6b4e10;
+  --text3: #a07830;
+  --white: #fffdf5;
+  --cream: #fdf8e8;
+  --cream2: #fef5d0;
+  --eq: #7a4e00;
+  --dbt: #c8930a;
+  --hyb: #9a6b1a;
+  --liq: #b88a0a;
+  --red: #9b2a10;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  min-height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 80% 60% at 0% 0%, rgba(232,185,14,0.22) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 50% at 100% 0%, rgba(255,255,255,0.7) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 40% at 50% 100%, rgba(232,168,14,0.1) 0%, transparent 55%),
+    linear-gradient(155deg, #fdf5cc 0%, #fffdf5 40%, #fef8e0 100%);
+  background-attachment: fixed;
+  color: var(--text);
+}
+
+body::before {
+  content:'';
+  position:fixed;inset:0;
+  background-image: radial-gradient(circle, rgba(180,130,20,0.14) 1px, transparent 1px);
+  background-size: 30px 30px;
+  pointer-events:none;z-index:0;
+  mask-image: radial-gradient(ellipse 100% 80% at 50% 0%, black 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 100% 80% at 50% 0%, black 30%, transparent 80%);
+}
+
+body::after {
+  content:'';
+  position:fixed;top:0;left:0;width:100%;height:3px;
+  background: linear-gradient(90deg, transparent, var(--gold), var(--gold3), var(--gold), transparent);
+  z-index:300;
+}
+
+/* ══ LAYOUT ══ */
+.shell {
+  position: relative;
+  z-index: 1;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ══ TOPBAR ══ */
+.topbar {
+  flex-shrink: 0;
+  background: rgba(255,253,235,0.94);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--gold-border);
+  padding: 0 2.5rem;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 100;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-mark {
+  width: 34px; height: 34px; border-radius: 9px;
+  background: linear-gradient(135deg, var(--gold), var(--gold3));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px; font-weight: 700; color: #fff;
+}
+
+.brand-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem; color: var(--text);
+}
+
+.brand-name span { color: var(--gold); }
+
+.topbar-skip {
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  border: none; border-radius: 8px;
+  padding: 7px 18px;
+  color: #fff; font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.78rem; font-weight: 700; cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: all 0.2s;
+  box-shadow: 0 2px 12px rgba(200,147,10,0.3);
+}
+
+.topbar-skip:hover { transform: translateY(-1px); box-shadow: 0 4px 18px rgba(200,147,10,0.4); }
+
+/* ══ PROGRESS BAR ══ */
+.progress-wrap {
+  flex-shrink: 0;
+  background: rgba(255,250,220,0.9);
+  border-bottom: 1px solid var(--gold-border);
+  padding: 8px 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  overflow-x: auto;
+}
+
+.prog-step {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.prog-dot-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px;
+}
+
+.prog-dot {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 2px solid rgba(200,147,10,0.3);
+  background: rgba(255,250,220,0.8);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem; font-weight: 700;
+  color: var(--text3);
+  transition: all 0.3s;
+}
+
+.prog-dot.active {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(200,147,10,0.15);
+}
+
+.prog-dot.done {
+  background: rgba(200,147,10,0.15);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.prog-label {
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: var(--text3);
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.prog-label.active { color: var(--gold); font-weight: 800; }
+.prog-label.done { color: var(--text2); }
+
+.prog-line {
+  height: 2px;
+  width: 40px;
+  background: rgba(200,147,10,0.15);
+  border-radius: 1px;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+
+.prog-line.done { background: var(--gold); }
+
+/* ══ SLIDE CONTAINER ══ */
+.slides-area {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  padding: 1.4rem 2.5rem 1rem;
+  overflow-y: auto;
+  display: none;
+  flex-direction: column;
+  animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.slide.active { display: flex; }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(32px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideBack {
+  from { opacity: 0; transform: translateX(-32px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.slide.back { animation: slideBack 0.4s cubic-bezier(0.4, 0, 0.2, 1) both; }
+
+/* ══ SLIDE LAYOUT ══ */
+.slide-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.slide-header {
+  margin-bottom: 1rem;
+}
+
+.slide-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--gold-dim);
+  border: 1px solid var(--gold-border);
+  border-radius: 100px;
+  padding: 4px 14px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.66rem;
+  color: var(--gold);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 0.8rem;
+}
+
+.slide-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  color: var(--text);
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin-bottom: 0.5rem;
+}
+
+.slide-title em { font-style: italic; color: var(--gold); }
+
+.slide-subtitle {
+  font-size: 0.82rem;
+  color: var(--text2);
+  font-weight: 400;
+  max-width: 700px;
+  line-height: 1.5;
+}
+
+/* ══ PRESENTATION GRID ══ */
+.pres-grid {
+  display: grid;
+  gap: 0.85rem;
+  flex: 1;
+  align-content: start;
+  align-items: stretch;
+}
+
+.pres-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+.pres-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.pres-grid.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+.pres-grid.cols-1 { grid-template-columns: 1fr; }
+
+/* ══ PRES CARD ══ */
+.pcard {
+  background: rgba(255,253,235,0.95);
+  border: 1px solid var(--gold-border);
+  border-radius: 12px;
+  padding: 1.1rem 1.3rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 16px rgba(200,147,10,0.07);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.pcard:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(200,147,10,0.12); }
+
+.pcard::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--gold), var(--gold3));
+}
+
+.pcard.accent-eq::before  { background: linear-gradient(90deg, #7a4e00, #c8930a); }
+.pcard.accent-dbt::before { background: linear-gradient(90deg, #c8930a, #e8c44a); }
+.pcard.accent-hyb::before { background: linear-gradient(90deg, #9a6b1a, #c8930a); }
+.pcard.accent-liq::before { background: linear-gradient(90deg, #d4a017, #f0c842); }
+.pcard.accent-red::before { background: linear-gradient(90deg, #9b2a10, #d04020); }
+.pcard.accent-green::before { background: linear-gradient(90deg, #1a6b30, #2e9a50); }
+
+.pcard-icon {
+  font-size: 1.3rem;
+  margin-bottom: 0.4rem;
+}
+
+.pcard-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.62rem;
+  padding: 2px 9px;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.tag-gold   { color: var(--gold);  background: var(--gold-dim);  border: 1px solid var(--gold-border); }
+.tag-dark   { color: var(--dark);  background: rgba(26,14,0,0.08); border: 1px solid rgba(26,14,0,0.15); }
+.tag-red    { color: var(--red);   background: rgba(155,42,16,0.08); border: 1px solid rgba(155,42,16,0.2); }
+.tag-green  { color: #1a6b30; background: rgba(26,107,48,0.08); border: 1px solid rgba(26,107,48,0.18); }
+.tag-amber  { color: #9a6b1a; background: rgba(154,107,26,0.08); border: 1px solid rgba(154,107,26,0.2); }
+
+.pcard-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.35rem;
+  letter-spacing: -0.01em;
+}
+
+.pcard-sub {
+  font-size: 0.68rem;
+  color: var(--gold);
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 700;
+  margin-bottom: 0.55rem;
+  letter-spacing: 0.04em;
+}
+
+/* ══ BULLET POINTS ══ */
+.bullets {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bullets li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: var(--text2);
+  line-height: 1.3;
+  font-weight: 500;
+}
+
+.bullets li::before {
+  content: '◆';
+  color: var(--gold);
+  font-size: 0.5rem;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.bullets li strong {
+  color: var(--text);
+  font-weight: 700;
+  display: block;
+  margin-bottom: 1px;
+}
+
+/* When strong is followed by text, the text goes below */
+.bullets li .b-desc {
+  color: var(--text2);
+  font-size: 0.72rem;
+  font-weight: 400;
+  display: block;
+  margin-top: 1px;
+}
+
+.bullets.lg li { font-size: 0.8rem; gap: 9px; }
+.bullets.lg li::before { font-size: 0.52rem; margin-top: 3px; }
+
+/* Key stat highlight */
+.kstat {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 2px;
+}
+
+.kstat-label {
+  font-size: 0.65rem;
+  color: var(--text3);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.kstat-row {
+  margin-top: 0.6rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(200,147,10,0.12);
+}
+
+.pcard-examples {
+  margin-top: 0.7rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid rgba(200,147,10,0.15);
+}
+
+.examples-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--text3);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+/* Rule box */
+.rule-box {
+  background: linear-gradient(135deg, rgba(200,147,10,0.1), rgba(232,196,74,0.06));
+  border: 1px solid var(--gold-border);
+  border-radius: 10px;
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 0.8rem;
+}
+
+.rule-formula {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 4px;
+  letter-spacing: 0.02em;
+}
+
+.rule-sub { font-size: 0.76rem; color: var(--text2); font-weight: 500; line-height: 1.5; }
+
+.rule-examples {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.rex {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem;
+  background: rgba(200,147,10,0.1);
+  border: 1px solid var(--gold-border);
+  padding: 3px 10px;
+  border-radius: 4px;
+  color: var(--text2);
+  font-weight: 600;
+}
+
+.rex b { color: var(--gold); font-weight: 800; }
+
+/* ══ WIDE CARD (full row) ══ */
+.pcard.wide {
+  grid-column: 1 / -1;
+}
+
+/* ══ BOTTOM NAV ══ */
+.bottom-nav {
+  flex-shrink: 0;
+  background: rgba(255,250,220,0.95);
+  border-top: 1px solid var(--gold-border);
+  padding: 10px 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-info {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--text3);
+  letter-spacing: 0.05em;
+}
+
+.nav-info b { color: var(--gold); }
+
+.nav-btns { display: flex; gap: 10px; }
+
+.btn-back {
+  padding: 9px 22px;
+  background: transparent;
+  border: 1px solid var(--gold-border);
+  border-radius: 8px;
+  color: var(--text2);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-back:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-faint); }
+
+.btn-next {
+  padding: 9px 26px;
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 14px rgba(200,147,10,0.35);
+  letter-spacing: 0.02em;
+}
+
+.btn-next:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(200,147,10,0.45); }
+.btn-next:active { transform: translateY(0); }
+
+/* ══ CALCULATOR SLIDE ══ */
+.calc-layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 1.5rem;
+  flex: 1;
+  min-height: 0;
+}
+
+.calc-form-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow-y: auto;
+}
+
+.calc-form-card {
+  background: rgba(255,253,235,0.97);
+  border: 2px solid var(--gold-border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 24px rgba(200,147,10,0.1);
+}
+
+.calc-form-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  color: var(--text);
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--gold-border);
+}
+
+.f-sec-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--gold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 0.7rem;
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.f-sec-label:first-child { margin-top: 0; }
+.f-sec-label::after { content: ''; flex: 1; height: 1px; background: var(--gold-border); }
+
+.f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 0.6rem; }
+.f-row.full { grid-template-columns: 1fr; }
+.f-group { display: flex; flex-direction: column; gap: 4px; }
+.f-label { font-size: 0.7rem; color: var(--text2); font-weight: 600; }
+
+.f-input-wrap { position: relative; }
+.f-pfx {
+  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem;
+  color: var(--gold); font-weight: 700; pointer-events: none;
+}
+
+.f-input, .f-select {
+  width: 100%;
+  background: rgba(232,185,14,0.08);
+  border: 1px solid rgba(200,147,10,0.3);
+  border-radius: 7px;
+  padding: 8px 11px;
+  color: #2a1800;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.82rem;
+  font-weight: 600;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  -moz-appearance: textfield;
+}
+
+.f-input.pfx { padding-left: 24px; }
+.f-input::placeholder { color: rgba(180,130,20,0.45); }
+.f-input::-webkit-inner-spin-button, .f-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+.f-input:focus, .f-select:focus {
+  border-color: var(--gold);
+  background: rgba(232,185,14,0.13);
+  box-shadow: 0 0 0 3px rgba(200,147,10,0.1);
+}
+
+.f-select {
+  cursor: pointer; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23c8930a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 10px center;
+  padding-right: 28px;
+}
+
+.f-select option { background: #fef8dc; color: #2a1800; }
+
+.risk-row { display: flex; align-items: center; gap: 8px; }
+.risk-rng {
+  -webkit-appearance: none; flex: 1; height: 4px;
+  background: linear-gradient(90deg, var(--gold) var(--rp,50%), rgba(200,147,10,0.15) var(--rp,50%));
+  border-radius: 2px; outline: none; cursor: pointer;
+}
+.risk-rng::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 15px; height: 15px; border-radius: 50%;
+  background: var(--gold); border: 2px solid #fffdf5;
+  box-shadow: 0 0 0 2px var(--gold); cursor: pointer; transition: transform 0.15s;
+}
+.risk-rng::-webkit-slider-thumb:hover { transform: scale(1.2); }
+.risk-val { font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; color: var(--gold); font-weight: 700; min-width: 68px; text-align: right; }
+
+.submit-btn {
+  width: 100%; margin-top: 1rem; padding: 12px;
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  border: none; border-radius: 9px; color: #fff;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.88rem; font-weight: 800; cursor: pointer;
+  letter-spacing: 0.02em; transition: all 0.2s;
+  box-shadow: 0 3px 16px rgba(200,147,10,0.35);
+}
+.submit-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(200,147,10,0.45); }
+
+.download-btn {
+  display: none;
+  width: 100%; margin-top: 0.6rem; padding: 10px;
+  background: transparent;
+  border: 1.5px solid var(--gold-border);
+  border-radius: 9px; color: var(--gold);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.82rem; font-weight: 700; cursor: pointer;
+  letter-spacing: 0.02em; transition: all 0.2s;
+}
+.download-btn:hover { background: var(--gold-dim); border-color: var(--gold); }
+
+/* ══ RESULTS ══ */
+.results-panel {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.r-idle {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  height: 100%;
+  border: 2px dashed var(--gold-border);
+  border-radius: 16px;
+  text-align: center;
+  padding: 2rem;
+}
+
+.r-idle-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.4; }
+.r-idle-text { font-size: 0.85rem; color: var(--text3); line-height: 1.6; }
+
+.r-card {
+  background: rgba(255,253,235,0.96);
+  border: 1px solid var(--gold-border);
+  border-radius: 14px;
+  padding: 1.2rem 1.4rem;
+  box-shadow: 0 2px 14px rgba(200,147,10,0.07);
+}
+
+.r-card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.8rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(200,147,10,0.15);
+}
+
+.r-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.8rem; }
+
+.r-stat {
+  background: rgba(255,250,220,0.7);
+  border: 1px solid rgba(200,147,10,0.18);
+  border-radius: 10px; padding: 0.8rem 1rem;
+}
+
+.r-stat.pos { border-color: rgba(200,147,10,0.4); background: rgba(200,147,10,0.06); }
+.r-stat.neg { border-color: rgba(155,42,16,0.25); background: rgba(155,42,16,0.04); }
+
+.r-stat-lbl { font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem; color: var(--text3); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 4px; }
+.r-stat-val { font-family: 'IBM Plex Mono', monospace; font-size: 1.15rem; font-weight: 700; color: var(--text); }
+.r-stat-val.g { color: var(--gold); }
+.r-stat-val.r { color: var(--red); }
+.r-stat-sub { font-size: 0.65rem; color: var(--text3); margin-top: 2px; }
+
+.r-alert {
+  border-radius: 10px; padding: 0.8rem 1rem;
+  display: flex; gap: 10px; align-items: flex-start;
+  font-size: 0.78rem; line-height: 1.5; font-weight: 500;
+}
+
+.r-alert-warn { background: rgba(155,42,16,0.06); border: 1px solid rgba(155,42,16,0.2); color: #7a2010; }
+.r-alert-ok   { background: rgba(200,147,10,0.07); border: 1px solid rgba(200,147,10,0.25); color: var(--text2); }
+
+/* donut */
+.donut-row { display: flex; gap: 1.2rem; align-items: flex-start; }
+
+.donut-wrap { flex-shrink: 0; position: relative; width: 140px; height: 140px; }
+.donut-svg { width: 140px; height: 140px; transform: rotate(-90deg); }
+.donut-track { fill: none; stroke: rgba(200,147,10,0.12); stroke-width: 24; }
+.donut-seg { fill: none; stroke-width: 24; stroke-linecap: butt; transition: stroke-dasharray 0.9s cubic-bezier(0.4,0,0.2,1), stroke-dashoffset 0.9s cubic-bezier(0.4,0,0.2,1); }
+
+.donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.dc-lbl { font-size: 0.56rem; color: var(--text3); font-family: 'IBM Plex Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; }
+.dc-val { font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; color: var(--gold); font-weight: 700; }
+
+.alloc-legend { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+
+.al-item { display: flex; flex-direction: column; gap: 3px; }
+.al-hdr { display: flex; align-items: center; justify-content: space-between; }
+.al-name { display: flex; align-items: center; gap: 6px; font-size: 0.73rem; color: var(--text2); font-weight: 600; }
+.al-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.al-right { display: flex; flex-direction: column; align-items: flex-end; }
+.al-pct { font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; font-weight: 700; }
+.al-amt { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; color: var(--text3); }
+.al-track { height: 4px; background: rgba(200,147,10,0.12); border-radius: 2px; overflow: hidden; }
+.al-fill { height: 100%; border-radius: 2px; transition: width 0.9s cubic-bezier(0.4,0,0.2,1); }
+
+.r-rule {
+  background: rgba(200,147,10,0.07); border: 1px solid rgba(200,147,10,0.22);
+  border-radius: 8px; padding: 8px 12px; font-size: 0.75rem;
+  color: var(--text2); line-height: 1.5; font-weight: 600;
+  display: flex; gap: 7px; margin-top: 0.8rem;
+}
+
+.r-rule strong { color: var(--text); }
+
+/* suit bars */
+.suit-rows { display: flex; flex-direction: column; gap: 7px; }
+.s-row { display: flex; align-items: center; gap: 9px; }
+.s-lbl { font-size: 0.7rem; color: var(--text2); font-weight: 600; width: 110px; flex-shrink: 0; }
+.s-track { flex: 1; height: 5px; background: rgba(200,147,10,0.12); border-radius: 3px; overflow: hidden; }
+.s-fill { height: 100%; border-radius: 3px; transition: width 1s cubic-bezier(0.4,0,0.2,1); }
+.s-score { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; color: var(--text3); width: 32px; text-align: right; }
+
+/* rec list */
+.rec-list { display: flex; flex-direction: column; gap: 7px; }
+.rec-item { background: rgba(255,248,215,0.8); border: 1px solid rgba(200,147,10,0.18); border-radius: 9px; padding: 0.7rem 0.9rem; display: flex; gap: 9px; align-items: flex-start; }
+.rec-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.rec-name { font-size: 0.78rem; font-weight: 700; color: var(--text); margin-bottom: 1px; }
+.rec-meta { font-size: 0.68rem; color: var(--text2); font-weight: 500; }
+
+.rtag { font-family: 'IBM Plex Mono', monospace; font-size: 0.58rem; padding: 1px 6px; border-radius: 3px; font-weight: 700; display: inline-block; margin-top: 3px; }
+.rtag-o { background: rgba(200,147,10,0.1); color: var(--gold); border: 1px solid rgba(200,147,10,0.25); }
+.rtag-c { background: rgba(100,60,0,0.08); color: #6b3e00; border: 1px solid rgba(100,60,0,0.18); }
+.rtag-i { background: rgba(160,110,0,0.08); color: #a07020; border: 1px solid rgba(160,110,0,0.18); }
+
+/* market grid */
+.market-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 0.7rem; }
+.amc { background: rgba(255,248,215,0.8); border: 1px solid rgba(200,147,10,0.18); border-radius: 9px; padding: 0.8rem 0.9rem; }
+.amc-tag { font-family: 'IBM Plex Mono', monospace; font-size: 0.58rem; font-weight: 700; padding: 2px 6px; border-radius: 3px; display: inline-block; margin-bottom: 4px; background: rgba(200,147,10,0.1); color: var(--gold); border: 1px solid rgba(200,147,10,0.22); }
+.amc-name { font-size: 0.78rem; font-weight: 800; color: var(--text); margin-bottom: 2px; }
+.amc-stat { font-family: 'IBM Plex Mono', monospace; font-size: 0.66rem; color: var(--gold); font-weight: 700; margin-bottom: 2px; }
+.amc-desc { font-size: 0.66rem; color: var(--text2); line-height: 1.4; font-weight: 500; }
+
+/* disclaimer */
+.disclaimer-bar {
+  font-size: 0.65rem; color: var(--text3); text-align: center; margin-top: auto;
+  padding-top: 0.5rem; border-top: 1px solid rgba(200,147,10,0.12); line-height: 1.5;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .pres-grid.cols-3, .pres-grid.cols-4 { grid-template-columns: 1fr 1fr; }
+  .calc-layout { grid-template-columns: 1fr; }
+  .results-panel { min-height: 400px; }
+}
+
+@media (max-width: 600px) {
+  .pres-grid.cols-2, .pres-grid.cols-3, .pres-grid.cols-4 { grid-template-columns: 1fr; }
+  .progress-wrap { padding: 10px 1rem; }
+  .topbar, .bottom-nav { padding: 0 1rem; }
+  .slide { padding: 1.2rem 1rem; }
+  .prog-line { width: 20px; }
+  .r-stats { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- TOPBAR -->
+  <nav class="topbar">
+    <div class="brand">
+      <div class="brand-mark">M</div>
+      <div class="brand-name">SMART <span>MFD</span></div>
+    </div>
+    <button class="topbar-skip" onclick="goTo(6)">⚡ Skip to Calculator</button>
+  </nav>
+
+  <!-- PROGRESS -->
+  <div class="progress-wrap" id="progressWrap">
+    <!-- generated by JS -->
+  </div>
+
+  <!-- SLIDES -->
+  <div class="slides-area">
+
+    <!-- ══ SLIDE 1: WELCOME ══ -->
+    <div class="slide active" id="slide-1">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <div class="slide-eyebrow">⬡ MFD Learning Toolkit · 6 Steps</div>
+          <h1 class="slide-title">Welcome to <em>SMART MFD</em></h1>
+          <p class="slide-subtitle">A step-by-step guide to Mutual Fund basics — each slide covers one concept, ending with your personalised allocation calculator.</p>
+        </div>
+        <div class="pres-grid cols-3" style="align-items:stretch">
+          <div class="pcard" style="display:flex;flex-direction:column">
+            <div class="pcard-icon">📋</div>
+            <div class="pcard-title">What You'll Learn</div>
+            <div class="pcard-sub">5 topics · ~4 minutes</div>
+            <ul class="bullets" style="flex:1">
+              <li><div><strong>Fund Structures</strong><span class="b-desc">Open, Close &amp; Interval funds explained</span></div></li>
+              <li><div><strong>Asset Classes</strong><span class="b-desc">Equity, Debt, Hybrid &amp; Liquid with risk profiles</span></div></li>
+              <li><div><strong>Diversification</strong><span class="b-desc">The 100−Age allocation rule and how it works</span></div></li>
+              <li><div><strong>Emergency Fund</strong><span class="b-desc">Your safety net before you start investing</span></div></li>
+              
+              <li><div><strong>Calculator</strong><span class="b-desc">Your personalised asset allocation plan</span></div></li>
+            </ul>
+          </div>
+          <div class="pcard accent-dbt" style="display:flex;flex-direction:column">
+            <div class="pcard-icon">👤</div>
+            <div class="pcard-title">Who Is This For?</div>
+            <div class="pcard-sub">Any level of experience</div>
+            <ul class="bullets" style="flex:1">
+              <li><div><strong>First-time investors</strong><span class="b-desc">Learning the basics of mutual funds</span></div></li>
+              <li><div><strong>MFD students</strong><span class="b-desc">Studying mutual fund distribution concepts</span></div></li>
+              <li><div><strong>Existing investors</strong><span class="b-desc">Reviewing or rebalancing their allocation</span></div></li>
+              <li><div><strong>Anyone</strong><span class="b-desc">Who wants a data-backed investment plan</span></div></li>
+            </ul>
+          </div>
+          <div class="pcard accent-eq" style="display:flex;flex-direction:column">
+            <div class="pcard-icon">⚡</div>
+            <div class="pcard-title">How to Navigate</div>
+            <div class="pcard-sub">Multiple ways to explore</div>
+            <ul class="bullets" style="flex:1">
+              <li><div><strong>Next →</strong><span class="b-desc">Moves you forward one slide at a time</span></div></li>
+              <li><div><strong>← Back</strong><span class="b-desc">Returns to the previous slide</span></div></li>
+              <li><div><strong>Progress bar</strong><span class="b-desc">Click any step dot to jump directly to it</span></div></li>
+              <li><div><strong>Skip to Calculator</strong><span class="b-desc">Top bar button — jumps straight to Step 7</span></div></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SLIDE 2: FUND STRUCTURES ══ -->
+    <div class="slide" id="slide-2">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <div class="slide-eyebrow">Step 1 of 5 · Fund Structures</div>
+          <h1 class="slide-title">The 3 <em>Fund Structures</em></h1>
+          <p class="slide-subtitle">Every mutual fund in India belongs to one of three legal structures that define how you can buy and sell.</p>
+        </div>
+        <div class="pres-grid cols-3">
+          <div class="pcard accent-dbt">
+            <div class="pcard-tag tag-gold">◉ Open-Ended</div>
+            <div class="pcard-title">Open-Ended Fund</div>
+            <div class="pcard-sub">Buy or sell any business day</div>
+            <ul class="bullets">
+              <li>Units available <strong>continuously</strong> at NAV</li>
+              <li><strong>No fixed maturity</strong> date — runs forever</li>
+              <li>Fund size grows/shrinks with investors</li>
+              <li><strong>Most liquid</strong> — redeem anytime</li>
+              <li>Ideal for <strong>SIP investments</strong></li>
+            </ul>
+            <div class="pcard-examples">
+              <div class="examples-label">EXAMPLES</div>
+              <ul class="bullets"><li>Equity Funds, Debt Funds, ELSS, Index Funds, Liquid Funds</li></ul>
+            </div>
+          </div>
+          <div class="pcard accent-red">
+            <div class="pcard-tag tag-red">◼ Close-Ended</div>
+            <div class="pcard-title">Close-Ended Fund</div>
+            <div class="pcard-sub">Fixed maturity · Lock-in period</div>
+            <ul class="bullets">
+              <li>Units issued <strong>only during NFO</strong> period</li>
+              <li>Cannot redeem directly — <strong>fixed maturity</strong></li>
+              <li>May trade on <strong>stock exchange</strong> (limited liquidity)</li>
+              <li>No fresh purchases after NFO closes</li>
+              <li>Better for <strong>disciplined long-term</strong> investors</li>
+            </ul>
+            <div class="pcard-examples">
+              <div class="examples-label">EXAMPLES</div>
+              <ul class="bullets"><li>Fixed Maturity Plans (FMPs), Capital Protection Funds</li></ul>
+            </div>
+          </div>
+          <div class="pcard accent-hyb">
+            <div class="pcard-tag tag-amber">◈ Interval</div>
+            <div class="pcard-title">Interval Fund</div>
+            <div class="pcard-sub">Specific transaction windows only</div>
+            <ul class="bullets">
+              <li>Hybrid of <strong>Open + Close</strong> ended features</li>
+              <li>Buy/sell only during <strong>pre-defined windows</strong></li>
+              <li>Windows may open <strong>monthly or quarterly</strong></li>
+              <li>Closed to transactions between windows</li>
+              <li>Suits investors who can <strong>plan liquidity</strong> needs</li>
+            </ul>
+            <div class="pcard-examples">
+              <div class="examples-label">EXAMPLES</div>
+              <ul class="bullets"><li>Interval Income Plans, Interval Debt Plans</li></ul>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SLIDE 3: ASSET CLASSES ══ -->
+    <div class="slide" id="slide-3">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <div class="slide-eyebrow">Step 2 of 5 · Asset Classes</div>
+          <h1 class="slide-title">The 4 <em>Asset Classes</em></h1>
+          <p class="slide-subtitle">Mutual funds invest in one of four asset classes. Each has a distinct risk level, ideal horizon, and investment purpose.</p>
+        </div>
+        <div class="pres-grid cols-4">
+          <div class="pcard accent-eq">
+            <div class="pcard-tag tag-red">High Risk</div>
+            <div class="pcard-title">Equity</div>
+            <div class="pcard-sub">Wealth Creation</div>
+            <ul class="bullets">
+              <li><div><strong>Company Shares</strong><span class="b-desc">Invests in stocks listed on stock exchanges</span></div></li>
+              <li><div><strong>Highest Returns</strong><span class="b-desc">Best long-term growth potential of all classes</span></div></li>
+              <li><div><strong>Short-term Volatile</strong><span class="b-desc">Prices fluctuate significantly day to day</span></div></li>
+              <li><div><strong>Beats Inflation</strong><span class="b-desc">Historically outperforms inflation over 5+ years</span></div></li>
+            </ul>
+            <div class="kstat-row"><div class="kstat">5+ Yrs</div><div class="kstat-label">Ideal Horizon</div></div>
+          </div>
+          <div class="pcard accent-dbt">
+            <div class="pcard-tag tag-green">Low Risk</div>
+            <div class="pcard-title">Debt</div>
+            <div class="pcard-sub">Capital Preservation</div>
+            <ul class="bullets">
+              <li><div><strong>Bonds &amp; Fixed Income</strong><span class="b-desc">Government bonds and corporate debentures</span></div></li>
+              <li><div><strong>Stable Returns</strong><span class="b-desc">Predictable income with low volatility</span></div></li>
+              <li><div><strong>Capital Safety</strong><span class="b-desc">Lower risk of losing principal amount</span></div></li>
+              <li><div><strong>Medium-term Goals</strong><span class="b-desc">Suitable for 1–3 year investment objectives</span></div></li>
+            </ul>
+            <div class="kstat-row"><div class="kstat">1–3 Yrs</div><div class="kstat-label">Ideal Horizon</div></div>
+          </div>
+          <div class="pcard accent-hyb">
+            <div class="pcard-tag tag-amber">Med Risk</div>
+            <div class="pcard-title">Hybrid</div>
+            <div class="pcard-sub">Balanced Growth</div>
+            <ul class="bullets">
+              <li><div><strong>Equity + Debt Mix</strong><span class="b-desc">Combines both asset classes in one fund</span></div></li>
+              <li><div><strong>Dynamic Allocation</strong><span class="b-desc">Balanced Advantage Funds (BAF) adjust automatically</span></div></li>
+              <li><div><strong>Volatility Buffer</strong><span class="b-desc">Debt portion softens equity swings</span></div></li>
+              <li><div><strong>Multiple Sub-types</strong><span class="b-desc">Conservative, balanced, or aggressive variants</span></div></li>
+            </ul>
+            <div class="kstat-row"><div class="kstat">3–5 Yrs</div><div class="kstat-label">Ideal Horizon</div></div>
+          </div>
+          <div class="pcard accent-liq">
+            <div class="pcard-tag tag-gold">Very Low</div>
+            <div class="pcard-title">Liquid</div>
+            <div class="pcard-sub">Emergency / Parking</div>
+            <ul class="bullets">
+              <li><div><strong>Ultra Short Instruments</strong><span class="b-desc">Treasury bills and commercial papers &lt;91 days</span></div></li>
+              <li><div><strong>Capital Safe</strong><span class="b-desc">Near-zero risk of loss on your principal</span></div></li>
+              <li><div><strong>Instant Access</strong><span class="b-desc">T+1 redemption — money back next business day</span></div></li>
+              <li><div><strong>Beats Savings Account</strong><span class="b-desc">~6–7% p.a. vs ~3.5% in a bank account</span></div></li>
+            </ul>
+            <div class="kstat-row"><div class="kstat">&lt;91 Days</div><div class="kstat-label">Ideal Horizon</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SLIDE 4: DIVERSIFICATION ══ -->
+    <div class="slide" id="slide-4">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <div class="slide-eyebrow">Step 3 of 5 · Diversification</div>
+          <h1 class="slide-title">The <em>Diversification</em> Engine</h1>
+          <p class="slide-subtitle">Don't put all your eggs in one basket. Spreading your money across asset classes reduces risk without giving up returns.</p>
+        </div>
+        <div class="pres-grid cols-3">
+          <div class="pcard accent-dbt">
+            <div class="pcard-title">The 100 − Age Rule</div>
+            <div class="rule-box">
+              <div class="rule-formula">Equity % = 100 − Your Age</div>
+              <div class="rule-sub">As you age, your capacity to absorb market volatility decreases. Equity exposure reduces proportionally; stable debt increases.</div>
+              <div class="rule-examples">
+                <span class="rex">Age 25 → <b>75% Equity</b></span>
+                <span class="rex">Age 40 → <b>60% Equity</b></span>
+                <span class="rex">Age 60 → <b>40% Equity</b></span>
+              </div>
+            </div>
+            <ul class="bullets">
+              <li><div><strong>Horizon Override</strong><span class="b-desc">If horizon &lt;3 years, equity drops to 0% regardless of age</span></div></li>
+              <li><div><strong>Risk Adjustment</strong><span class="b-desc">Risk score (1–5) shifts the equity/debt mix further</span></div></li>
+              <li><div><strong>Goal Alignment</strong><span class="b-desc">Your goal — Preserve, Balanced, Wealth, or Diversify — refines the final split</span></div></li>
+            </ul>
+          </div>
+          <div class="pcard">
+            <div class="pcard-icon">🛡</div>
+            <div class="pcard-title">Why Diversify Across Classes?</div>
+            <ul class="bullets">
+              <li><div><strong>Reduces Concentration Risk</strong><span class="b-desc">No single market event can wipe your entire portfolio</span></div></li>
+              <li><div><strong>Smooths Volatility</strong><span class="b-desc">Debt and liquid components buffer equity market swings</span></div></li>
+              <li><div><strong>All-weather Performance</strong><span class="b-desc">Different classes lead in different economic cycles</span></div></li>
+              <li><div><strong>Liquidity Always Available</strong><span class="b-desc">Your liquid fund portion is accessible anytime</span></div></li>
+            </ul>
+          </div>
+          <div class="pcard accent-eq">
+            <div class="pcard-icon">⚖</div>
+            <div class="pcard-title">Invest in Diversification Goal</div>
+            <ul class="bullets">
+              <li><div><strong>Select the Goal</strong><span class="b-desc">Choose "Invest in Diversification" in the calculator</span></div></li>
+              <li><div><strong>All 4 Classes Funded</strong><span class="b-desc">Engine spreads surplus across Equity, Debt, Hybrid &amp; Liquid</span></div></li>
+              <li><div><strong>Proportionate Allocation</strong><span class="b-desc">Each class gets a meaningful share — no class is zero</span></div></li>
+              <li><div><strong>₹ Amounts Shown</strong><span class="b-desc">Exact monthly rupee amounts with fund type recommendations</span></div></li>
+              <li><div><strong>Risk-adjusted Formula</strong><span class="b-desc">Based on 100−Age, then tuned to your risk level (1–5)</span></div></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SLIDE 5: EMERGENCY FUND ══ -->
+    <div class="slide" id="slide-5">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <div class="slide-eyebrow">Step 4 of 5 · Emergency Fund</div>
+          <h1 class="slide-title">Your <em>Emergency Fund</em> First</h1>
+          <p class="slide-subtitle">Before investing a single rupee in the market, you must have this safety net in place.</p>
+        </div>
+        <div class="pres-grid cols-3">
+          <div class="pcard accent-red">
+            <div class="pcard-icon">⚠</div>
+            <div class="pcard-title">The Golden Rule</div>
+            <div class="pcard-sub">Build this before investing</div>
+            <ul class="bullets">
+              <li><div><strong>3 to 6 Months of Expenses</strong><span class="b-desc">Set aside this amount in a safe, instantly accessible account</span></div></li>
+              <li><div><strong>Before Any Market Investment</strong><span class="b-desc">This fund must exist before you invest a single rupee</span></div></li>
+              <li><div><strong>Prevents Forced Selling</strong><span class="b-desc">Stops you selling investments at a loss during a crisis</span></div></li>
+            </ul>
+            <div class="kstat-row" style="margin-top:0.7rem">
+              <div class="kstat">3–6×</div>
+              <div class="kstat-label">Monthly expenses target</div>
+            </div>
+          </div>
+          <div class="pcard">
+            <div class="pcard-icon">📌</div>
+            <div class="pcard-title">What It Covers — and Doesn't</div>
+            <ul class="bullets">
+              <li><div><strong>✅ Job Loss or Salary Delay</strong><span class="b-desc">Covers essential expenses while you recover income</span></div></li>
+              <li><div><strong>✅ Medical Emergencies</strong><span class="b-desc">Hospital bills and urgent healthcare costs</span></div></li>
+              <li><div><strong>✅ Urgent Repairs</strong><span class="b-desc">Home, vehicle, or critical equipment failures</span></div></li>
+              <li><div><strong>❌ Not for Holidays or Shopping</strong><span class="b-desc">This is not a discretionary spending fund</span></div></li>
+              <li><div><strong>❌ Not for Investing</strong><span class="b-desc">Never deploy this fund into stocks or mutual funds</span></div></li>
+              <li><div><strong>❌ Not in Lock-in Products</strong><span class="b-desc">Must stay liquid — no FDs with penalties, no ELSS</span></div></li>
+            </ul>
+          </div>
+          <div class="pcard accent-dbt">
+            <div class="pcard-icon">💧</div>
+            <div class="pcard-title">Where to Park It</div>
+            <ul class="bullets">
+              <li><div><strong>Liquid Mutual Funds</strong><span class="b-desc">Best option — ~6–7% p.a., T+1 redemption, no lock-in</span></div></li>
+              <li><div><strong>Overnight Funds</strong><span class="b-desc">1-day maturity instruments, near-zero risk, same-day access</span></div></li>
+              <li><div><strong>High-Interest Savings / Sweep FD</strong><span class="b-desc">DICGC insured up to ₹5L — easy access, lower returns</span></div></li>
+            </ul>
+            <div style="margin-top:0.7rem;background:rgba(200,147,10,0.08);border-radius:7px;padding:7px 10px">
+              <span style="font-size:0.68rem;font-weight:700;color:var(--gold)">◈ In the Calculator</span>
+              <div style="font-size:0.68rem;color:var(--text2);margin-top:2px;line-height:1.45">Enter emergency fund months. If &lt;3 months, the engine auto-adds a Liquid Fund allocation to your plan.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SLIDE 6: CALCULATOR ══ -->
+    <div class="slide" id="slide-6">
+      <div class="slide-inner" style="max-width:100%">
+        <div class="slide-header" style="margin-bottom:1rem">
+          <div class="slide-eyebrow">⚡ Final Step · Calculator</div>
+          <h1 class="slide-title" style="font-size:1.8rem">Your <em>Allocation Calculator</em></h1>
+        </div>
+        <div class="calc-layout">
+
+          <!-- FORM -->
+          <div class="calc-form-panel">
+            <div class="calc-form-card">
+              <div class="calc-form-title">📋 Your Investor Profile</div>
+
+              <div class="f-sec-label">Financial Health</div>
+              <div class="f-row">
+                <div class="f-group">
+                  <div class="f-label">Monthly Income (₹)</div>
+                  <div class="f-input-wrap"><span class="f-pfx">₹</span><input class="f-input pfx" type="number" id="income" placeholder="80000" min="0"></div>
+                </div>
+                <div class="f-group">
+                  <div class="f-label">Monthly Expenses (₹)</div>
+                  <div class="f-input-wrap"><span class="f-pfx">₹</span><input class="f-input pfx" type="number" id="expenses" placeholder="50000" min="0"></div>
+                </div>
+              </div>
+              <div class="f-row">
+                <div class="f-group">
+                  <div class="f-label">I want to invest each month (₹)</div>
+                  <div style="font-size:0.62rem;color:var(--text3);margin-bottom:3px">Leave blank to use your calculated surplus</div>
+                  <div class="f-input-wrap"><span class="f-pfx">₹</span><input class="f-input pfx" type="number" id="monthly-invest" placeholder="e.g. 10000" min="0"></div>
+                </div>
+                <div class="f-group">
+                  <div class="f-label">Age (years)</div>
+                  <input class="f-input" type="number" id="age" placeholder="35" min="18" max="80">
+                </div>
+              </div>
+              <div class="f-row full">
+                <div class="f-group">
+                  <div class="f-label">Emergency Fund (months saved)</div>
+                  <input class="f-input" type="number" id="emergency" placeholder="3" min="0" max="36">
+                </div>
+              </div>
+
+              <div class="f-sec-label">Investment Profile</div>
+              <div class="f-row">
+                <div class="f-group">
+                  <div class="f-label">Investment Horizon</div>
+                  <select class="f-select" id="horizon">
+                    <option value="">Select horizon</option>
+                    <option value="0">&lt; 91 Days</option>
+                    <option value="1">1–3 Years</option>
+                    <option value="3">3–5 Years</option>
+                    <option value="5">5+ Years</option>
+                  </select>
+                </div>
+                <div class="f-group">
+                  <div class="f-label">Primary Goal</div>
+                  <select class="f-select" id="goal">
+                    <option value="">Select goal</option>
+                    <option value="emergency">Emergency / Liquidity</option>
+                    <option value="preserve">Capital Preservation</option>
+                    <option value="balanced">Balanced Growth</option>
+                    <option value="wealth">Wealth Creation</option>
+                    <option value="diversify">Invest in Diversification</option>
+                  </select>
+                </div>
+              </div>
+              <div class="f-row full">
+                <div class="f-group">
+                  <div class="f-label">Fund Structure Preference</div>
+                  <select class="f-select" id="structure">
+                    <option value="open">Open-Ended (Flexible, anytime)</option>
+                    <option value="close">Close-Ended (Fixed maturity)</option>
+                    <option value="interval">Interval (Transaction windows)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="f-sec-label">Risk Tolerance</div>
+              <div class="risk-row">
+                <span style="font-size:0.65rem;color:var(--text3);font-family:'IBM Plex Mono',monospace">Low</span>
+                <input type="range" class="risk-rng" id="risk" min="1" max="5" value="3" oninput="syncRisk(this)">
+                <span style="font-size:0.65rem;color:var(--text3);font-family:'IBM Plex Mono',monospace">High</span>
+                <div class="risk-val" id="riskVal">Medium</div>
+              </div>
+
+              <button class="submit-btn" onclick="calculate()">Generate My Allocation Plan ↓</button>
+              <button class="download-btn" id="downloadBtn" onclick="downloadResults()">⬇ Download Result as PDF</button>
+            </div>
+          </div>
+
+          <!-- RESULTS -->
+          <div class="results-panel" id="resultsPanel">
+            <div class="r-idle" id="rIdle">
+              <div class="r-idle-icon">◈</div>
+              <div class="r-idle-text">Fill in your investor profile on the left and press <strong style="color:var(--gold)">Generate My Allocation Plan</strong> to see your personalised MF allocation report here.</div>
+            </div>
+          </div>
+
+        </div>
+        <div class="disclaimer-bar">⚠ Educational tool. Not financial advice. All MF investments subject to market risks. Consult a SEBI-registered adviser before investing.</div>
+      </div>
+    </div>
+
+  </div><!-- /slides-area -->
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <div class="nav-info">Step <b id="currentStepLabel">1</b> of <b>6</b> &nbsp;·&nbsp; SMART MFD Asset Allocator</div>
+    <div class="nav-btns">
+      <button class="btn-back" id="btnBack" onclick="prevSlide()" style="display:none">← Back</button>
+      <button class="btn-next" id="btnNext" onclick="nextSlide()">Next →</button>
+    </div>
+  </div>
+
+</div><!-- /shell -->
+
+<script>
+const STEPS = [
+  { id:1, label:'Welcome' },
+  { id:2, label:'Structures' },
+  { id:3, label:'Asset Classes' },
+  { id:4, label:'Diversification' },
+  { id:5, label:'Emrg. Fund' },
+  { id:6, label:'Calculator' }
+];
+
+let current = 1;
+let direction = 'forward';
+
+function buildProgress() {
+  const wrap = document.getElementById('progressWrap');
+  wrap.innerHTML = '';
+  STEPS.forEach((s, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'prog-step';
+    dot.onclick = () => goTo(s.id);
+    const dc = s.id < current ? 'done' : s.id === current ? 'active' : '';
+    const lc = s.id < current ? 'done' : s.id === current ? 'active' : '';
+    dot.innerHTML = `
+      <div class="prog-dot-wrap">
+        <div class="prog-dot ${dc}">${s.id < current ? '✓' : s.id}</div>
+        <div class="prog-label ${lc}">${s.label}</div>
+      </div>
+    `;
+    wrap.appendChild(dot);
+    if (i < STEPS.length - 1) {
+      const line = document.createElement('div');
+      line.className = 'prog-line' + (s.id < current ? ' done' : '');
+      wrap.appendChild(line);
+    }
+  });
+}
+
+function goTo(n, dir) {
+  direction = dir || (n > current ? 'forward' : 'back');
+  document.getElementById(`slide-${current}`).classList.remove('active','back');
+  current = n;
+  const slide = document.getElementById(`slide-${current}`);
+  slide.classList.add('active');
+  if (direction === 'back') slide.classList.add('back');
+  else slide.classList.remove('back');
+  updateNav();
+  buildProgress();
+}
+
+function nextSlide() { if (current < 7) goTo(current + 1, 'forward'); }
+function prevSlide() { if (current > 1) goTo(current - 1, 'back'); }
+
+function updateNav() {
+  document.getElementById('currentStepLabel').textContent = current;
+  document.getElementById('btnBack').style.display = current > 1 ? '' : 'none';
+  const btnNext = document.getElementById('btnNext');
+  if (current === 6) {
+    btnNext.style.display = 'none';
+  } else if (current === 5) {
+    btnNext.textContent = '⚡ Go to Calculator →';
+    btnNext.style.display = '';
+  } else {
+    btnNext.textContent = 'Next →';
+    btnNext.style.display = '';
+  }
+}
+
+buildProgress();
+updateNav();
+
+// ── CALCULATOR ──
+const RISK_NAMES = ['','Very Low','Low','Medium','High','Very High'];
+const CIRC = 2 * Math.PI * 60; // r=60 → ~377
+
+function syncRisk(el) {
+  el.style.setProperty('--rp', ((parseInt(el.value)-1)/4*100)+'%');
+  document.getElementById('riskVal').textContent = RISK_NAMES[parseInt(el.value)];
+}
+
+// Initialise slider fill on page load
+window.addEventListener('DOMContentLoaded', () => {
+  const riskEl = document.getElementById('risk');
+  if (riskEl) syncRisk(riskEl);
+});
+
+function fmt(n) {
+  const a=Math.abs(n), s=n<0?'-':'';
+  if(a>=1e7) return s+'₹'+(a/1e7).toFixed(2)+' Cr';
+  if(a>=1e5) return s+'₹'+(a/1e5).toFixed(1)+'L';
+  if(a>=1e3) return s+'₹'+(a/1e3).toFixed(1)+'K';
+  return s+'₹'+a.toFixed(0);
+}
+
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+
+function normalise(e,d,h,l){
+  e=Math.max(0,e);d=Math.max(0,d);h=Math.max(0,h);l=Math.max(0,l);
+  const sum=e+d+h+l; if(sum===0)return[0,100,0,0];
+  const f=100/sum;
+  let re=Math.round(e*f),rd=Math.round(d*f),rh=Math.round(h*f),rl=Math.round(l*f);
+  rd+=100-re-rd-rh-rl; return[re,Math.max(0,rd),rh,rl];
+}
+
+function setDonut(ep,dp,hp,lp){
+  const segs=[['ds-eq',ep,'#7a4e00'],['ds-dbt',dp,'#c8930a'],['ds-hyb',hp,'#9a6b1a'],['ds-liq',lp,'#d4a017']];
+  let off=0;
+  segs.forEach(([id,pct])=>{
+    const len=(pct/100)*CIRC;
+    const el=document.getElementById(id);
+    if(el){el.style.strokeDasharray=`${len} ${CIRC-len}`;el.style.strokeDashoffset=-off;}
+    off+=len;
+  });
+}
+
+function calculate(){
+  const income=parseFloat(document.getElementById('income').value)||0;
+  const expenses=parseFloat(document.getElementById('expenses').value)||0;
+  const age=parseFloat(document.getElementById('age').value)||30;
+  const emg=parseFloat(document.getElementById('emergency').value)||0;
+  const mi=parseFloat(document.getElementById('monthly-invest').value)||0;
+  const horizon=document.getElementById('horizon').value;
+  const goal=document.getElementById('goal').value;
+  const risk=parseInt(document.getElementById('risk').value)||3;
+  const structure=document.getElementById('structure').value||'open';
+
+  const surplus=income-expenses;
+  const investable=mi>0?mi:Math.max(0,surplus);
+
+  // ── Engine ──
+  const baseEq=clamp(100-age,0,100);
+  let e=baseEq,d=100-baseEq,h=0,l=0,rule='';
+  const hNum=parseInt(horizon);
+
+  if(hNum===0||goal==='emergency'){
+    e=0;d=0;h=0;l=100;
+    rule=`Your investment window is under 91 days, so the full amount goes into a <strong>Liquid Fund</strong> — the safest place to park money short-term, with instant access whenever you need it.`;
+  } else if(hNum===1){
+    e=0;h=0;d=risk<=2?75:85;l=100-d;
+    rule=`A 1–3 year horizon is too short for equity — markets may not recover in time if they fall. So <strong>equity is 0%</strong>, and your money is split between Debt (${d}%) for steady returns and Liquid (${l}%) for easy access.`;
+  } else if(goal==='preserve'){
+    e=0;h=0;d=85;l=15;
+    rule=`Your goal is to protect what you have, not grow aggressively. So <strong>85% goes into Debt</strong> for stable, predictable returns and 15% stays liquid for quick access. Equity is excluded entirely.`;
+  } else if(goal==='diversify'){
+    const ageBase=clamp(100-age,0,100);
+    l=10;h=risk<=2?15:risk>=4?10:20;
+    e=clamp(Math.round(ageBase*(risk/5)*0.85),10,65);
+    d=100-e-h-l;
+    rule=`You chose to spread across all 4 asset classes. Your base equity is <strong>${ageBase}%</strong> (100 minus your age of ${age}), then adjusted for your risk level of ${risk} out of 5 and distributed proportionally across Equity, Debt, Hybrid, and Liquid.`;
+  } else if(hNum===5||(goal==='wealth'&&hNum!==3)){
+    e=baseEq;h=10;l=5;d=100-e-h-l;
+    rule=`You are ${age} years old with a 5+ year horizon — ideal conditions for equity. The 100−Age formula sets <strong>${e}% in equity</strong> (100 minus ${age}). ${age>55 ? 'A slight conservative tilt is applied since you are over 55, to protect capital as you approach retirement.' : 'With your long runway, you can ride out market ups and downs — equity is set to its full recommended level.'}`;
+  } else if(hNum===3||(goal==='balanced'&&hNum!==5)){
+    e=clamp(baseEq-15,10,40);h=25;l=10;d=100-e-h-l;
+    rule=`You are ${age} years old, which normally suggests <strong>${baseEq}% in equity</strong> (100 minus ${age}). But a 3–5 year horizon means markets may not have enough time to recover from a downturn, so equity is reduced to <strong>${e}%</strong>. A ${h}% Hybrid allocation is added to give you some growth potential while keeping volatility in check.`;
+  } else {
+    rule=`Based on your age of ${age}, the 100−Age formula recommends <strong>${e}% in equity</strong> and ${d}% in Debt. For a more personalised plan, select your <strong>investment horizon</strong> above — it helps the engine fine-tune the split for your actual timeframe.`;
+  }
+
+  if(goal!=='diversify'){
+    if(risk===1){e=clamp(e-20,0,100);d+=12;l=clamp(l+8,0,30);}
+    if(risk===2){e=clamp(e-10,0,100);d+=5;h=clamp(h+5,0,30);}
+    if(risk===4){e=clamp(e+10,0,90);d-=5;h=clamp(h-3,0,30);}
+    if(risk===5){e=clamp(e+20,0,90);d-=12;l=clamp(l-5,0,30);}
+  }
+
+  let [ep,dp,hp,lp]=normalise(e,d,h,l);
+  const eA=investable*ep/100,dA=investable*dp/100,hA=investable*hp/100,lA=investable*lp/100;
+
+  // Suitability
+  const hScore=isNaN(hNum)?2:hNum===5?5:hNum===3?3:hNum===1?1:0;
+  const eS=clamp(Math.round((risk*10+hScore*8)*0.82),5,100);
+  const dS=clamp(Math.round(((6-risk)*12+(5-clamp(hScore,0,5))*5)*0.78),5,100);
+  const hS=clamp(Math.round((6-Math.abs(risk-3))*14+hScore*4),5,100);
+  const lS=hNum===0?100:clamp(Math.round((6-risk)*10+(3-clamp(hScore,0,3))*8),5,85);
+
+  // Recs
+  const tags={open:`<span class="rtag rtag-o">◉ Open</span>`,close:`<span class="rtag rtag-c">◼ Close</span>`,interval:`<span class="rtag rtag-i">◈ Interval</span>`};
+  const T=tags[structure]||tags.open;const TO=tags.open;
+  const recs=[];
+  if(ep>0){const fn=hNum>=5&&risk>=3?'Large Cap / Flexi Cap Fund':risk>=4?'Small & Mid Cap Fund':'ELSS / Multi Cap Fund';recs.push({c:'#7a4e00',n:fn,m:`High Risk · Equity · Growth · ${fmt(eA)}/mo`,t:T});}
+  if(dp>15){const fn=hNum<=1||isNaN(hNum)?'Short Duration / Ultra-Short Fund':'Corporate Bond / Banking & PSU Fund';recs.push({c:'#c8930a',n:fn,m:`Low Risk · Debt · Income · ${fmt(dA)}/mo`,t:T});}
+  if(hp>0)recs.push({c:'#9a6b1a',n:'Balanced Advantage Fund (BAF)',m:`Med Risk · Hybrid · Dynamic · ${fmt(hA)}/mo`,t:T});
+  if(lp>0)recs.push({c:'#d4a017',n:'Liquid / Overnight Fund',m:`Very Low Risk · <91 Days · ${fmt(lA)}/mo`,t:TO});
+  if(!recs.length)recs.push({c:'#d4a017',n:'Liquid Fund',m:'Capital safety first · Instant redemption',t:TO});
+
+  // ── Render ──
+  const alertHTML = surplus<0
+    ? `<div class="r-alert r-alert-warn">⚠ <div><strong>Deficit detected.</strong> Expenses exceed income by ${fmt(Math.abs(surplus))}/mo. Fix this before investing. Use Liquid Funds for any existing savings.</div></div>`
+    : `<div class="r-alert r-alert-ok">✓ <div>${mi>0?`You chose to invest <strong>${fmt(mi)}/mo</strong>.`:`Your calculated surplus is <strong>${fmt(surplus)}/mo</strong>.`} ${emg<3?`Build a 3-month emergency corpus (~${fmt(expenses*3)}) in a Liquid Fund first.`:`Emergency fund adequate (${emg} months).`}</div></div>`;
+
+  const panel=document.getElementById('resultsPanel');
+  panel.innerHTML = `
+    ${alertHTML}
+
+    <div class="r-card">
+      <div class="r-card-title">💰 Monthly Summary</div>
+      <div class="r-stats">
+        <div class="r-stat"><div class="r-stat-lbl">Income</div><div class="r-stat-val">${fmt(income)}</div></div>
+        <div class="r-stat"><div class="r-stat-lbl">Expenses</div><div class="r-stat-val">${fmt(expenses)}</div></div>
+        <div class="r-stat ${surplus>=0?'pos':'neg'}"><div class="r-stat-lbl">${mi>0?'Investing':'Surplus'}</div><div class="r-stat-val ${surplus>=0?'g':'r'}">${fmt(mi>0?mi:surplus)}</div><div class="r-stat-sub">${mi>0?'your chosen amount':''}</div></div>
+      </div>
+    </div>
+
+    ${investable>0?`
+    <div class="r-card">
+      <div class="r-card-title">📊 Diversification Breakdown</div>
+      <div class="donut-row">
+        <div class="donut-wrap">
+          <svg class="donut-svg" viewBox="0 0 140 140">
+            <circle class="donut-track" cx="70" cy="70" r="60"/>
+            <circle class="donut-seg" id="ds-eq"  cx="70" cy="70" r="60" stroke="#7a4e00" stroke-dasharray="0 377" stroke-dashoffset="0"/>
+            <circle class="donut-seg" id="ds-dbt" cx="70" cy="70" r="60" stroke="#c8930a" stroke-dasharray="0 377" stroke-dashoffset="0"/>
+            <circle class="donut-seg" id="ds-hyb" cx="70" cy="70" r="60" stroke="#9a6b1a" stroke-dasharray="0 377" stroke-dashoffset="0"/>
+            <circle class="donut-seg" id="ds-liq" cx="70" cy="70" r="60" stroke="#d4a017" stroke-dasharray="0 377" stroke-dashoffset="0"/>
+          </svg>
+          <div class="donut-center"><div class="dc-lbl">Investable</div><div class="dc-val">${fmt(investable)}/mo</div></div>
+        </div>
+        <div class="alloc-legend">
+          ${[['Equity',ep,eA,'#7a4e00'],['Debt',dp,dA,'#c8930a'],['Hybrid',hp,hA,'#9a6b1a'],['Liquid',lp,lA,'#d4a017']].map(([n,p,a,c])=>`
+            <div class="al-item">
+              <div class="al-hdr">
+                <div class="al-name"><div class="al-dot" style="background:${c}"></div>${n}</div>
+                <div class="al-right"><div class="al-pct" style="color:${c}">${p}%</div><div class="al-amt">${fmt(a)}</div></div>
+              </div>
+              <div class="al-track"><div class="al-fill" style="background:${c};width:${p}%"></div></div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div class="r-rule"><span>◈</span><span>${rule}</span></div>
+    </div>
+
+    <div class="r-card">
+      <div class="r-card-title">🎯 Suitability Assessment</div>
+      <div class="suit-rows">
+        ${[['Equity',eS,'#7a4e00'],['Debt',dS,'#c8930a'],['Hybrid',hS,'#9a6b1a'],['Liquid',lS,'#d4a017']].map(([n,s,c])=>`
+          <div class="s-row"><div class="s-lbl">${n}</div><div class="s-track"><div class="s-fill" style="background:${c};width:${s}%"></div></div><div class="s-score">${s}%</div></div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="r-card">
+      <div class="r-card-title">📋 Fund Recommendations</div>
+      <div class="rec-list">
+        ${recs.map(r=>`<div class="rec-item"><div class="rec-dot" style="background:${r.c}"></div><div><div class="rec-name">${r.n}</div><div class="rec-meta">${r.m}</div>${r.t}</div></div>`).join('')}
+      </div>
+    </div>
+`:''}
+  `;
+
+  setTimeout(()=>setDonut(ep,dp,hp,lp),80);
+
+  // Show download button
+  document.getElementById('downloadBtn').style.display = 'block';
+}
+
+function downloadResults() {
+  const income   = parseFloat(document.getElementById('income').value)||0;
+  const expenses = parseFloat(document.getElementById('expenses').value)||0;
+  const age      = parseFloat(document.getElementById('age').value)||30;
+  const mi       = parseFloat(document.getElementById('monthly-invest').value)||0;
+  const surplus  = income - expenses;
+  const investable = mi > 0 ? mi : Math.max(0, surplus);
+
+  // Grab the results HTML
+  const resultsHTML = document.getElementById('resultsPanel').innerHTML;
+
+  const printWin = window.open('', '_blank', 'width=900,height=700');
+  printWin.document.write(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>SMART MFD — Allocation Report</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Plus Jakarta Sans', sans-serif; background: #fff8e8; color: #1a1200; padding: 32px; font-size: 13px; }
+
+  .pdf-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 16px; border-bottom: 3px solid #c8930a; margin-bottom: 24px;
+  }
+  .pdf-brand { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #1a1200; }
+  .pdf-brand span { color: #c8930a; }
+  .pdf-meta { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; color: #8b6010; text-align: right; line-height: 1.6; }
+  .pdf-badge { background: #c8930a; color: #fff; padding: 3px 10px; border-radius: 4px; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; display: inline-block; margin-top: 4px; }
+
+  .r-card { background: #fffdf0; border: 1px solid rgba(200,147,10,0.25); border-radius: 12px; padding: 16px 18px; margin-bottom: 14px; }
+  .r-card-title { font-family: 'Playfair Display', serif; font-size: 0.95rem; font-weight: 700; color: #1a1200; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid rgba(200,147,10,0.15); }
+  .r-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+  .r-stat { background: rgba(200,147,10,0.06); border: 1px solid rgba(200,147,10,0.2); border-radius: 8px; padding: 10px 12px; }
+  .r-stat.pos { border-color: rgba(200,147,10,0.4); }
+  .r-stat.neg { border-color: rgba(155,42,16,0.3); }
+  .r-stat-lbl { font-family: 'IBM Plex Mono', monospace; font-size: 0.58rem; color: #8b6010; letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 3px; }
+  .r-stat-val { font-family: 'IBM Plex Mono', monospace; font-size: 1.1rem; font-weight: 700; color: #1a1200; }
+  .r-stat-val.g { color: #c8930a; }
+  .r-stat-val.r { color: #9b2a10; }
+  .r-stat-sub { font-size: 0.6rem; color: #8b6010; margin-top: 1px; }
+  .r-alert { border-radius: 8px; padding: 8px 12px; display: flex; gap: 8px; font-size: 0.75rem; line-height: 1.5; font-weight: 500; margin-bottom: 12px; }
+  .r-alert-warn { background: rgba(155,42,16,0.06); border: 1px solid rgba(155,42,16,0.2); color: #7a2010; }
+  .r-alert-ok   { background: rgba(200,147,10,0.07); border: 1px solid rgba(200,147,10,0.25); color: #6b4e10; }
+  .donut-row { display: none; }
+  .alloc-legend { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+  .al-item { padding: 8px 10px; background: rgba(200,147,10,0.05); border: 1px solid rgba(200,147,10,0.18); border-radius: 7px; }
+  .al-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+  .al-name { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: #4a3010; font-weight: 600; }
+  .al-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .al-right { display: flex; flex-direction: column; align-items: flex-end; }
+  .al-pct { font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem; font-weight: 700; }
+  .al-amt { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; color: #8b6010; }
+  .al-track { height: 5px; background: rgba(200,147,10,0.12); border-radius: 2px; overflow: hidden; }
+  .al-fill  { height: 100%; border-radius: 2px; }
+  .r-rule { background: rgba(200,147,10,0.07); border: 1px solid rgba(200,147,10,0.22); border-radius: 7px; padding: 8px 10px; font-size: 0.72rem; color: #6b4e10; line-height: 1.5; font-weight: 600; margin-top: 8px; display: flex; gap: 7px; }
+  .r-rule strong { color: #1a1200; }
+  .suit-rows { display: flex; flex-direction: column; gap: 7px; }
+  .s-row { display: flex; align-items: center; gap: 8px; }
+  .s-lbl { font-size: 0.7rem; color: #6b4e10; font-weight: 600; width: 100px; flex-shrink: 0; }
+  .s-track { flex: 1; height: 6px; background: rgba(200,147,10,0.12); border-radius: 3px; overflow: hidden; }
+  .s-fill { height: 100%; border-radius: 3px; }
+  .s-score { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; color: #8b6010; width: 32px; text-align: right; }
+  .rec-list { display: flex; flex-direction: column; gap: 7px; }
+  .rec-item { background: rgba(255,248,215,0.9); border: 1px solid rgba(200,147,10,0.18); border-radius: 8px; padding: 8px 10px; display: flex; gap: 8px; align-items: flex-start; }
+  .rec-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+  .rec-name { font-size: 0.75rem; font-weight: 700; color: #1a1200; margin-bottom: 1px; }
+  .rec-meta { font-size: 0.66rem; color: #6b4e10; font-weight: 500; }
+  .rtag { font-family: 'IBM Plex Mono', monospace; font-size: 0.58rem; padding: 1px 6px; border-radius: 3px; font-weight: 700; display: inline-block; margin-top: 2px; }
+  .rtag-o { background: rgba(200,147,10,0.1); color: #c8930a; border: 1px solid rgba(200,147,10,0.25); }
+  .rtag-c { background: rgba(100,60,0,0.08); color: #6b3e00; border: 1px solid rgba(100,60,0,0.18); }
+  .rtag-i { background: rgba(160,110,0,0.08); color: #a07020; border: 1px solid rgba(160,110,0,0.18); }
+  .market-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
+  .amc { background: rgba(255,248,215,0.8); border: 1px solid rgba(200,147,10,0.18); border-radius: 8px; padding: 8px 10px; }
+  .amc-tag { font-family: 'IBM Plex Mono', monospace; font-size: 0.58rem; font-weight: 700; padding: 2px 6px; border-radius: 3px; display: inline-block; margin-bottom: 3px; background: rgba(200,147,10,0.1); color: #c8930a; border: 1px solid rgba(200,147,10,0.22); }
+  .amc-name { font-size: 0.75rem; font-weight: 800; color: #1a1200; margin-bottom: 2px; }
+  .amc-stat { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; color: #c8930a; font-weight: 700; margin-bottom: 2px; }
+  .amc-desc { font-size: 0.65rem; color: #4a3010; line-height: 1.4; }
+  .disclaimer-bar { font-size: 0.62rem; color: #8b6010; text-align: center; margin-top: 20px; padding-top: 10px; border-top: 1px solid rgba(200,147,10,0.2); line-height: 1.5; }
+  .r-idle { display: none !important; }
+  @media print {
+    body { background: #fff; padding: 20px; }
+    .r-card { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+  <div class="pdf-header">
+    <div class="pdf-brand">SMART <span>MFD</span></div>
+    <div class="pdf-meta">
+      Allocation Report · Generated ${new Date().toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'})}<br>
+      MFD Series · Asset Allocation Tool<br>
+      <span class="pdf-badge">Educational Use Only</span>
+    </div>
+  </div>
+  ${resultsHTML}
+  <div class="disclaimer-bar">⚠ This report is for educational purposes only. Not financial advice. All MF investments are subject to market risks. Consult a SEBI-registered investment adviser before investing.</div>
+</body>
+</html>`);
+  printWin.document.close();
+  printWin.focus();
+  setTimeout(() => { printWin.print(); }, 800);
+}
+</script>
+</body>
+</html>
