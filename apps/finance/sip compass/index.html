@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SIP Compass — Stay the Course</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #080810;
+      --surface: rgba(255,255,255,0.025);
+      --border: rgba(255,255,255,0.07);
+      --text: #e2e8f0;
+      --muted: #475569;
+      --subtle: #64748b;
+      --bull: #34d399;
+      --bear: #f87171;
+      --blue: #60a5fa;
+      --purple: #c084fc;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      background-image:
+        radial-gradient(ellipse 80% 40% at 20% 10%, rgba(52,211,153,0.04) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 80%, rgba(96,165,250,0.04) 0%, transparent 60%);
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      padding: 28px 16px 48px;
+    }
+
+    .container { max-width: 780px; margin: 0 auto; }
+
+    /* ── Header ── */
+    .header { text-align: center; margin-bottom: 32px; animation: fadeDown 0.6s ease both; }
+    .badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 20px;
+      padding: 3px 14px;
+      font-size: 10px;
+      color: var(--subtle);
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-size: clamp(26px, 6vw, 40px);
+      font-weight: 700;
+      letter-spacing: -1px;
+      line-height: 1.1;
+      background: linear-gradient(100deg, #f8fafc 40%, #64748b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+    .subtitle { color: var(--muted); font-size: 13px; }
+
+    /* ── Controls ── */
+    .controls-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px 24px;
+      margin-bottom: 20px;
+      animation: fadeUp 0.5s 0.1s ease both;
+    }
+    .controls-grid { display: flex; gap: 28px; flex-wrap: wrap; }
+    .control-group { flex: 1; min-width: 200px; }
+    .control-label {
+      font-size: 10px;
+      color: var(--subtle);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 10px;
+    }
+    .control-row { display: flex; align-items: center; gap: 12px; }
+    .control-value {
+      font-family: 'DM Mono', monospace;
+      font-size: 20px;
+      font-weight: 600;
+      min-width: 72px;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      flex: 1;
+      height: 4px;
+      border-radius: 4px;
+      outline: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    input[type=range]:hover::-webkit-slider-thumb { transform: scale(1.2); }
+    #sipSlider { background: linear-gradient(to right, var(--blue) 10%, #1e293b 10%); }
+    #sipSlider::-webkit-slider-thumb { background: var(--blue); }
+    #monthSlider { background: linear-gradient(to right, var(--purple) 20%, #1e293b 20%); }
+    #monthSlider::-webkit-slider-thumb { background: var(--purple); }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      animation: fadeUp 0.5s 0.15s ease both;
+    }
+    .tab-btn {
+      padding: 9px 24px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      transition: all 0.22s ease;
+    }
+    .tab-btn.bull {
+      background: rgba(52,211,153,0.1);
+      color: var(--bull);
+      border: 1px solid rgba(52,211,153,0.25);
+    }
+    .tab-btn.bear {
+      background: rgba(248,113,113,0.1);
+      color: var(--bear);
+      border: 1px solid rgba(248,113,113,0.25);
+    }
+    .tab-btn.bull.active { background: var(--bull); color: #0a0a14; }
+    .tab-btn.bear.active { background: var(--bear); color: #0a0a14; }
+    .tab-btn:hover { transform: translateY(-2px); }
+
+    /* ── Stats ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+      animation: fadeUp 0.5s 0.2s ease both;
+    }
+    @media (max-width: 560px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      transition: all 0.25s ease;
+      cursor: default;
+    }
+    .stat-card:hover { background: rgba(255,255,255,0.05); transform: translateY(-2px); }
+    .stat-label { font-size: 10px; color: var(--subtle); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; }
+    .stat-value { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 600; }
+
+    /* ── Charts ── */
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 16px 14px;
+      margin-bottom: 14px;
+      animation: fadeUp 0.5s 0.25s ease both;
+    }
+    .chart-title {
+      font-size: 10px;
+      color: var(--subtle);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      padding-left: 4px;
+    }
+    .chart-wrap { position: relative; }
+
+    /* ── Comparison ── */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+      animation: fadeUp 0.5s 0.3s ease both;
+    }
+    .compare-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      cursor: pointer;
+      transition: all 0.22s ease;
+    }
+    .compare-card:hover { transform: translateY(-2px); }
+    .compare-card.bull.active { background: rgba(52,211,153,0.08); border-color: rgba(52,211,153,0.3); }
+    .compare-card.bear.active { background: rgba(248,113,113,0.08); border-color: rgba(248,113,113,0.3); }
+    .compare-name { font-size: 12px; font-weight: 600; margin-bottom: 8px; }
+    .compare-row { font-size: 11px; color: var(--muted); margin-bottom: 3px; }
+    .compare-row span { color: #94a3b8; }
+    .compare-return { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 700; margin-top: 6px; }
+
+    /* ── Insight ── */
+    .insight {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      font-size: 12.5px;
+      color: var(--muted);
+      line-height: 1.75;
+      animation: fadeUp 0.5s 0.35s ease both;
+    }
+    .insight strong { color: #94a3b8; }
+    .highlight { color: var(--purple); font-weight: 500; }
+
+    /* ── Animations ── */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="badge">SIP Compass</div>
+    <h1>SIP Compass</h1>
+    <p class="subtitle">See how your SIP performs across different market cycles</p>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls-card">
+    <div class="controls-grid">
+      <div class="control-group">
+        <label class="control-label">Monthly SIP Amount</label>
+        <div class="control-row">
+          <span class="control-value" id="sipDisplay" style="color:var(--blue)">₹5K</span>
+          <input type="range" id="sipSlider" min="1000" max="50000" step="500" value="5000"/>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label">Duration</label>
+        <div class="control-row">
+          <span class="control-value" id="monthDisplay" style="color:var(--purple)">3.0y</span>
+          <input type="range" id="monthSlider" min="12" max="120" step="6" value="36"/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn bull active" id="btnBull" onclick="setTab('bull')">📈 Bull Market</button>
+    <button class="tab-btn bear" id="btnBear" onclick="setTab('bear')">📉 Bear Market</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row" id="statsRow">
+    <div class="stat-card"><div class="stat-label">Total Invested</div><div class="stat-value" id="s-invested" style="color:var(--blue)">—</div></div>
+    <div class="stat-card"><div class="stat-label">Current Value</div><div class="stat-value" id="s-value">—</div></div>
+    <div class="stat-card"><div class="stat-label">Total Return</div><div class="stat-value" id="s-return">—</div></div>
+    <div class="stat-card"><div class="stat-label">Units Accumulated</div><div class="stat-value" id="s-units" style="color:var(--purple)">—</div></div>
+  </div>
+
+  <!-- NAV Chart -->
+  <div class="chart-card">
+    <div class="chart-title">NAV Movement</div>
+    <div class="chart-wrap"><canvas id="navChart" height="130"></canvas></div>
+  </div>
+
+  <!-- Invested vs Value -->
+  <div class="chart-card">
+    <div class="chart-title">Invested vs Portfolio Value</div>
+    <div class="chart-wrap"><canvas id="valueChart" height="160"></canvas></div>
+  </div>
+
+  <!-- Return % -->
+  <div class="chart-card">
+    <div class="chart-title">Cumulative Return %</div>
+    <div class="chart-wrap"><canvas id="returnChart" height="130"></canvas></div>
+  </div>
+
+  <!-- Side-by-side comparison -->
+  <div class="compare-grid">
+    <div class="compare-card bull active" id="cmpBull" onclick="setTab('bull')">
+      <div class="compare-name" style="color:var(--bull)">📈 Bull Market</div>
+      <div class="compare-row">Invested: <span id="c-bull-inv">—</span></div>
+      <div class="compare-row">Value: <span id="c-bull-val" style="color:var(--bull)">—</span></div>
+      <div class="compare-return" id="c-bull-ret" style="color:var(--bull)">—</div>
+    </div>
+    <div class="compare-card bear" id="cmpBear" onclick="setTab('bear')">
+      <div class="compare-name" style="color:var(--bear)">📉 Bear Market</div>
+      <div class="compare-row">Invested: <span id="c-bear-inv">—</span></div>
+      <div class="compare-row">Value: <span id="c-bear-val" style="color:var(--bear)">—</span></div>
+      <div class="compare-return" id="c-bear-ret" style="color:var(--bear)">—</div>
+    </div>
+  </div>
+
+  <!-- Insight -->
+  <div class="insight">
+    <strong>💡 Key Insight: </strong>
+    In a bear market, SIP benefits from <span class="highlight">rupee-cost averaging</span> — you accumulate more units at lower NAVs.
+    When markets recover, those extra units amplify your gains significantly.
+    Staying invested through the downturn is precisely what makes the difference.
+  </div>
+
+</div>
+
+<script>
+  // ── Seeded RNG ──
+  function seededRand(seed) {
+    let s = seed;
+    return () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
+  }
+
+  // ── Generate NAV data ──
+  function genNAV(months, type, seed) {
+    const rand = seededRand(seed);
+    let nav = 100;
+    const out = [];
+    for (let i = 0; i < months; i++) {
+      let change;
+      if (type === 'bull') {
+        change = 0.012 + (rand() - 0.35) * 0.06;
+        if (i % 7 === 0) change -= 0.04;
+      } else {
+        change = -0.008 + (rand() - 0.45) * 0.07;
+        if (i % 9 === 0) change += 0.035;
+      }
+      nav = Math.max(nav * (1 + change), 10);
+      out.push(parseFloat(nav.toFixed(2)));
+    }
+    return out;
+  }
+
+  // ── Compute SIP ──
+  function computeSIP(navData, monthly) {
+    let units = 0, invested = 0;
+    return navData.map((nav, i) => {
+      units += monthly / nav;
+      invested += monthly;
+      const value = units * nav;
+      return {
+        month: i + 1,
+        nav,
+        totalInvested: Math.round(invested),
+        currentValue: Math.round(value),
+        returnPct: parseFloat(((value - invested) / invested * 100).toFixed(1)),
+        units: parseFloat(units.toFixed(3)),
+      };
+    });
+  }
+
+  // ── Format ──
+  function fmt(v) {
+    if (v >= 100000) return `₹${(v/100000).toFixed(1)}L`;
+    if (v >= 1000)   return `₹${(v/1000).toFixed(1)}K`;
+    return `₹${v}`;
+  }
+
+  // ── Chart defaults ──
+  const chartDefaults = {
+    responsive: true,
+    animation: { duration: 500, easing: 'easeInOutQuart' },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: 'rgba(10,10,20,0.95)',
+        borderColor: 'rgba(255,255,255,0.1)',
+        borderWidth: 1,
+        titleColor: '#94a3b8',
+        bodyColor: '#e2e8f0',
+        padding: 10,
+        cornerRadius: 8,
+      }
+    },
+    scales: {
+      x: {
+        grid: { color: 'rgba(255,255,255,0.04)', drawBorder: false },
+        ticks: { color: '#475569', font: { size: 10, family: 'DM Sans' }, maxTicksLimit: 7 },
+        border: { display: false },
+      },
+      y: {
+        grid: { color: 'rgba(255,255,255,0.04)', drawBorder: false },
+        ticks: { color: '#475569', font: { size: 10, family: 'DM Sans' } },
+        border: { display: false },
+      }
+    }
+  };
+
+  function makeGrad(ctx, color, alpha1 = 0.3, alpha2 = 0.01) {
+    const g = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
+    g.addColorStop(0, color.replace(')', `,${alpha1})`).replace('rgb', 'rgba'));
+    g.addColorStop(1, color.replace(')', `,${alpha2})`).replace('rgb', 'rgba'));
+    return g;
+  }
+
+  // ── Init Charts ──
+  let navChart, valueChart, returnChart;
+  let activeTab = 'bull';
+  let sipAmount = 5000;
+  let months = 36;
+
+  function initCharts() {
+    const navCtx   = document.getElementById('navChart').getContext('2d');
+    const valCtx   = document.getElementById('valueChart').getContext('2d');
+    const retCtx   = document.getElementById('returnChart').getContext('2d');
+
+    navChart = new Chart(navCtx, {
+      type: 'line',
+      data: { labels: [], datasets: [{
+        data: [], borderColor: '#34d399', borderWidth: 2,
+        fill: true, backgroundColor: 'rgba(52,211,153,0.08)',
+        pointRadius: 0, tension: 0.35,
+      }]},
+      options: {
+        ...chartDefaults,
+        scales: {
+          ...chartDefaults.scales,
+          y: { ...chartDefaults.scales.y, ticks: { ...chartDefaults.scales.y.ticks, callback: v => `₹${v}` } }
+        },
+        plugins: { ...chartDefaults.plugins, tooltip: {
+          ...chartDefaults.plugins.tooltip,
+          callbacks: { label: ctx => ` NAV: ₹${ctx.raw}` }
+        }}
+      }
+    });
+
+    valueChart = new Chart(valCtx, {
+      type: 'line',
+      data: { labels: [], datasets: [
+        { label: 'Invested', data: [], borderColor: '#60a5fa', borderWidth: 2, fill: true,
+          backgroundColor: 'rgba(96,165,250,0.08)', pointRadius: 0, tension: 0.35 },
+        { label: 'Portfolio Value', data: [], borderColor: '#34d399', borderWidth: 2, fill: true,
+          backgroundColor: 'rgba(52,211,153,0.08)', pointRadius: 0, tension: 0.35 },
+      ]},
+      options: {
+        ...chartDefaults,
+        plugins: {
+          ...chartDefaults.plugins,
+          legend: { display: true, labels: { color: '#64748b', font: { size: 11, family: 'DM Sans' }, boxWidth: 12, padding: 16 } },
+          tooltip: { ...chartDefaults.plugins.tooltip, callbacks: {
+            label: ctx => ` ${ctx.dataset.label}: ${fmt(ctx.raw)}`
+          }}
+        },
+        scales: {
+          ...chartDefaults.scales,
+          y: { ...chartDefaults.scales.y, ticks: { ...chartDefaults.scales.y.ticks, callback: fmt } }
+        }
+      }
+    });
+
+    returnChart = new Chart(retCtx, {
+      type: 'line',
+      data: { labels: [], datasets: [{
+        data: [], borderColor: '#34d399', borderWidth: 2,
+        fill: true, backgroundColor: 'rgba(52,211,153,0.08)',
+        pointRadius: 0, tension: 0.35,
+      }]},
+      options: {
+        ...chartDefaults,
+        scales: {
+          ...chartDefaults.scales,
+          y: { ...chartDefaults.scales.y,
+            ticks: { ...chartDefaults.scales.y.ticks, callback: v => `${v}%` },
+          }
+        },
+        plugins: { ...chartDefaults.plugins, tooltip: {
+          ...chartDefaults.plugins.tooltip,
+          callbacks: { label: ctx => ` Return: ${ctx.raw}%` }
+        }}
+      }
+    });
+  }
+
+  // ── Update everything ──
+  function update() {
+    const bullNav  = genNAV(months, 'bull', 42);
+    const bearNav  = genNAV(months, 'bear', 99);
+    const bullData = computeSIP(bullNav, sipAmount);
+    const bearData = computeSIP(bearNav, sipAmount);
+    const activeData = activeTab === 'bull' ? bullData : bearData;
+    const accent = activeTab === 'bull' ? '#34d399' : '#f87171';
+    const accentRGB = activeTab === 'bull' ? '52,211,153' : '248,113,113';
+
+    const labels = activeData.map(d => d.month);
+    const last = activeData[activeData.length - 1];
+
+    // Stats
+    document.getElementById('s-invested').textContent = fmt(last.totalInvested);
+    document.getElementById('s-value').style.color = accent;
+    document.getElementById('s-value').textContent = fmt(last.currentValue);
+    document.getElementById('s-return').style.color = accent;
+    document.getElementById('s-return').textContent = `${last.returnPct > 0 ? '+' : ''}${last.returnPct}%`;
+    document.getElementById('s-units').textContent = last.units.toFixed(2);
+
+    // NAV Chart
+    navChart.data.labels = labels;
+    navChart.data.datasets[0].data = activeData.map(d => d.nav);
+    navChart.data.datasets[0].borderColor = accent;
+    navChart.data.datasets[0].backgroundColor = `rgba(${accentRGB},0.08)`;
+    navChart.update();
+
+    // Value Chart
+    const vColor2 = accent;
+    valueChart.data.labels = labels;
+    valueChart.data.datasets[0].data = activeData.map(d => d.totalInvested);
+    valueChart.data.datasets[1].data = activeData.map(d => d.currentValue);
+    valueChart.data.datasets[1].borderColor = accent;
+    valueChart.data.datasets[1].backgroundColor = `rgba(${accentRGB},0.08)`;
+    valueChart.update();
+
+    // Return Chart
+    returnChart.data.labels = labels;
+    returnChart.data.datasets[0].data = activeData.map(d => d.returnPct);
+    returnChart.data.datasets[0].borderColor = accent;
+    returnChart.data.datasets[0].backgroundColor = `rgba(${accentRGB},0.08)`;
+    returnChart.update();
+
+    // Comparison cards
+    const bLast = bullData[bullData.length - 1];
+    const rLast = bearData[bearData.length - 1];
+    document.getElementById('c-bull-inv').textContent = fmt(bLast.totalInvested);
+    document.getElementById('c-bull-val').textContent = fmt(bLast.currentValue);
+    document.getElementById('c-bull-ret').textContent = `${bLast.returnPct > 0 ? '+' : ''}${bLast.returnPct}%`;
+    document.getElementById('c-bear-inv').textContent = fmt(rLast.totalInvested);
+    document.getElementById('c-bear-val').textContent = fmt(rLast.currentValue);
+    document.getElementById('c-bear-ret').textContent = `${rLast.returnPct > 0 ? '+' : ''}${rLast.returnPct}%`;
+
+    // Tab active states
+    document.getElementById('btnBull').className = `tab-btn bull${activeTab === 'bull' ? ' active' : ''}`;
+    document.getElementById('btnBear').className = `tab-btn bear${activeTab === 'bear' ? ' active' : ''}`;
+    document.getElementById('cmpBull').className = `compare-card bull${activeTab === 'bull' ? ' active' : ''}`;
+    document.getElementById('cmpBear').className = `compare-card bear${activeTab === 'bear' ? ' active' : ''}`;
+  }
+
+  function setTab(t) {
+    activeTab = t;
+    update();
+  }
+
+  // ── Slider listeners ──
+  const sipSlider   = document.getElementById('sipSlider');
+  const monthSlider = document.getElementById('monthSlider');
+  const sipDisplay  = document.getElementById('sipDisplay');
+  const monthDisplay = document.getElementById('monthDisplay');
+
+  function updateSipSliderBg() {
+    const pct = ((sipAmount - 1000) / 49000 * 100).toFixed(1);
+    sipSlider.style.background = `linear-gradient(to right, var(--blue) ${pct}%, #1e293b ${pct}%)`;
+  }
+  function updateMonthSliderBg() {
+    const pct = ((months - 12) / 108 * 100).toFixed(1);
+    monthSlider.style.background = `linear-gradient(to right, var(--purple) ${pct}%, #1e293b ${pct}%)`;
+  }
+
+  sipSlider.addEventListener('input', e => {
+    sipAmount = +e.target.value;
+    sipDisplay.textContent = fmt(sipAmount);
+    updateSipSliderBg();
+    update();
+  });
+
+  monthSlider.addEventListener('input', e => {
+    months = +e.target.value;
+    monthDisplay.textContent = `${(months/12).toFixed(1)}y`;
+    updateMonthSliderBg();
+    update();
+  });
+
+  // ── Boot ──
+  initCharts();
+  updateSipSliderBg();
+  updateMonthSliderBg();
+  update();
+</script>
+</body>
+</html>
