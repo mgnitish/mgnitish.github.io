@@ -119,6 +119,34 @@ body::after {
 
 .topbar-skip:hover { transform: translateY(-1px); box-shadow: 0 4px 18px rgba(200,147,10,0.4); }
 
+.topbar-links {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.topbar-icon-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  text-decoration: none;
+  color: var(--text2);
+  background: rgba(200,147,10,0.08);
+  border: 1px solid var(--gold-border);
+  transition: all 0.2s;
+}
+
+.topbar-icon-link:hover {
+  background: rgba(200,147,10,0.18);
+  border-color: var(--gold);
+  color: var(--gold);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(200,147,10,0.2);
+}
+
 /* ══ PROGRESS BAR ══ */
 .progress-wrap {
   flex-shrink: 0;
@@ -832,6 +860,17 @@ body::after {
     <div class="brand">
       <div class="brand-mark">M</div>
       <div class="brand-name">SMART <span>MFD</span></div>
+    </div>
+    <div class="topbar-links">
+      <a class="topbar-icon-link" href="https://mgnitish.github.io/" target="_blank" rel="noopener" title="Portfolio">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </a>
+      <a class="topbar-icon-link" href="https://twitter.com/mgnitish_builds" target="_blank" rel="noopener" title="@mgnitish_builds on X">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.259 5.63 5.905-5.63zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a class="topbar-icon-link" href="mailto:mgnitishbuilds@gmail.com" title="mgnitishbuilds@gmail.com">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      </a>
     </div>
     <button class="topbar-skip" onclick="goTo(6)">⚡ Skip to Calculator</button>
   </nav>
