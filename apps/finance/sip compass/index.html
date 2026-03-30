@@ -17,7 +17,7 @@
       --muted: #475569;
       --subtle: #64748b;
       --bull: #34d399;
-      --bear: #f87171;
+      --bear: #fb923c;
       --blue: #60a5fa;
       --purple: #c084fc;
     }
@@ -114,59 +114,36 @@
     #monthSlider { background: linear-gradient(to right, var(--purple) 20%, #1e293b 20%); }
     #monthSlider::-webkit-slider-thumb { background: var(--purple); }
 
-    /* ── Tabs ── */
-    .tabs {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 20px;
-      animation: fadeUp 0.5s 0.15s ease both;
-    }
-    .tab-btn {
-      padding: 9px 24px;
-      border-radius: 10px;
-      border: none;
-      cursor: pointer;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.4px;
-      transition: all 0.22s ease;
-    }
-    .tab-btn.bull {
-      background: rgba(52,211,153,0.1);
-      color: var(--bull);
-      border: 1px solid rgba(52,211,153,0.25);
-    }
-    .tab-btn.bear {
-      background: rgba(248,113,113,0.1);
-      color: var(--bear);
-      border: 1px solid rgba(248,113,113,0.25);
-    }
-    .tab-btn.bull.active { background: var(--bull); color: #0a0a14; }
-    .tab-btn.bear.active { background: var(--bear); color: #0a0a14; }
-    .tab-btn:hover { transform: translateY(-2px); }
-
     /* ── Stats ── */
-    .stats-row {
+    .stats-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: 1fr 1fr;
       gap: 10px;
       margin-bottom: 18px;
-      animation: fadeUp 0.5s 0.2s ease both;
+      animation: fadeUp 0.5s 0.15s ease both;
     }
-    @media (max-width: 560px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
-    .stat-card {
+    .stats-col {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 16px;
-      transition: all 0.25s ease;
-      cursor: default;
+      border-radius: 14px;
+      padding: 16px 18px;
     }
-    .stat-card:hover { background: rgba(255,255,255,0.05); transform: translateY(-2px); }
-    .stat-label { font-size: 10px; color: var(--subtle); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; }
-    .stat-value { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 600; }
+    .stats-col.bull-col { border-color: rgba(52,211,153,0.25); background: rgba(52,211,153,0.04); }
+    .stats-col.bear-col { border-color: rgba(251,146,60,0.25); background: rgba(251,146,60,0.04); }
+    .stats-col-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .stats-col.bull-col .stats-col-title { color: var(--bull); }
+    .stats-col.bear-col .stats-col-title { color: var(--bear); }
+    .stat-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+    .stat-row:last-child { margin-bottom: 0; }
+    .stat-label { font-size: 10px; color: var(--subtle); letter-spacing: 0.8px; text-transform: uppercase; }
+    .stat-value { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 600; }
+    @media (max-width: 480px) { .stats-grid { grid-template-columns: 1fr; } }
 
     /* ── Charts ── */
     .chart-card {
@@ -187,29 +164,71 @@
     }
     .chart-wrap { position: relative; }
 
-    /* ── Comparison ── */
-    .compare-grid {
+
+
+    /* ── Market Insight Frames ── */
+    .market-insights {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 14px;
-      animation: fadeUp 0.5s 0.3s ease both;
+      gap: 12px;
+      margin-bottom: 20px;
+      animation: fadeUp 0.5s 0.38s ease both;
     }
-    .compare-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px 18px;
-      cursor: pointer;
-      transition: all 0.22s ease;
+    @media (max-width: 560px) { .market-insights { grid-template-columns: 1fr; } }
+    .insight-frame {
+      border-radius: 14px;
+      padding: 18px 20px;
     }
-    .compare-card:hover { transform: translateY(-2px); }
-    .compare-card.bull.active { background: rgba(52,211,153,0.08); border-color: rgba(52,211,153,0.3); }
-    .compare-card.bear.active { background: rgba(248,113,113,0.08); border-color: rgba(248,113,113,0.3); }
-    .compare-name { font-size: 12px; font-weight: 600; margin-bottom: 8px; }
-    .compare-row { font-size: 11px; color: var(--muted); margin-bottom: 3px; }
-    .compare-row span { color: #94a3b8; }
-    .compare-return { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 700; margin-top: 6px; }
+    .insight-frame.bull-frame {
+      background: rgba(52,211,153,0.05);
+      border: 1px solid rgba(52,211,153,0.18);
+    }
+    .insight-frame.bear-frame {
+      background: rgba(251,146,60,0.05);
+      border: 1px solid rgba(251,146,60,0.18);
+    }
+    .insight-frame-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .insight-frame.bull-frame .insight-frame-title { color: var(--bull); }
+    .insight-frame.bear-frame .insight-frame-title { color: var(--bear); }
+    .insight-frame ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .insight-frame ul li {
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.6;
+      padding-left: 16px;
+      position: relative;
+    }
+    .insight-frame.bull-frame ul li::before {
+      content: '▸';
+      position: absolute;
+      left: 0;
+      color: var(--bull);
+      font-size: 10px;
+      top: 2px;
+    }
+    .insight-frame.bear-frame ul li::before {
+      content: '▸';
+      position: absolute;
+      left: 0;
+      color: var(--bear);
+      font-size: 10px;
+      top: 2px;
+    }
+    .insight-frame ul li strong { color: #e2e8f0; font-weight: 600; }
 
     /* ── Insight ── */
     .insight {
@@ -268,51 +287,63 @@
     </div>
   </div>
 
-  <!-- Tabs -->
-  <div class="tabs">
-    <button class="tab-btn bull active" id="btnBull" onclick="setTab('bull')">📈 Bull Market</button>
-    <button class="tab-btn bear" id="btnBear" onclick="setTab('bear')">📉 Bear Market</button>
+  <!-- Stats: side by side -->
+  <div class="stats-grid">
+    <div class="stats-col bull-col">
+      <div class="stats-col-title">📈 Bull Market</div>
+      <div class="stat-row"><span class="stat-label">Invested</span><span class="stat-value" style="color:var(--blue)" id="bull-invested">—</span></div>
+      <div class="stat-row"><span class="stat-label">Value</span><span class="stat-value" style="color:var(--bull)" id="bull-value">—</span></div>
+      <div class="stat-row"><span class="stat-label">Return</span><span class="stat-value" style="color:var(--bull)" id="bull-return">—</span></div>
+      <div class="stat-row"><span class="stat-label">Units</span><span class="stat-value" style="color:var(--purple)" id="bull-units">—</span></div>
+    </div>
+    <div class="stats-col bear-col">
+      <div class="stats-col-title">📉 Bear Market</div>
+      <div class="stat-row"><span class="stat-label">Invested</span><span class="stat-value" style="color:var(--blue)" id="bear-invested">—</span></div>
+      <div class="stat-row"><span class="stat-label">Value</span><span class="stat-value" style="color:var(--bear)" id="bear-value">—</span></div>
+      <div class="stat-row"><span class="stat-label">Return</span><span class="stat-value" style="color:var(--bear)" id="bear-return">—</span></div>
+      <div class="stat-row"><span class="stat-label">Units</span><span class="stat-value" style="color:var(--purple)" id="bear-units">—</span></div>
+    </div>
   </div>
 
-  <!-- Stats -->
-  <div class="stats-row" id="statsRow">
-    <div class="stat-card"><div class="stat-label">Total Invested</div><div class="stat-value" id="s-invested" style="color:var(--blue)">—</div></div>
-    <div class="stat-card"><div class="stat-label">Current Value</div><div class="stat-value" id="s-value">—</div></div>
-    <div class="stat-card"><div class="stat-label">Total Return</div><div class="stat-value" id="s-return">—</div></div>
-    <div class="stat-card"><div class="stat-label">Units Accumulated</div><div class="stat-value" id="s-units" style="color:var(--purple)">—</div></div>
-  </div>
-
-  <!-- NAV Chart -->
+  <!-- NAV Chart — both lines -->
   <div class="chart-card">
     <div class="chart-title">NAV Movement</div>
     <div class="chart-wrap"><canvas id="navChart" height="130"></canvas></div>
   </div>
 
-  <!-- Invested vs Value -->
+  <!-- Invested vs Portfolio Value — both scenarios -->
   <div class="chart-card">
     <div class="chart-title">Invested vs Portfolio Value</div>
     <div class="chart-wrap"><canvas id="valueChart" height="160"></canvas></div>
   </div>
 
-  <!-- Return % -->
+  <!-- Cumulative Return % — both lines -->
   <div class="chart-card">
     <div class="chart-title">Cumulative Return %</div>
     <div class="chart-wrap"><canvas id="returnChart" height="130"></canvas></div>
   </div>
 
-  <!-- Side-by-side comparison -->
-  <div class="compare-grid">
-    <div class="compare-card bull active" id="cmpBull" onclick="setTab('bull')">
-      <div class="compare-name" style="color:var(--bull)">📈 Bull Market</div>
-      <div class="compare-row">Invested: <span id="c-bull-inv">—</span></div>
-      <div class="compare-row">Value: <span id="c-bull-val" style="color:var(--bull)">—</span></div>
-      <div class="compare-return" id="c-bull-ret" style="color:var(--bull)">—</div>
+  <!-- Market Insight Frames -->
+  <div class="market-insights">
+    <div class="insight-frame bull-frame">
+      <div class="insight-frame-title">📈 Bull Market — How SIPs behave</div>
+      <ul>
+        <li><strong>NAV rises steadily</strong> — each instalment buys fewer units than the last, but at higher prices</li>
+        <li><strong>Portfolio value compounds quickly</strong> — existing units appreciate as NAV climbs month after month</li>
+        <li><strong>Returns are front-loaded</strong> — early instalments benefit the most from the long upward run</li>
+        <li><strong>Rupee-cost averaging works modestly</strong> — you buy more at dips, less at peaks, smoothing entry</li>
+        <li><strong>Best strategy:</strong> stay invested and let compounding do the work — avoid the urge to withdraw early</li>
+      </ul>
     </div>
-    <div class="compare-card bear" id="cmpBear" onclick="setTab('bear')">
-      <div class="compare-name" style="color:var(--bear)">📉 Bear Market</div>
-      <div class="compare-row">Invested: <span id="c-bear-inv">—</span></div>
-      <div class="compare-row">Value: <span id="c-bear-val" style="color:var(--bear)">—</span></div>
-      <div class="compare-return" id="c-bear-ret" style="color:var(--bear)">—</div>
+    <div class="insight-frame bear-frame">
+      <div class="insight-frame-title">📉 Bear Market — How SIPs behave</div>
+      <ul>
+        <li><strong>NAV falls or stays flat</strong> — each instalment buys <em>more</em> units than the last at lower prices</li>
+        <li><strong>Unit accumulation accelerates</strong> — the same ₹ amount accumulates a larger and larger unit base</li>
+        <li><strong>Short-term value looks stagnant</strong> — portfolio value lags invested amount during the downturn</li>
+        <li><strong>Recovery amplifies gains</strong> — when NAV rebounds, the extra units accumulated magnify the upside sharply</li>
+        <li><strong>Best strategy:</strong> do not stop or pause — a bear market is precisely when SIPs work hardest for you</li>
+      </ul>
     </div>
   </div>
 
@@ -417,78 +448,91 @@
 
   // ── Init Charts ──
   let navChart, valueChart, returnChart;
-  let activeTab = 'bull';
   let sipAmount = 5000;
   let months = 36;
 
-  function initCharts() {
-    const navCtx   = document.getElementById('navChart').getContext('2d');
-    const valCtx   = document.getElementById('valueChart').getContext('2d');
-    const retCtx   = document.getElementById('returnChart').getContext('2d');
+  const legendLabels = {
+    color: '#64748b',
+    font: { size: 11, family: 'DM Sans' },
+    boxWidth: 12,
+    padding: 16,
+  };
 
+  function initCharts() {
+    const navCtx = document.getElementById('navChart').getContext('2d');
+    const valCtx = document.getElementById('valueChart').getContext('2d');
+    const retCtx = document.getElementById('returnChart').getContext('2d');
+
+    // NAV: bull line + bear line
     navChart = new Chart(navCtx, {
       type: 'line',
-      data: { labels: [], datasets: [{
-        data: [], borderColor: '#34d399', borderWidth: 2,
-        fill: true, backgroundColor: 'rgba(52,211,153,0.08)',
-        pointRadius: 0, tension: 0.35,
-      }]},
-      options: {
-        ...chartDefaults,
-        scales: {
-          ...chartDefaults.scales,
-          y: { ...chartDefaults.scales.y, ticks: { ...chartDefaults.scales.y.ticks, callback: v => `₹${v}` } }
-        },
-        plugins: { ...chartDefaults.plugins, tooltip: {
-          ...chartDefaults.plugins.tooltip,
-          callbacks: { label: ctx => ` NAV: ₹${ctx.raw}` }
-        }}
-      }
-    });
-
-    valueChart = new Chart(valCtx, {
-      type: 'line',
       data: { labels: [], datasets: [
-        { label: 'Invested', data: [], borderColor: '#60a5fa', borderWidth: 2, fill: true,
-          backgroundColor: 'rgba(96,165,250,0.08)', pointRadius: 0, tension: 0.35 },
-        { label: 'Portfolio Value', data: [], borderColor: '#34d399', borderWidth: 2, fill: true,
-          backgroundColor: 'rgba(52,211,153,0.08)', pointRadius: 0, tension: 0.35 },
+        { label: '📈 Bull NAV', data: [], borderColor: '#34d399', borderWidth: 2,
+          fill: false, pointRadius: 0, tension: 0.35 },
+        { label: '📉 Bear NAV', data: [], borderColor: '#fb923c', borderWidth: 2,
+          fill: false, pointRadius: 0, tension: 0.35 },
       ]},
       options: {
         ...chartDefaults,
-        plugins: {
-          ...chartDefaults.plugins,
-          legend: { display: true, labels: { color: '#64748b', font: { size: 11, family: 'DM Sans' }, boxWidth: 12, padding: 16 } },
-          tooltip: { ...chartDefaults.plugins.tooltip, callbacks: {
-            label: ctx => ` ${ctx.dataset.label}: ${fmt(ctx.raw)}`
-          }}
+        plugins: { ...chartDefaults.plugins,
+          legend: { display: true, labels: legendLabels },
+          tooltip: { ...chartDefaults.plugins.tooltip,
+            callbacks: { label: ctx => ` ${ctx.dataset.label}: ₹${ctx.raw}` }
+          }
         },
-        scales: {
-          ...chartDefaults.scales,
-          y: { ...chartDefaults.scales.y, ticks: { ...chartDefaults.scales.y.ticks, callback: fmt } }
-        }
+        scales: { ...chartDefaults.scales,
+          y: { ...chartDefaults.scales.y, ticks: { ...chartDefaults.scales.y.ticks, callback: v => `₹${v}` } }
+        },
       }
     });
 
-    returnChart = new Chart(retCtx, {
+    // Value: invested (shared) + bull portfolio + bear portfolio
+    valueChart = new Chart(valCtx, {
       type: 'line',
-      data: { labels: [], datasets: [{
-        data: [], borderColor: '#34d399', borderWidth: 2,
-        fill: true, backgroundColor: 'rgba(52,211,153,0.08)',
-        pointRadius: 0, tension: 0.35,
-      }]},
+      data: { labels: [], datasets: [
+        { label: 'Invested', data: [], borderColor: '#60a5fa', borderWidth: 1.5,
+          borderDash: [4,3], fill: false, pointRadius: 0, tension: 0.1 },
+        { label: '📈 Bull Value', data: [], borderColor: '#34d399', borderWidth: 2,
+          fill: false, pointRadius: 0, tension: 0.35 },
+        { label: '📉 Bear Value', data: [], borderColor: '#fb923c', borderWidth: 2,
+          fill: false, pointRadius: 0, tension: 0.35 },
+      ]},
       options: {
         ...chartDefaults,
-        scales: {
-          ...chartDefaults.scales,
-          y: { ...chartDefaults.scales.y,
-            ticks: { ...chartDefaults.scales.y.ticks, callback: v => `${v}%` },
+        plugins: { ...chartDefaults.plugins,
+          legend: { display: true, labels: legendLabels },
+          tooltip: { ...chartDefaults.plugins.tooltip,
+            callbacks: { label: ctx => ` ${ctx.dataset.label}: ${fmt(ctx.raw)}` }
           }
         },
-        plugins: { ...chartDefaults.plugins, tooltip: {
-          ...chartDefaults.plugins.tooltip,
-          callbacks: { label: ctx => ` Return: ${ctx.raw}%` }
-        }}
+        scales: { ...chartDefaults.scales,
+          y: { ...chartDefaults.scales.y, ticks: { ...chartDefaults.scales.y.ticks, callback: fmt } }
+        },
+      }
+    });
+
+    // Return %: bull line + bear line
+    returnChart = new Chart(retCtx, {
+      type: 'line',
+      data: { labels: [], datasets: [
+        { label: '📈 Bull Return', data: [], borderColor: '#34d399', borderWidth: 2,
+          fill: false, pointRadius: 0, tension: 0.35 },
+        { label: '📉 Bear Return', data: [], borderColor: '#fb923c', borderWidth: 2,
+          fill: false, pointRadius: 0, tension: 0.35 },
+      ]},
+      options: {
+        ...chartDefaults,
+        plugins: { ...chartDefaults.plugins,
+          legend: { display: true, labels: legendLabels },
+          tooltip: { ...chartDefaults.plugins.tooltip,
+            callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.raw}%` }
+          }
+        },
+        scales: { ...chartDefaults.scales,
+          y: { ...chartDefaults.scales.y,
+            ticks: { ...chartDefaults.scales.y.ticks, callback: v => `${v}%` }
+          }
+        },
       }
     });
   }
@@ -499,64 +543,40 @@
     const bearNav  = genNAV(months, 'bear', 99);
     const bullData = computeSIP(bullNav, sipAmount);
     const bearData = computeSIP(bearNav, sipAmount);
-    const activeData = activeTab === 'bull' ? bullData : bearData;
-    const accent = activeTab === 'bull' ? '#34d399' : '#f87171';
-    const accentRGB = activeTab === 'bull' ? '52,211,153' : '248,113,113';
+    const labels   = bullData.map(d => d.month);
+    const bLast    = bullData[bullData.length - 1];
+    const rLast    = bearData[bearData.length - 1];
 
-    const labels = activeData.map(d => d.month);
-    const last = activeData[activeData.length - 1];
+    // Bull stats
+    document.getElementById('bull-invested').textContent = fmt(bLast.totalInvested);
+    document.getElementById('bull-value').textContent    = fmt(bLast.currentValue);
+    document.getElementById('bull-return').textContent   = `${bLast.returnPct > 0 ? '+' : ''}${bLast.returnPct}%`;
+    document.getElementById('bull-units').textContent    = bLast.units.toFixed(2);
 
-    // Stats
-    document.getElementById('s-invested').textContent = fmt(last.totalInvested);
-    document.getElementById('s-value').style.color = accent;
-    document.getElementById('s-value').textContent = fmt(last.currentValue);
-    document.getElementById('s-return').style.color = accent;
-    document.getElementById('s-return').textContent = `${last.returnPct > 0 ? '+' : ''}${last.returnPct}%`;
-    document.getElementById('s-units').textContent = last.units.toFixed(2);
+    // Bear stats
+    document.getElementById('bear-invested').textContent = fmt(rLast.totalInvested);
+    document.getElementById('bear-value').textContent    = fmt(rLast.currentValue);
+    document.getElementById('bear-return').textContent   = `${rLast.returnPct > 0 ? '+' : ''}${rLast.returnPct}%`;
+    document.getElementById('bear-units').textContent    = rLast.units.toFixed(2);
 
-    // NAV Chart
+    // NAV chart
     navChart.data.labels = labels;
-    navChart.data.datasets[0].data = activeData.map(d => d.nav);
-    navChart.data.datasets[0].borderColor = accent;
-    navChart.data.datasets[0].backgroundColor = `rgba(${accentRGB},0.08)`;
-    navChart.update();
+    navChart.data.datasets[0].data = bullData.map(d => d.nav);
+    navChart.data.datasets[1].data = bearData.map(d => d.nav);
+    navChart.update({duration:0});
 
-    // Value Chart
-    const vColor2 = accent;
+    // Value chart
     valueChart.data.labels = labels;
-    valueChart.data.datasets[0].data = activeData.map(d => d.totalInvested);
-    valueChart.data.datasets[1].data = activeData.map(d => d.currentValue);
-    valueChart.data.datasets[1].borderColor = accent;
-    valueChart.data.datasets[1].backgroundColor = `rgba(${accentRGB},0.08)`;
-    valueChart.update();
+    valueChart.data.datasets[0].data = bullData.map(d => d.totalInvested);
+    valueChart.data.datasets[1].data = bullData.map(d => d.currentValue);
+    valueChart.data.datasets[2].data = bearData.map(d => d.currentValue);
+    valueChart.update({duration:0});
 
-    // Return Chart
+    // Return chart
     returnChart.data.labels = labels;
-    returnChart.data.datasets[0].data = activeData.map(d => d.returnPct);
-    returnChart.data.datasets[0].borderColor = accent;
-    returnChart.data.datasets[0].backgroundColor = `rgba(${accentRGB},0.08)`;
-    returnChart.update();
-
-    // Comparison cards
-    const bLast = bullData[bullData.length - 1];
-    const rLast = bearData[bearData.length - 1];
-    document.getElementById('c-bull-inv').textContent = fmt(bLast.totalInvested);
-    document.getElementById('c-bull-val').textContent = fmt(bLast.currentValue);
-    document.getElementById('c-bull-ret').textContent = `${bLast.returnPct > 0 ? '+' : ''}${bLast.returnPct}%`;
-    document.getElementById('c-bear-inv').textContent = fmt(rLast.totalInvested);
-    document.getElementById('c-bear-val').textContent = fmt(rLast.currentValue);
-    document.getElementById('c-bear-ret').textContent = `${rLast.returnPct > 0 ? '+' : ''}${rLast.returnPct}%`;
-
-    // Tab active states
-    document.getElementById('btnBull').className = `tab-btn bull${activeTab === 'bull' ? ' active' : ''}`;
-    document.getElementById('btnBear').className = `tab-btn bear${activeTab === 'bear' ? ' active' : ''}`;
-    document.getElementById('cmpBull').className = `compare-card bull${activeTab === 'bull' ? ' active' : ''}`;
-    document.getElementById('cmpBear').className = `compare-card bear${activeTab === 'bear' ? ' active' : ''}`;
-  }
-
-  function setTab(t) {
-    activeTab = t;
-    update();
+    returnChart.data.datasets[0].data = bullData.map(d => d.returnPct);
+    returnChart.data.datasets[1].data = bearData.map(d => d.returnPct);
+    returnChart.update({duration:0});
   }
 
   // ── Slider listeners ──
