@@ -375,9 +375,67 @@ body::before {
   .btn-score { padding: 11px 2px; font-size: 0.85rem; }
   .players-panel { grid-template-columns: 1fr; }
 }
+
+/* ── Social Icons Bar ── */
+.mg-social-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 6px 16px;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  box-sizing: border-box;
+}
+.mg-social-bar a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: rgba(255,255,255,0.75);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.13);
+  transition: background 0.18s, color 0.18s, border-color 0.18s, transform 0.18s;
+  flex-shrink: 0;
+}
+.mg-social-bar a:hover {
+  background: rgba(255,255,255,0.18);
+  color: #fff;
+  border-color: rgba(255,255,255,0.3);
+  transform: translateY(-1px);
+}
+.mg-social-bar-spacer {
+  height: 43px;
+  width: 100%;
+}
+
 </style>
 </head>
 <body>
+<!-- mg-social-bar -->
+<div class="mg-social-bar">
+  <a href="https://mgnitish.github.io/" target="_blank" rel="noopener" title="mgnitish.github.io">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+  </a>
+  <a href="https://twitter.com/mgnitish_builds" target="_blank" rel="noopener" title="@mgnitish_builds on X">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.259 5.63 5.905-5.63zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+  </a>
+  <a href="mailto:mgnitishbuilds@gmail.com" title="mgnitishbuilds@gmail.com">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+  </a>
+</div>
+<div class="mg-social-bar-spacer"></div>
+
 <div class="app">
   <!-- SETUP -->
   <div class="setup-screen" id="setupScreen">
