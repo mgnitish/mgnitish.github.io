@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexStep — Find Your Field</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sun: #E24B4A;
+    --sun-light: #FCEBEB;
+    --leaf: #2C2C2A;
+    --leaf-light: #F1EFE8;
+    --sky: #5F5E5A;
+    --sky-light: #F1EFE8;
+    --bg: #F8F8F6;
+    --card: #FFFFFF;
+    --text: #2C2C2A;
+    --muted: #5F5E5A;
+    --border: #D3D1C7;
+    --pill-r: 999px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 17px; }
+  h1,h2,h3 { font-family: 'Syne', sans-serif; }
+
+  /* NAV */
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 2rem; border-bottom: 1px solid var(--border);
+    background: var(--card); position: sticky; top: 0; z-index: 100;
+  }
+  .logo { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; }
+  .logo span { color: var(--sun); }
+  .nav-badge { background: var(--sun-light); color: var(--sun); font-size: 0.8rem; padding: 3px 10px; border-radius: var(--pill-r); font-weight: 500; }
+
+  /* HERO */
+  .hero {
+    padding: 4rem 2rem 3rem;
+    max-width: 900px; margin: 0 auto; text-align: center;
+  }
+  .hero-tag {
+    display: inline-block; background: var(--leaf-light); color: var(--leaf);
+    font-size: 0.9rem; font-weight: 500; padding: 5px 14px; border-radius: var(--pill-r);
+    margin-bottom: 1.5rem; letter-spacing: 0.03em;
+  }
+  .hero h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); font-weight: 800; line-height: 1.1; margin-bottom: 1rem; }
+  .hero h1 em { color: var(--sun); font-style: normal; }
+  .hero p { color: var(--muted); font-size: 1.15rem; max-width: 520px; margin: 0 auto 2.5rem; line-height: 1.7; }
+  .hero-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--text); color: #fff; border: none; padding: 0.85rem 2rem;
+    border-radius: var(--pill-r); font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700;
+    cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(44,44,42,0.2); }
+  .btn-secondary {
+    background: transparent; color: var(--text); border: 1.5px solid var(--border);
+    padding: 0.85rem 2rem; border-radius: var(--pill-r); font-family: 'Syne', sans-serif;
+    font-size: 1rem; font-weight: 700; cursor: pointer; transition: border-color 0.15s, background 0.15s;
+  }
+  .btn-secondary:hover { border-color: var(--text); background: var(--leaf-light); }
+
+  /* PAGES */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* SECTION HEADER */
+  .section-header { text-align: center; padding: 3rem 2rem 1.5rem; }
+  .section-header h2 { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
+  .section-header p { color: var(--muted); font-size: 1.05rem; }
+
+  /* CATEGORY GRID */
+  .cat-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem; max-width: 960px; margin: 0 auto; padding: 0 1.5rem 4rem;
+  }
+  .cat-card {
+    background: var(--card); border: 1.5px solid var(--border); border-radius: 16px;
+    padding: 1.5rem 1.2rem; cursor: pointer; transition: all 0.18s;
+    display: flex; flex-direction: column; gap: 0.6rem;
+  }
+  .cat-card:hover { border-color: var(--text); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(44,44,42,0.1); }
+  .cat-icon { font-size: 2rem; line-height: 1; }
+  .cat-card h3 { font-size: 1.05rem; font-weight: 700; }
+  .cat-card p { font-size: 0.88rem; color: var(--muted); line-height: 1.5; }
+  .cat-count { font-size: 0.78rem; color: var(--sun); background: var(--sun-light); padding: 2px 8px; border-radius: var(--pill-r); align-self: flex-start; font-weight: 500; }
+
+  /* FIELD DETAIL */
+  .field-detail { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .back-btn {
+    background: none; border: none; color: var(--muted); cursor: pointer;
+    font-size: 0.9rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 6px;
+    font-family: 'DM Sans', sans-serif; padding: 0;
+  }
+  .back-btn:hover { color: var(--sun); }
+  .field-hero {
+    background: var(--leaf-light); border-radius: 20px; padding: 2rem;
+    margin-bottom: 2rem; border: 1.5px solid var(--border);
+  }
+  .field-hero-top { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; }
+  .field-big-icon { font-size: 3rem; line-height: 1; }
+  .field-hero h2 { font-size: 1.7rem; font-weight: 800; }
+  .field-hero .tagline { color: var(--muted); font-size: 0.95rem; margin-top: 0.3rem; }
+  .field-badges { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.8rem; }
+  .badge { font-size: 0.72rem; padding: 3px 10px; border-radius: var(--pill-r); font-weight: 500; }
+  .badge-green { background: var(--leaf-light); color: var(--text); }
+  .badge-blue { background: var(--sky-light); color: var(--sky); }
+  .badge-orange { background: var(--sun-light); color: var(--sun); }
+
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
+  .info-card {
+    background: var(--card); border: 1.5px solid var(--border); border-radius: 14px; padding: 1.2rem;
+  }
+  .info-card .label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 0.4rem; }
+  .info-card .value { font-size: 1.1rem; font-weight: 700; font-family: 'Syne', sans-serif; }
+  .info-card .sub { font-size: 0.8rem; color: var(--muted); margin-top: 0.2rem; }
+
+  .detail-section { margin-bottom: 1.8rem; }
+  .detail-section h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 6px; }
+  .tag-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .tag { background: var(--bg); border: 1.5px solid var(--border); border-radius: var(--pill-r); font-size: 0.82rem; padding: 5px 14px; color: var(--text); }
+  .role-list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+  .role-list li {
+    background: var(--card); border: 1.5px solid var(--border); border-radius: 10px;
+    padding: 0.7rem 1rem; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;
+  }
+  .role-list li::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--sun); flex-shrink: 0; }
+  .good-for { background: var(--leaf-light); border-radius: 12px; padding: 1rem 1.2rem; border: 1px solid var(--border); }
+  .good-for p { font-size: 0.88rem; color: var(--text); line-height: 1.6; }
+
+  /* QUIZ */
+  .quiz-wrap { max-width: 620px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .quiz-progress { display: flex; gap: 6px; margin-bottom: 2rem; }
+  .quiz-dot { height: 5px; border-radius: var(--pill-r); flex: 1; background: var(--border); transition: background 0.3s; }
+  .quiz-dot.done { background: var(--text); }
+  .quiz-dot.active { background: var(--sun); }
+  .quiz-q { font-family: 'Syne', sans-serif; font-size: 1.55rem; font-weight: 800; margin-bottom: 0.4rem; }
+  .quiz-sub { color: var(--muted); font-size: 1rem; margin-bottom: 1.8rem; }
+  .quiz-options { display: flex; flex-direction: column; gap: 0.75rem; }
+  .quiz-opt {
+    background: var(--card); border: 1.5px solid var(--border); border-radius: 12px;
+    padding: 1rem 1.2rem; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 12px;
+  }
+  .quiz-opt:hover { border-color: var(--text); background: var(--leaf-light); }
+  .quiz-opt.selected { border-color: var(--text); background: var(--leaf-light); }
+  .quiz-opt .opt-icon { font-size: 1.5rem; width: 32px; text-align: center; flex-shrink: 0; }
+  .quiz-opt .opt-text { font-size: 1rem; font-weight: 500; }
+  .quiz-opt .opt-sub { font-size: 0.85rem; color: var(--muted); margin-top: 2px; }
+  .quiz-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; }
+  .quiz-step { font-size: 0.82rem; color: var(--muted); }
+
+  /* RESULTS */
+  .results-wrap { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .results-header { text-align: center; margin-bottom: 2.5rem; }
+  .results-header h2 { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
+  .results-header p { color: var(--muted); font-size: 1.05rem; }
+  .result-card {
+    background: var(--card); border: 1.5px solid var(--border); border-radius: 16px;
+    padding: 1.5rem; margin-bottom: 1rem; display: flex; gap: 1.2rem; align-items: flex-start;
+    cursor: pointer; transition: all 0.18s;
+  }
+  .result-card:hover { border-color: var(--text); box-shadow: 0 6px 20px rgba(44,44,42,0.08); }
+  .result-card.top { border-color: var(--sun); border-width: 2px; }
+  .result-rank { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: var(--border); width: 40px; flex-shrink: 0; line-height: 1; }
+  .result-card.top .result-rank { color: var(--sun); }
+  .result-info { flex: 1; }
+  .result-info h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.3rem; display: flex; align-items: center; gap: 8px; }
+  .top-badge { background: var(--sun); color: #fff; font-size: 0.72rem; padding: 2px 8px; border-radius: var(--pill-r); font-weight: 500; }
+  .result-info p { font-size: 0.92rem; color: var(--muted); margin-bottom: 0.7rem; line-height: 1.5; }
+  .result-meta { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .results-profile {
+    background: var(--leaf-light); border: 1.5px solid var(--border); border-radius: 14px;
+    padding: 1rem 1.2rem; margin-bottom: 1.8rem; display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;
+  }
+  .results-profile .profile-label { font-size: 0.78rem; color: var(--muted); width: 100%; margin-bottom: 0.1rem; }
+  .profile-chip {
+    background: #fff; border: 1.5px solid var(--border); border-radius: var(--pill-r);
+    padding: 4px 12px; font-size: 0.82rem; font-weight: 500; color: var(--text);
+    display: flex; align-items: center; gap: 5px;
+  }
+  .profile-chip span { font-size: 0.95rem; }
+  .retake-link button { background: none; border: none; color: var(--sun); cursor: pointer; font-size: 0.9rem; font-family: 'DM Sans', sans-serif; text-decoration: underline; }
+
+  /* FOOTER */
+  footer { border-top: 1px solid var(--border); padding: 2.5rem 2rem; background: var(--card); }
+  .footer-inner { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 1.2rem; }
+  .footer-brand { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; }
+  .footer-brand span { color: var(--sun); }
+  .footer-tagline { color: var(--muted); font-size: 0.9rem; }
+  .footer-links { display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; }
+  .footer-link {
+    display: flex; align-items: center; gap: 7px;
+    background: var(--bg); border: 1.5px solid var(--border); border-radius: var(--pill-r);
+    padding: 7px 16px; font-size: 0.85rem; color: var(--text); text-decoration: none;
+    transition: all 0.15s; font-weight: 500;
+  }
+  .footer-link:hover { border-color: var(--text); background: var(--leaf-light); }
+  .footer-link svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+  @media (max-width: 600px) {
+    nav { padding: 0.75rem 1rem; }
+    .info-grid { grid-template-columns: 1fr; }
+    .hero { padding: 3rem 1.2rem 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Nex<span>Step</span></div>
+</nav>
+
+<!-- HOME PAGE -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <div class="hero-tag">For fresh graduates</div>
+    <h1>Congrats on your graduation! 🎓<br><em>Let's find your next move.</em></h1>
+    <p>Explore job fields that match your degree, skills, and interests — and make the most of your time before PG.</p>
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="showPage('page-quiz')">Take the Quiz</button>
+      <button class="btn-secondary" onclick="showPage('page-browse')">Browse Fields</button>
+    </div>
+  </div>
+</div>
+
+<!-- BROWSE PAGE -->
+<div id="page-browse" class="page">
+  <div class="section-header">
+    <button class="back-btn" onclick="showPage('page-home')" style="margin: 0 auto 1rem;">← Back to Home</button>
+    <h2>Explore by Field</h2>
+    <p>Click any field to see roles, income, and skills needed</p>
+  </div>
+  <div class="cat-grid" id="cat-grid"></div>
+</div>
+
+<!-- FIELD DETAIL PAGE -->
+<div id="page-field" class="page">
+  <div class="field-detail" id="field-detail-content"></div>
+</div>
+
+<!-- QUIZ PAGE -->
+<div id="page-quiz" class="page">
+  <div class="quiz-wrap">
+    <div class="quiz-progress" id="quiz-progress"></div>
+    <div id="quiz-body"></div>
+    <div class="quiz-nav">
+      <span class="quiz-step" id="quiz-step-label"></span>
+      <button class="btn-primary" id="quiz-next-btn" onclick="quizNext()">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS PAGE -->
+<div id="page-results" class="page">
+  <div class="results-wrap">
+    <div class="results-header">
+      <h2>Your Top Fields 🎯</h2>
+      <p>Based on your profile, here are the best fields to explore</p>
+    </div>
+    <div id="results-profile"></div>
+    <div id="results-list"></div>
+    <div class="retake-link">
+      <button onclick="showPage('page-quiz'); startQuiz()">Retake quiz</button>
+      &nbsp;·&nbsp;
+      <button onclick="showPage('page-browse')" style="background:none;border:none;color:var(--sun);cursor:pointer;font-size:0.9rem;font-family:'DM Sans',sans-serif;text-decoration:underline;">Browse all fields</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">Nex<span>Step</span></div>
+    <div class="footer-tagline">Helping graduates find their path</div>
+    <div class="footer-links">
+      <a class="footer-link" href="https://mgnitish.github.io" target="_blank">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        mgnitish.github.io
+      </a>
+      <a class="footer-link" href="https://twitter.com/mgnitish_builds" target="_blank">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        @mgnitish_builds
+      </a>
+      <a class="footer-link" href="mailto:mgnitishbuilds@gmail.com">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+        mgnitishbuilds@gmail.com
+      </a>
+      <a class="footer-link" href="upi://pay?pa=nitishmg7@okhdfcbank&pn=Nitish" target="_blank">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="10"/></svg>
+        UPI · nitishmg7@okhdfcbank
+      </a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const FIELDS = [
+  {
+    id: 'education',
+    icon: '📚',
+    name: 'Education & Coaching',
+    tagline: 'Teach, tutor, and train others',
+    shortDesc: 'From home tutoring to coaching centre roles — ideal if you love explaining things.',
+    degrees: ['BA','BSc','BCom','BBA','BCA'],
+    skills: ['communication','people'],
+    workStyle: ['indoor','flexible'],
+    salaryRange: '₹8,000 – ₹18,000/month',
+    salaryMin: 8000,
+    duration: 'Flexible / Part-time',
+    roles: ['Home tutor (school subjects)', 'Coaching centre faculty assistant', 'Exam invigilator', 'Online tutor (Vedantu, Unacademy)', 'Study circle coordinator'],
+    skillsNeeded: ['Subject knowledge', 'Communication', 'Patience', 'English fluency'],
+    buildSkills: ['Presentation skills', 'Online teaching tools (Zoom, Google Meet)', 'Content creation for teaching'],
+    goodFor: 'Best for BA/BSc grads with strong subject knowledge. Especially good if you have 6–12 months before PG and want flexible hours.',
+    tags: ['Part-time', 'Flexible', 'High demand']
+  },
+  {
+    id: 'admin',
+    icon: '📋',
+    name: 'Admin & Data Entry',
+    tagline: 'Office, back-office, and data roles',
+    shortDesc: 'Back-office and data roles in companies, hospitals, and government offices.',
+    degrees: ['BCom','BBA','BA','BSc'],
+    skills: ['numbers','organized'],
+    workStyle: ['indoor'],
+    salaryRange: '₹8,000 – ₹14,000/month',
+    salaryMin: 8000,
+    duration: 'Full-time / Contract',
+    roles: ['Data entry operator', 'Office admin assistant', 'Hospital receptionist', 'Government office support staff', 'Document processing executive'],
+    skillsNeeded: ['MS Office (Word, Excel)', 'Typing speed', 'Attention to detail', 'Basic computer skills'],
+    buildSkills: ['Tally basics', 'Excel (pivot tables, VLOOKUP)', 'Government portal usage'],
+    goodFor: 'BCom and BBA grads with basic computer skills. Perfect as a 3–6 month role while preparing for competitive exams.',
+    tags: ['Full-time', 'Stable', 'Entry-level']
+  },
+  {
+    id: 'sales',
+    icon: '🏪',
+    name: 'Retail & Field Sales',
+    tagline: 'Customer-facing, on-ground roles',
+    shortDesc: 'Sales, promotions, and retail execution roles across cities and towns.',
+    degrees: ['BA','BCom','BBA','BSc','BCA'],
+    skills: ['communication','people'],
+    workStyle: ['outdoor','flexible'],
+    salaryRange: '₹10,000 – ₹20,000/month',
+    salaryMin: 10000,
+    duration: 'Full-time / Contract',
+    roles: ['Retail store executive', 'Field sales promoter', 'Insurance / financial product associate', 'E-commerce delivery coordination', 'Customer service executive'],
+    skillsNeeded: ['Communication', 'Confidence', 'Basic product knowledge', 'Smartphone use'],
+    buildSkills: ['Negotiation skills', 'CRM tools (basic)', 'Local geography & networking'],
+    goodFor: 'Any grad comfortable talking to people. Great for those in Tier-2 / Tier-3 cities where retail and FMCG companies actively hire.',
+    tags: ['Income potential', 'Outdoor', 'Incentives']
+  },
+  {
+    id: 'ngo',
+    icon: '🤝',
+    name: 'NGO & Social Work',
+    tagline: 'Community and development roles',
+    shortDesc: 'Field work and coordination roles with NGOs, government schemes, and development projects.',
+    degrees: ['BA','BSW','BSc'],
+    skills: ['people','communication'],
+    workStyle: ['outdoor','flexible'],
+    salaryRange: '₹7,000 – ₹15,000/month',
+    salaryMin: 7000,
+    duration: 'Contract / Project-based',
+    roles: ['Field survey worker', 'Community mobiliser', 'Govt scheme awareness officer', 'Self-help group (SHG) coordinator', 'Health camp support staff'],
+    skillsNeeded: ['Local language fluency', 'Community knowledge', 'Record-keeping', 'Empathy'],
+    buildSkills: ['Survey tools (Google Forms, KoboToolbox)', 'Report writing', 'Community engagement'],
+    goodFor: 'BA / BSW grads passionate about community impact. Many NGOs specifically look for local language speakers with a graduation degree.',
+    tags: ['Meaningful work', 'Field-based', 'Contract']
+  },
+  {
+    id: 'freelance',
+    icon: '💻',
+    name: 'Freelance & Remote Work',
+    tagline: 'Work from anywhere, on your terms',
+    shortDesc: 'Content writing, translation, social media, and digital tasks you can do from home.',
+    degrees: ['BA','BCom','BCA','BSc','BBA'],
+    skills: ['creative','communication'],
+    workStyle: ['remote','flexible'],
+    salaryRange: '₹5,000 – ₹25,000/month',
+    salaryMin: 5000,
+    duration: 'Freelance / Part-time',
+    roles: ['Content writer (regional or English)', 'Translator / transcription assistant', 'Social media manager (small businesses)', 'Data labelling / annotation', 'Online research assistant'],
+    skillsNeeded: ['Writing skills', 'Basic internet literacy', 'Time management', 'Self-discipline'],
+    buildSkills: ['SEO basics', 'Canva / basic design', 'Freelance platforms (Fiverr, Upwork, Pepper Content)'],
+    goodFor: 'Grads with strong writing or language skills. Especially good if you are in a smaller town with limited local job options. Income can grow quickly.',
+    tags: ['Work from home', 'Flexible hours', 'Scalable income']
+  },
+  {
+    id: 'banking',
+    icon: '🏦',
+    name: 'Banking & Finance Support',
+    tagline: 'Entry roles in banks and NBFCs',
+    shortDesc: 'Entry-level roles in cooperative banks, NBFCs, and microfinance organisations.',
+    degrees: ['BCom','BBA','BA'],
+    skills: ['numbers','organized'],
+    workStyle: ['indoor'],
+    salaryRange: '₹10,000 – ₹18,000/month',
+    salaryMin: 10000,
+    duration: 'Full-time',
+    roles: ['Cooperative bank clerk', 'Microfinance field officer', 'NBFC loan processing assistant', 'Insurance agent (LIC, private)', 'Bank exam coaching student assistant'],
+    skillsNeeded: ['Basic accounts knowledge', 'Numeracy', 'Customer interaction', 'Trust and integrity'],
+    buildSkills: ['Tally / accounting software', 'IBPS / bank exam prep', 'Financial product basics'],
+    goodFor: 'BCom and BBA grads planning to appear for bank exams. Working in a cooperative bank or NBFC gives direct experience AND helps exam preparation.',
+    tags: ['Exam-aligned', 'Stable', 'Full-time']
+  },
+  {
+    id: 'govt',
+    icon: '🏛️',
+    name: 'Government Scheme Work',
+    tagline: 'Support roles in govt programmes',
+    shortDesc: 'Contract and support roles in Tamil Nadu government welfare and survey programmes.',
+    degrees: ['BA','BCom','BSc','BBA'],
+    skills: ['organized','communication'],
+    workStyle: ['outdoor','indoor'],
+    salaryRange: '₹8,000 – ₹14,000/month',
+    salaryMin: 8000,
+    duration: 'Contract / Seasonal',
+    roles: ['Census / survey enumerator', 'Aadhaar / Jan Dhan enrolment assistant', 'Panchayat office support staff', 'Govt exam centre support', 'Welfare scheme beneficiary outreach worker'],
+    skillsNeeded: ['Local language literacy', 'Data recording accuracy', 'Familiarity with govt processes', 'Reliability'],
+    buildSkills: ['Government portal navigation', 'Field data collection apps', 'Basic typing'],
+    goodFor: 'Any grad aspiring for government jobs. Hands-on exposure to government processes is invaluable when preparing for Group 2 / Group 4 or similar state-level exams.',
+    tags: ['Govt exposure', 'District-level', 'Contract']
+  },
+  {
+    id: 'entertainment',
+    icon: '🎬',
+    name: 'Entertainment & Events',
+    tagline: 'Malls, theatres, events, and hospitality',
+    shortDesc: 'Front-of-house, hosting, and coordination roles in malls, multiplexes, event companies, and venues across TN.',
+    degrees: ['BA','BCom','BBA','BSc','BCA'],
+    skills: ['communication','people'],
+    workStyle: ['indoor','outdoor','flexible'],
+    salaryRange: '₹9,000 – ₹20,000/month',
+    salaryMin: 9000,
+    duration: 'Part-time / Contract / Seasonal',
+    roles: ['Multiplex / theatre floor staff', 'Mall customer service executive', 'Event host / anchor (corporate & college events)', 'Promoter / brand activation executive', 'Wedding & function coordinator assistant', 'Amusement park / family entertainment centre staff'],
+    skillsNeeded: ['Presentable appearance', 'Communication', 'Energy & enthusiasm', 'Crowd & customer handling'],
+    buildSkills: ['Event planning basics', 'Public speaking & hosting', 'Vendor coordination', 'Social media coverage for events'],
+    goodFor: 'Outgoing grads who enjoy being around people and don\'t mind weekend or evening shifts. Demand picks up strongly during festival seasons and college event circuits.',
+    tags: ['People-facing', 'Weekend shifts', 'Festive season demand']
+  },
+  {
+    id: 'gig',
+    icon: '🛵',
+    name: 'Gig & Quick Commerce',
+    tagline: 'Delivery, rides, and on-demand work',
+    shortDesc: 'Flexible earning on your own schedule with Swiggy, Zomato, Blinkit, Rapido and more.',
+    degrees: ['BA','BSc','BCom','BBA','BCA'],
+    skills: ['people','communication'],
+    workStyle: ['outdoor','flexible'],
+    salaryRange: '₹12,000 – ₹30,000/month',
+    salaryMin: 12000,
+    duration: 'Flexible / Gig',
+    roles: ['Swiggy / Zomato delivery partner', 'Blinkit / Zepto / BigBasket quick commerce rider', 'Rapido / bike taxi pilot', 'Porter / Dunzo logistics partner', 'Amazon Flex delivery associate'],
+    skillsNeeded: ['Two-wheeler licence (mandatory)', 'Smartphone with data', 'City / locality knowledge', 'Physical fitness'],
+    buildSkills: ['Route optimisation', 'Customer handling', 'Time management', 'App-based order management'],
+    goodFor: 'Any grad with a two-wheeler and licence. Ideal if you need immediate income with zero wait time — most platforms onboard within 3–5 days. Works perfectly alongside exam prep since you control your own hours.',
+    tags: ['Immediate income', 'Own hours', 'High demand']
+  },
+  {
+    id: 'healthcare',
+    icon: '🏥',
+    name: 'Healthcare Support',
+    tagline: 'Hospitals, clinics, and diagnostics',
+    shortDesc: 'Front desk, ward support, and medical admin roles in private and public hospital networks.',
+    degrees: ['BSc','BA','BCom','BBA'],
+    skills: ['people','organized'],
+    workStyle: ['indoor'],
+    salaryRange: '₹9,000 – ₹18,000/month',
+    salaryMin: 9000,
+    duration: 'Full-time / Contract',
+    roles: ['Hospital front desk / receptionist', 'Pharmacy billing assistant', 'Diagnostic centre sample collection assistant', 'Medical records & documentation executive', 'Patient care coordinator (corporate hospitals)'],
+    skillsNeeded: ['Empathy & calm under pressure', 'Basic computer skills', 'Communication', 'Attention to detail'],
+    buildSkills: ['Medical terminology basics', 'Hospital management software (eHospital, Practo)', 'Health insurance claim processing'],
+    goodFor: 'BSc Biology, Chemistry, or Zoology grads are preferred but any degree works for admin roles. Corporate hospital chains actively hire fresh grads. Good stepping stone before M.Sc or nursing PG.',
+    tags: ['High demand', 'Full-time', 'BSc preferred']
+  },
+  {
+    id: 'logistics',
+    icon: '📦',
+    name: 'Logistics & Warehousing',
+    tagline: 'Warehouses, ports, and supply chain',
+    shortDesc: 'Fixed-location inventory, dispatch, and supply chain support roles — different from gig delivery.',
+    degrees: ['BCom','BBA','BSc','BA'],
+    skills: ['numbers','organized'],
+    workStyle: ['indoor','outdoor'],
+    salaryRange: '₹10,000 – ₹18,000/month',
+    salaryMin: 10000,
+    duration: 'Full-time / Contract',
+    roles: ['Warehouse inventory checker (Amazon, Flipkart hubs)', 'Dispatch & packing supervisor', 'Port documentation assistant', 'Freight forwarding office support', 'Cold chain / pharma logistics coordinator'],
+    skillsNeeded: ['Basic Excel / inventory tools', 'Physical stamina for warehouse roles', 'Accuracy in record-keeping', 'Shift flexibility'],
+    buildSkills: ['Warehouse management systems (WMS)', 'Supply chain fundamentals', 'SAP / ERP basics', 'Export-import documentation'],
+    goodFor: 'BCom and BBA grads looking for structured full-time work. Port ecosystems, industrial corridors, and e-commerce fulfilment hubs in major cities are actively hiring.',
+    tags: ['Full-time', 'Industrial belt', 'Shift-based']
+  },
+  {
+    id: 'hospitality',
+    icon: '🍽️',
+    name: 'Food & Hospitality',
+    tagline: 'Hotels, restaurants, and tourism',
+    shortDesc: 'Front-of-house, kitchen coordination, and guest service roles across the hospitality and tourism sector.',
+    degrees: ['BA','BCom','BBA','BSc'],
+    skills: ['people','communication'],
+    workStyle: ['indoor','flexible'],
+    salaryRange: '₹9,000 – ₹20,000/month',
+    salaryMin: 9000,
+    duration: 'Full-time / Seasonal',
+    roles: ['Hotel front desk executive', 'Restaurant floor supervisor trainee', 'Cloud kitchen order coordinator', 'Resort guest relations staff', 'Café / QSR (Quick Service Restaurant) team member'],
+    skillsNeeded: ['Hospitality mindset', 'Communication', 'Presentability', 'Willingness to work weekends & holidays'],
+    buildSkills: ['Food safety basics (FSSAI awareness)', 'POS billing systems', 'Guest handling & conflict resolution', 'Basic F&B knowledge'],
+    goodFor: 'Outgoing grads comfortable with weekend shifts and holiday seasons. Hill stations and coastal tourism destinations create strong seasonal demand. Good fit before a Hotel Management PG.',
+    tags: ['Tourism belt', 'Seasonal demand', 'Tips & incentives']
+  },
+  {
+    id: 'investments',
+    icon: '📈',
+    name: 'Investments & Wealth',
+    tagline: 'Mutual funds, stocks, and capital markets',
+    shortDesc: 'Entry roles in mutual funds, broking, and wealth management — accessible with short certifications.',
+    degrees: ['BCom','BBA','BA','BSc'],
+    skills: ['numbers','communication'],
+    workStyle: ['indoor','flexible'],
+    salaryRange: '₹10,000 – ₹25,000/month',
+    salaryMin: 10000,
+    duration: 'Full-time / Commission-based',
+    roles: ['Mutual fund distributor (AMFI certified)', 'Client onboarding executive at AMCs', 'KYC verification executive (CAMS, KFintech)', 'Sub-broker / authorised person (Zerodha, Angel One, Upstox)', 'Back-office executive at broking firms', 'Demat account opening executive'],
+    skillsNeeded: ['Basic understanding of financial products', 'Communication & trust-building', 'Numeracy', 'Willingness to clear NISM / AMFI certification'],
+    buildSkills: ['NISM Series V-A (Mutual Fund) certification', 'AMFI registration', 'Basic equity & market concepts', 'Excel for portfolio tracking'],
+    goodFor: 'BCom and BBA grads with an interest in markets. The AMFI / NISM Series V-A exam can be cleared in 2–3 weeks with self-study — it unlocks legitimate entry into the MF distribution space. High earning potential through commissions once you build a client base.',
+    tags: ['Certification needed', 'Commission upside', 'Growing sector']
+  },
+  {
+    id: 'travel',
+    icon: '✈️',
+    name: 'Travel & Tourism',
+    tagline: 'Tour operations, travel desks, and tourism',
+    shortDesc: 'Help people go places — roles in tour operators, travel agencies, airports, and tourism boards.',
+    degrees: ['BA','BCom','BBA','BSc'],
+    skills: ['communication','people'],
+    workStyle: ['indoor','outdoor','flexible'],
+    salaryRange: '₹10,000 – ₹18,000/month',
+    salaryMin: 10000,
+    duration: 'Full-time / Seasonal',
+    roles: ['Travel desk executive (MakeMyTrip, Thomas Cook, local operators)', 'Tour guide / local experience host', 'Corporate travel coordinator', 'Visa documentation assistant', 'Airport ground staff / check-in executive', 'Eco-tourism & trekking camp coordinator'],
+    skillsNeeded: ['Geography & destination knowledge', 'Communication & people skills', 'Attention to booking details', 'Flexibility with irregular hours'],
+    buildSkills: ['GDS tools (Amadeus, Galileo basics)', 'Visa & documentation processes', 'Tour itinerary planning', 'Travel content & social media'],
+    goodFor: 'Outgoing grads who love travel and people. Starting salaries are modest but perks are real — familiarisation trips, airline discounts, and hotel stays. Best for those treating this as a career entry, not just a gap filler. IATA certification is a strong add-on.',
+    tags: ['Travel perks', 'People-facing', 'Seasonal peaks']
+  },
+  {
+    id: 'media',
+    icon: '🎙️',
+    name: 'Media, Journalism & Content',
+    tagline: 'News, digital content, and storytelling',
+    shortDesc: 'Write, report, shoot, and create — for news portals, YouTube channels, podcasts, and regional OTT platforms.',
+    degrees: ['BA','BCom','BBA','BSc','BCA'],
+    skills: ['creative','communication'],
+    workStyle: ['outdoor','flexible','remote'],
+    salaryRange: '₹8,000 – ₹20,000/month',
+    salaryMin: 8000,
+    duration: 'Full-time / Freelance',
+    roles: ['Digital news portal reporter / sub-editor', 'YouTube channel script writer or on-camera presenter', 'Political / current affairs content researcher', 'Podcast production assistant', 'Regional OTT / streaming platform content coordinator', 'Social media news page manager'],
+    skillsNeeded: ['Strong writing or speaking ability', 'Current affairs awareness', 'Smartphone video & basic editing', 'Curiosity & follow-through'],
+    buildSkills: ['Video editing (CapCut, DaVinci Resolve)', 'SEO & headline writing', 'Interviewing & fact-checking', 'Canva for social media graphics', 'YouTube / Instagram analytics'],
+    goodFor: 'BA grads in English, Journalism, or Political Science are a natural fit — but any grad with strong writing or on-camera confidence can break in. Regional language fluency is a huge advantage for local news channels and political content creators. Entry pay is modest but freelance and creator income can scale fast.',
+    tags: ['Creative field', 'Regional language advantage', 'Freelance potential']
+  },
+  {
+    id: 'campus',
+    icon: '🎓',
+    name: 'Campus & Library Roles',
+    tagline: 'Stay close to academia',
+    shortDesc: 'Library, lab, and administrative assistant roles in colleges and schools.',
+    degrees: ['BA','BSc','BCom','BLib'],
+    skills: ['organized','communication'],
+    workStyle: ['indoor'],
+    salaryRange: '₹7,000 – ₹13,000/month',
+    salaryMin: 7000,
+    duration: 'Part-time / Contract',
+    roles: ['College library assistant', 'Lab demonstrator (Science)', 'School office assistant', 'Exam coordination support staff', 'Admission helpdesk executive'],
+    skillsNeeded: ['Subject knowledge', 'Organised work habits', 'Record-keeping', 'Communication'],
+    buildSkills: ['Library management systems', 'Academic documentation', 'Research assistance skills'],
+    goodFor: 'Grads planning to pursue M.Lib, M.Sc, or M.Ed. Working on a campus keeps you in an academic environment and often provides PG fee concessions.',
+    tags: ['Academic environment', 'Low-stress', 'Part-time']
+  }
+];
+
+const QUIZ = [
+  {
+    id: 'degree',
+    q: 'What is your UG degree?',
+    sub: 'Pick the stream closest to yours',
+    opts: [
+      { icon: '📖', text: 'Arts (BA)', sub: 'History, Tamil, English, Economics...', val: 'BA' },
+      { icon: '🔬', text: 'Science (BSc)', sub: 'Maths, Physics, Chemistry, Bio...', val: 'BSc' },
+      { icon: '📊', text: 'Commerce / Business (BCom / BBA)', sub: 'Accounts, Management, Finance...', val: 'BCom' },
+      { icon: '💻', text: 'Computer Science (BCA / BSc CS)', sub: 'Non-engineering IT degrees', val: 'BCA' },
+    ]
+  },
+  {
+    id: 'skills',
+    q: 'What are you naturally good at?',
+    sub: 'Be honest — pick your strongest trait',
+    opts: [
+      { icon: '🗣️', text: 'Talking & Explaining', sub: 'People love how you communicate', val: 'communication' },
+      { icon: '🔢', text: 'Numbers & Detail', sub: 'You catch errors others miss', val: 'numbers' },
+      { icon: '🎨', text: 'Writing & Creativity', sub: 'Ideas flow easily for you', val: 'creative' },
+      { icon: '👥', text: 'Building Relationships', sub: 'People trust you quickly', val: 'people' },
+    ]
+  },
+  {
+    id: 'time',
+    q: 'How much time do you have?',
+    sub: 'Before your PG or next big step',
+    opts: [
+      { icon: '⚡', text: '3 months or less', sub: 'Short sprint only', val: '3m' },
+      { icon: '📅', text: '3 – 6 months', sub: 'A good half-year window', val: '6m' },
+      { icon: '🗓️', text: '6 – 12 months', sub: 'Full gap year', val: '12m' },
+    ]
+  },
+  {
+    id: 'salary',
+    q: 'What salary do you expect?',
+    sub: 'Be realistic for a starting role',
+    opts: [
+      { icon: '🌱', text: '₹8,000 – ₹12,000', sub: 'Open to learning over earning', val: 'low' },
+      { icon: '💰', text: '₹12,000 – ₹20,000', sub: 'Need decent pay', val: 'mid' },
+      { icon: '🚀', text: '₹20,000+', sub: 'Income is a priority', val: 'high' },
+    ]
+  },
+  {
+    id: 'style',
+    q: 'How do you like to work?',
+    sub: 'Pick what feels most natural',
+    opts: [
+      { icon: '🏢', text: 'Indoors / Office', sub: 'AC room, desk, fixed hours', val: 'indoor' },
+      { icon: '🌳', text: 'Outdoors / Field', sub: 'Moving around, meeting people', val: 'outdoor' },
+      { icon: '🏠', text: 'Work from Home', sub: 'Remote, own schedule', val: 'remote' },
+      { icon: '🔄', text: 'Flexible / Mixed', sub: 'No strong preference', val: 'flexible' },
+    ]
+  }
+];
+
+let currentPage = 'page-home';
+let quizStep = 0;
+let quizAnswers = {};
+let fromBrowse = false;
+
+let prevPage = 'page-home';
+
+function showPage(id, extra) {
+  prevPage = currentPage;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  currentPage = id;
+  window.scrollTo(0,0);
+}
+
+// BROWSE
+function renderBrowse() {
+  const grid = document.getElementById('cat-grid');
+  grid.innerHTML = FIELDS.map(f => `
+    <div class="cat-card" onclick="showField('${f.id}', 'browse')">
+      <div class="cat-icon">${f.icon}</div>
+      <h3>${f.name}</h3>
+      <p>${f.shortDesc}</p>
+      <span class="cat-count">${f.roles.length} roles</span>
+    </div>
+  `).join('');
+}
+
+function showField(id, from) {
+  fromBrowse = (from === 'browse');
+  const f = FIELDS.find(x => x.id === id);
+  const el = document.getElementById('field-detail-content');
+  el.innerHTML = `
+    <button class="back-btn" onclick="showPage(fromBrowse ? 'page-browse' : 'page-results')">← Back</button>
+    <div class="field-hero">
+      <div class="field-hero-top">
+        <div class="field-big-icon">${f.icon}</div>
+        <div>
+          <h2>${f.name}</h2>
+          <p class="tagline">${f.tagline}</p>
+        </div>
+      </div>
+      <div class="field-badges">
+        ${f.tags.map(t => `<span class="badge badge-orange">${t}</span>`).join('')}
+        ${f.degrees.slice(0,3).map(d => `<span class="badge badge-blue">${d}</span>`).join('')}
+      </div>
+    </div>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="label">Typical Income</div>
+        <div class="value">${f.salaryRange}</div>
+        <div class="sub">Entry-level in India</div>
+      </div>
+      <div class="info-card">
+        <div class="label">Work Type</div>
+        <div class="value">${f.duration}</div>
+        <div class="sub">${f.workStyle.join(' / ')}</div>
+      </div>
+    </div>
+    <div class="detail-section">
+      <h3>💼 Roles you can apply for</h3>
+      <ul class="role-list">${f.roles.map(r => `<li>${r}</li>`).join('')}</ul>
+    </div>
+    <div class="detail-section">
+      <h3>✅ Skills you already need</h3>
+      <div class="tag-list">${f.skillsNeeded.map(s => `<span class="tag">${s}</span>`).join('')}</div>
+    </div>
+    <div class="detail-section">
+      <h3>📈 Skills to build while working</h3>
+      <div class="tag-list">${f.buildSkills.map(s => `<span class="tag">${s}</span>`).join('')}</div>
+    </div>
+    <div class="detail-section">
+      <h3>🎯 Best for</h3>
+      <div class="good-for"><p>${f.goodFor}</p></div>
+    </div>
+  `;
+  showPage('page-field');
+}
+
+// QUIZ
+function startQuiz() {
+  quizStep = 0;
+  quizAnswers = {};
+  renderQuizStep();
+}
+
+function renderQuizStep() {
+  const q = QUIZ[quizStep];
+  const progress = document.getElementById('quiz-progress');
+  progress.innerHTML = QUIZ.map((_,i) => `<div class="quiz-dot ${i < quizStep ? 'done' : i === quizStep ? 'active' : ''}"></div>`).join('');
+  document.getElementById('quiz-step-label').textContent = `${quizStep + 1} of ${QUIZ.length}`;
+  const btn = document.getElementById('quiz-next-btn');
+  btn.textContent = quizStep === QUIZ.length - 1 ? 'See My Results →' : 'Next →';
+  document.getElementById('quiz-body').innerHTML = `
+    <div class="quiz-q">${q.q}</div>
+    <p class="quiz-sub">${q.sub}</p>
+    <div class="quiz-options">
+      ${q.opts.map(o => `
+        <div class="quiz-opt ${quizAnswers[q.id] === o.val ? 'selected' : ''}" onclick="selectOpt('${q.id}','${o.val}',this)">
+          <div class="opt-icon">${o.icon}</div>
+          <div>
+            <div class="opt-text">${o.text}</div>
+            <div class="opt-sub">${o.sub}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function selectOpt(qid, val, el) {
+  quizAnswers[qid] = val;
+  document.querySelectorAll('.quiz-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function quizNext() {
+  const q = QUIZ[quizStep];
+  if (!quizAnswers[q.id]) { alert('Please pick an option first!'); return; }
+  if (quizStep < QUIZ.length - 1) {
+    quizStep++;
+    renderQuizStep();
+  } else {
+    showResults();
+  }
+}
+
+function showResults() {
+  const a = quizAnswers;
+  const deg = a.degree;
+  const skill = a.skills;
+  const salary = a.salary;
+  const style = a.style;
+
+  function score(f) {
+    let s = 0;
+
+    // Degree match — worth 2 pts
+    if (f.degrees.includes(deg)) s += 2;
+
+    // Skill match — worth 2 pts
+    if (f.skills.includes(skill)) s += 2;
+
+    // Work style match — flexible fields get partial credit
+    if (f.workStyle.includes(style)) s += 2;
+    else if (f.workStyle.includes('flexible')) s += 1;
+
+    // Salary fit — reward fields within the user's range
+    if (salary === 'low' && f.salaryMin <= 9000) s += 2;
+    else if (salary === 'low' && f.salaryMin <= 12000) s += 1;
+    if (salary === 'mid' && f.salaryMin <= 12000) s += 2;
+    else if (salary === 'mid' && f.salaryMin <= 15000) s += 1;
+    if (salary === 'high' && f.salaryMin >= 10000) s += 2;
+
+    // Combination bonuses — strong degree+skill signals for specific fields
+    if (f.id === 'education' && skill === 'communication' && (deg === 'BSc' || deg === 'BA')) s += 3;
+    if (f.id === 'education' && skill === 'people' && (deg === 'BSc' || deg === 'BA')) s += 2;
+    if (f.id === 'investments' && skill === 'numbers' && (deg === 'BCom' || deg === 'BBA')) s += 3;
+    if (f.id === 'banking' && skill === 'numbers' && deg === 'BCom') s += 2;
+    if (f.id === 'media' && skill === 'creative' && deg === 'BA') s += 3;
+    if (f.id === 'freelance' && skill === 'creative') s += 2;
+    if (f.id === 'healthcare' && deg === 'BSc') s += 2;
+    if (f.id === 'campus' && (deg === 'BSc' || deg === 'BA') && style === 'indoor') s += 2;
+
+    // Gig, NGO, and Logistics are outdoor-heavy — don't boost for indoor preference
+    if (f.id === 'gig' && style !== 'indoor') s += 2;
+    if (f.id === 'ngo' && style !== 'indoor') s += 1;
+    if (f.id === 'logistics' && style !== 'indoor') s += 1;
+
+    // Tie-break: add small noise so results vary and aren't always identical
+    s += Math.random() * 0.4;
+
+    return s;
+  }
+
+  // Build human-readable labels from answers
+  const degreeLabel  = { BA: '📖 Arts (BA)', BSc: '🔬 Science (BSc)', BCom: '📊 Commerce / BBA', BCA: '💻 BCA / BSc CS' };
+  const skillLabel   = { communication: '🗣️ Talking & Explaining', numbers: '🔢 Numbers & Detail', creative: '🎨 Writing & Creativity', people: '👥 Building Relationships' };
+  const timeLabel    = { '3m': '⚡ 3 months or less', '6m': '📅 3 – 6 months', '12m': '🗓️ 6 – 12 months' };
+  const salaryLabel  = { low: '🌱 ₹8k – ₹12k', mid: '💰 ₹12k – ₹20k', high: '🚀 ₹20k+' };
+  const styleLabel   = { indoor: '🏢 Office / Indoors', outdoor: '🌳 Outdoors / Field', remote: '🏠 Work from Home', flexible: '🔄 Flexible' };
+
+  const chips = [
+    degreeLabel[a.degree],
+    skillLabel[a.skills],
+    timeLabel[a.time],
+    salaryLabel[a.salary],
+    styleLabel[a.style]
+  ].filter(Boolean);
+
+  document.getElementById('results-profile').innerHTML = `
+    <div class="results-profile">
+      <div class="profile-label">Your profile</div>
+      ${chips.map(c => `<div class="profile-chip">${c}</div>`).join('')}
+    </div>
+  `;
+
+  const ranked = [...FIELDS].sort((x,y) => score(y) - score(x));
+
+  // Gig work is a last-resort option — always pin it to position 5 (index 4)
+  const gigIdx = ranked.findIndex(f => f.id === 'gig');
+  if (gigIdx < 4) {
+    const [gig] = ranked.splice(gigIdx, 1);
+    ranked.splice(4, 0, gig);
+  }
+
+  const top5 = ranked.slice(0,5);
+
+  document.getElementById('results-list').innerHTML = top5.map((f, i) => `
+    <div class="result-card ${i === 0 ? 'top' : ''}" onclick="showField('${f.id}','results')">
+      <div class="result-rank">${i+1}</div>
+      <div class="result-info">
+        <h3>${f.icon} ${f.name} ${i === 0 ? '<span class="top-badge">Best match</span>' : ''}</h3>
+        <p>${f.shortDesc}</p>
+        <div class="result-meta">
+          <span class="badge badge-green">${f.salaryRange}</span>
+          <span class="badge badge-blue">${f.duration}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  showPage('page-results');
+}
+
+// INIT
+renderBrowse();
+startQuiz();
+
+// wire back button in field detail using closure
+window.fromBrowse = false;
+</script>
+</body>
+</html>
