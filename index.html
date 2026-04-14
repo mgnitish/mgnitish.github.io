@@ -1727,7 +1727,7 @@
       const iframe  = document.getElementById('appFrameIframe');
       overlay.classList.remove('open');
       document.body.style.overflow = '';
-      setTimeout(() => { iframe.src = ''; }, 300);
+      setTimeout(() => { iframe.srcdoc = ''; iframe.src = ''; }, 300);
     }
 
     // Esc key closes frame
@@ -1735,13 +1735,40 @@
       if (e.key === 'Escape') closeAppFrame();
     });
 
-    // ── Intercept all pcard-link clicks → open in frame
-    document.querySelectorAll('.pcard-link').forEach(link => {
+    // ── Intercept all pcard-link clicks → open in frame (skip avengers-launch)
+    document.querySelectorAll('.pcard-link:not(.avengers-launch)').forEach(link => {
       link.addEventListener('click', function(e) {
         e.preventDefault();
         const url   = this.getAttribute('href');
         const title = this.closest('.pcard-body').querySelector('h3').textContent;
         openAppFrame(url, title);
+      });
+    });
+
+    // ── Avengers Grid War — launch via srcdoc (works on all browsers & mobile)
+    function openGameSrcdoc(title) {
+      const overlay = document.getElementById('appFrameOverlay');
+      const iframe  = document.getElementById('appFrameIframe');
+      const loading = document.getElementById('appFrameLoading');
+      const titleEl = document.getElementById('appFrameTitle');
+      const extLink = document.getElementById('appFrameExternal');
+
+      iframe.removeAttribute('src');
+      iframe.srcdoc = '';
+      loading.classList.remove('hidden');
+      titleEl.innerHTML = title + ' <span>·</span> nitish<span style="color:var(--accent)">.</span>';
+      extLink.href = 'https://mgnitish.github.io/apps/games/grid war/';
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+
+      const gameHtml = document.getElementById('avengers-game-html').textContent.trim();
+      requestAnimationFrame(() => { iframe.srcdoc = gameHtml; });
+    }
+
+    document.querySelectorAll('.avengers-launch').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        openGameSrcdoc('Avengers Grid War');
       });
     });
 
@@ -3030,24 +3057,4 @@ goPage('home');
 </body>
 </html>
 
-  </script>
-  <script>
-    // Launch Avengers Grid War from inline embedded HTML
-    document.querySelectorAll('.avengers-launch').forEach(function(btn) {
-      btn.addEventListener('click', function(e) {
-        e.preventDefault();
-        var gameHtml = document.getElementById('avengers-game-html').textContent;
-        var blob = new Blob([gameHtml], { type: 'text/html' });
-        var blobUrl = URL.createObjectURL(blob);
-        openAppFrame(blobUrl, 'Avengers Grid War');
-        // Clean up blob URL after iframe loads
-        var iframe = document.getElementById('appFrameIframe');
-        iframe.addEventListener('load', function onLoad() {
-          setTimeout(function() { URL.revokeObjectURL(blobUrl); }, 5000);
-          iframe.removeEventListener('load', onLoad);
-        });
-      });
-    });
-  </script>
-</body>
-</html>
+
