@@ -1,82 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
   <title>nitish mg — App Developer & AI Builder</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link
-    href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap"
-    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0a0a0c;
-      --bg-card: #111114;
-      --bg-card-hover: #18181c;
-      --surface: #1a1a1f;
-      --border: #2a2a30;
+      --bg: #0c0c0e;
+      --bg-card: #131316;
+      --bg-card-hover: #1a1a1e;
+      --surface: #1e1e23;
+      --border: #2c2c34;
+      --border-strong: #3a3a45;
       --text: #e8e6e3;
       --text-muted: #8a8a95;
       --accent: #1a8c4e;
-      --accent-dim: rgba(26, 140, 78, 0.08);
-      --accent-mid: rgba(26, 140, 78, 0.15);
-      --accent-glow: rgba(26, 140, 78, 0.25);
-      --warm: #f0c04d;
+      --accent-dim: rgba(26,140,78,0.08);
+      --accent-mid: rgba(26,140,78,0.18);
+      --accent-glow: rgba(26,140,78,0.22);
+
+      /* Category palette — muted, professional */
+      --cat-finance: #2a7d4f;
+      --cat-finance-bg: rgba(42,125,79,0.08);
+      --cat-finance-border: rgba(42,125,79,0.28);
+      --cat-games: #5c4fcf;
+      --cat-games-bg: rgba(92,79,207,0.08);
+      --cat-games-border: rgba(92,79,207,0.28);
+      --cat-utility: #b87333;
+      --cat-utility-bg: rgba(184,115,51,0.08);
+      --cat-utility-border: rgba(184,115,51,0.28);
+
       --serif: 'Instrument Serif', Georgia, serif;
       --sans: 'DM Sans', -apple-system, sans-serif;
       --mono: 'JetBrains Mono', monospace;
+      --radius-card: 16px;
     }
 
     [data-theme="light"] {
-      --bg: #f5f3ef;
+      --bg: #f4f2ee;
       --bg-card: #ffffff;
-      --bg-card-hover: #fafaf8;
-      --surface: #edeae5;
-      --border: #d8d4cd;
-      --text: #1a1a1c;
+      --bg-card-hover: #faf9f7;
+      --surface: #ebe8e3;
+      --border: #d6d2cb;
+      --border-strong: #bfbab0;
+      --text: #18181a;
       --text-muted: #6b6b75;
       --accent: #117a43;
-      --accent-dim: rgba(17, 122, 67, 0.07);
-      --accent-mid: rgba(17, 122, 67, 0.12);
-      --accent-glow: rgba(17, 122, 67, 0.2);
+      --accent-dim: rgba(17,122,67,0.07);
+      --accent-mid: rgba(17,122,67,0.14);
+      --accent-glow: rgba(17,122,67,0.18);
     }
 
-    [data-theme="light"] body::after {
-      opacity: 0.35;
-      mix-blend-mode: overlay;
-    }
+    [data-theme="light"] .nav-cta { color: #fff !important; }
 
-    [data-theme="light"] .hero-glow {
-      background: radial-gradient(circle, rgba(17, 122, 67, 0.06) 0%, transparent 70%);
-    }
-
-    [data-theme="light"] .app-preview-bg::after {
-      background: linear-gradient(to top, var(--bg-card), transparent);
-    }
-
-    [data-theme="light"] .stat-card,
-    [data-theme="light"]
-
-    [data-theme="light"] .ai-section::before {
-      background: radial-gradient(circle, rgba(17, 122, 67, 0.05) 0%, transparent 70%);
-    }
-
-    [data-theme="light"] .nav-cta {
-      color: #fff !important;
-    }
-
-    *,
-    *::before,
-    *::after {
-      margin: 0;
-      padding: 0;
+    *, *::before, *::after {
+      margin: 0; padding: 0;
       box-sizing: border-box;
+      max-width: 100%;
     }
 
-    html {
-      scroll-behavior: smooth;
-    }
+    html { scroll-behavior: smooth; }
 
     body {
       font-family: var(--sans);
@@ -84,84 +69,48 @@
       color: var(--text);
       line-height: 1.6;
       overflow-x: hidden;
-      transition: background 0.4s ease, color 0.4s ease;
+      transition: background 0.35s ease, color 0.35s ease;
       min-width: 320px;
       -webkit-text-size-adjust: 100%;
-      text-size-adjust: 100%;
     }
 
-    *, *::before, *::after {
-      box-sizing: border-box;
-      max-width: 100%;
-    }
-
-    ::selection {
-      background: var(--accent);
-      color: var(--bg);
-    }
-
-    /* ── Cyberpunk Grid + Noise Background ── */
+    /* Subtle dot grid only */
     body {
-      background-image:
-        linear-gradient(rgba(124,58,237,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(124,58,237,0.03) 1px, transparent 1px);
-      background-size: 40px 40px;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.035) 1px, transparent 1px);
+      background-size: 28px 28px;
     }
 
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 80% 50% at 20% 0%, rgba(124,58,237,0.12) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(6,214,160,0.08) 0%, transparent 60%);
-      pointer-events: none;
-      z-index: 0;
+    [data-theme="light"] body {
+      background-image: radial-gradient(circle, rgba(0,0,0,0.04) 1px, transparent 1px);
     }
 
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 9999;
-    }
+    ::selection { background: var(--accent); color: #fff; }
 
     /* ── Navigation ── */
     nav {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      width: 100%;
+      top: 0; left: 0; right: 0;
       z-index: 100;
-      padding: 1.25rem 2.5rem;
+      padding: 1.1rem 2.5rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      backdrop-filter: blur(20px);
-      background: color-mix(in srgb, var(--bg) 92%, transparent);
-      border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
-      transition: background 0.3s ease, border-color 0.3s ease;
-      box-sizing: border-box;
+      backdrop-filter: blur(20px) saturate(160%);
+      background: color-mix(in srgb, var(--bg) 88%, transparent);
+      border-bottom: 1px solid var(--border);
+      transition: background 0.3s, border-color 0.3s;
     }
 
     .nav-logo {
       font-family: var(--serif);
-      font-size: 1.5rem;
+      font-size: 1.45rem;
       color: var(--text);
       text-decoration: none;
       letter-spacing: -0.02em;
       flex-shrink: 0;
-      position: relative;
-      z-index: 1;
       white-space: nowrap;
     }
-
-    .nav-logo span {
-      color: var(--accent);
-    }
+    .nav-logo span { color: var(--accent); }
 
     .nav-links {
       display: flex;
@@ -172,1161 +121,36 @@
     .nav-links a {
       color: var(--text-muted);
       text-decoration: none;
-      font-size: 0.85rem;
+      font-size: 0.83rem;
       font-weight: 500;
       letter-spacing: 0.05em;
       text-transform: uppercase;
-      transition: color 0.3s;
+      transition: color 0.25s;
       position: relative;
     }
-
     .nav-links a::after {
       content: '';
       position: absolute;
-      bottom: -4px;
-      left: 0;
-      width: 0;
-      height: 1.5px;
+      bottom: -4px; left: 0;
+      width: 0; height: 1.5px;
       background: var(--accent);
       transition: width 0.3s;
     }
-
-    .nav-links a:hover {
-      color: var(--text);
-    }
-
-    .nav-links a:hover::after {
-      width: 100%;
-    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a:hover::after { width: 100%; }
 
     .nav-cta {
       background: var(--accent) !important;
-      color: var(--bg) !important;
-      padding: 0.5rem 1.25rem;
+      color: #fff !important;
+      padding: 0.45rem 1.2rem;
       border-radius: 100px;
       font-weight: 600 !important;
-      letter-spacing: 0.02em !important;
+      letter-spacing: 0.01em !important;
       text-transform: none !important;
-      transition: transform 0.2s, box-shadow 0.2s !important;
+      transition: opacity 0.2s, transform 0.2s !important;
     }
-
-    .nav-cta::after {
-      display: none !important;
-    }
-
-    .nav-cta:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 20px var(--accent-glow);
-    }
-
-    /* ── Hero ── */
-    .hero {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 8rem 2.5rem 4rem;
-      max-width: 1300px;
-      margin: 0 auto;
-      position: relative;
-    }
-
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: var(--accent-dim);
-      border: 1px solid var(--accent-mid);
-      padding: 0.4rem 1rem;
-      border-radius: 100px;
-      font-size: 0.8rem;
-      font-weight: 500;
-      color: var(--accent);
-      margin-bottom: 2rem;
-      width: fit-content;
-      animation: fadeUp 0.8s ease both;
-    }
-
-    .hero-badge .dot {
-      width: 6px;
-      height: 6px;
-      background: var(--accent);
-      border-radius: 50%;
-      animation: pulse 2s infinite;
-    }
-
-    .hero h1 {
-      font-family: var(--serif);
-      font-size: clamp(3.5rem, 8vw, 7rem);
-      line-height: 1.05;
-      font-weight: 400;
-      letter-spacing: -0.03em;
-      margin-bottom: 2rem;
-      animation: fadeUp 0.8s 0.1s ease both;
-    }
-
-    .hero h1 em {
-      font-style: italic;
-      color: var(--accent);
-    }
-
-    .hero-sub {
-      font-size: 1.2rem;
-      color: var(--text-muted);
-      max-width: 580px;
-      line-height: 1.7;
-      margin-bottom: 3rem;
-      animation: fadeUp 0.8s 0.2s ease both;
-    }
-
-    .hero-actions {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      animation: fadeUp 0.8s 0.3s ease both;
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: var(--bg);
-      padding: 0.85rem 2rem;
-      border-radius: 100px;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.95rem;
-      transition: all 0.25s;
-      border: none;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 30px var(--accent-glow);
-    }
-
-    .btn-secondary {
-      background: transparent;
-      color: var(--text);
-      padding: 0.85rem 2rem;
-      border-radius: 100px;
-      text-decoration: none;
-      font-weight: 500;
-      font-size: 0.95rem;
-      border: 1px solid var(--border);
-      transition: all 0.25s;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .btn-secondary:hover {
-      border-color: var(--text-muted);
-      background: var(--surface);
-    }
-
-    .hero-glow {
-      position: absolute;
-      top: 20%;
-      right: -10%;
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, var(--accent-dim) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    /* ── Scrolling ticker ── */
-    .ticker-wrap {
-      overflow: hidden;
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      padding: 1.25rem 0;
-      white-space: nowrap;
-    }
-
-    .ticker {
-      display: inline-flex;
-      animation: scroll 30s linear infinite;
-    }
-
-    .ticker span {
-      font-family: var(--serif);
-      font-size: 1.3rem;
-      color: var(--text-muted);
-      margin-right: 3rem;
-      font-style: italic;
-    }
-
-    .ticker span::before {
-      content: '◆';
-      color: var(--accent);
-      margin-right: 1.5rem;
-      font-size: 0.5rem;
-      vertical-align: middle;
-    }
-
-    /* ── Section styling ── */
-    section {
-      padding: 6rem 2.5rem;
-      max-width: 1300px;
-      margin: 0 auto;
-    }
-
-    .section-label {
-      font-family: var(--mono);
-      font-size: 0.75rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .section-label::before {
-      content: '';
-      width: 24px;
-      height: 1px;
-      background: var(--accent);
-    }
-
-    .section-title {
-      font-family: var(--serif);
-      font-size: clamp(2.2rem, 4vw, 3.5rem);
-      line-height: 1.15;
-      letter-spacing: -0.02em;
-      margin-bottom: 1.5rem;
-    }
-
-    .section-desc {
-      color: var(--text-muted);
-      font-size: 1.05rem;
-      max-width: 600px;
-      line-height: 1.7;
-      margin-bottom: 3.5rem;
-    }
-
-    /* ── About / Bio ── */
-    .about-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 4rem;
-      align-items: start;
-    }
-
-    .about-text p {
-      color: var(--text-muted);
-      font-size: 1.05rem;
-      line-height: 1.8;
-      margin-bottom: 1.5rem;
-    }
-
-    .about-text p strong {
-      color: var(--text);
-      font-weight: 600;
-    }
-
-    .about-stats {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-      margin-top: 2.5rem;
-    }
-
-    .stat-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 1.5rem;
-      transition: all 0.3s;
-    }
-
-    .stat-card:hover {
-      border-color: var(--accent-glow);
-      background: var(--bg-card-hover);
-      transform: translateY(-2px);
-    }
-
-    .stat-number {
-      font-family: var(--serif);
-      font-size: 2.5rem;
-      color: var(--accent);
-      line-height: 1;
-      margin-bottom: 0.4rem;
-    }
-
-    .stat-label {
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      font-weight: 500;
-    }
-
-    .about-details {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 2.5rem;
-    }
-
-    .detail-group {
-      margin-bottom: 2rem;
-    }
-
-    .detail-group:last-child {
-      margin-bottom: 0;
-    }
-
-    .detail-group h4 {
-      font-family: var(--mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 0.75rem;
-    }
-
-    .detail-group p,
-    .detail-group li {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      line-height: 1.7;
-    }
-
-    .detail-group ul {
-      list-style: none;
-    }
-
-    .detail-group ul li {
-      padding: 0.3rem 0;
-      padding-left: 1.25rem;
-      position: relative;
-    }
-
-    .detail-group ul li::before {
-      content: '→';
-      position: absolute;
-      left: 0;
-      color: var(--accent);
-      font-size: 0.8rem;
-    }
-
-    /* ── Certifications ── */
-    .certs-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 1.25rem;
-    }
-
-    .cert-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 1.75rem;
-      display: flex;
-      gap: 1.25rem;
-      align-items: flex-start;
-      transition: all 0.35s ease;
-      text-decoration: none;
-      color: var(--text);
-      position: relative;
-    }
-
-    .cert-card:hover {
-      border-color: var(--accent);
-      background: var(--bg-card-hover);
-      transform: translateY(-3px);
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-    }
-
-    .cert-logo {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      flex-shrink: 0;
-    }
-
-    .cert-info {
-      flex: 1;
-    }
-
-    .cert-info h3 {
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 0.3rem;
-      letter-spacing: -0.01em;
-      line-height: 1.35;
-    }
-
-    .cert-info .cert-issuer {
-      font-size: 0.82rem;
-      color: var(--accent);
-      font-weight: 500;
-      margin-bottom: 0.4rem;
-    }
-
-    .cert-info p {
-      color: var(--text-muted);
-      font-size: 0.84rem;
-      line-height: 1.55;
-    }
-
-    .cert-badge {
-      position: absolute;
-      top: 0.6rem;
-      right: 0.75rem;
-      font-family: var(--mono);
-      font-size: 0.6rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 0.2rem 0.6rem;
-      border-radius: 100px;
-      background: var(--accent-dim);
-      color: var(--accent);
-      border: 1px solid var(--accent-dim);
-    }
-
-    /* ── Category Tabs ── */
-    .category-tabs {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 2.5rem;
-      flex-wrap: wrap;
-    }
-
-    .cat-tab {
-      font-family: var(--sans);
-      font-size: 0.88rem;
-      font-weight: 500;
-      padding: 0.55rem 1.25rem;
-      border-radius: 100px;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: all 0.25s ease;
-    }
-
-    .cat-tab:hover {
-      border-color: var(--accent);
-      color: var(--text);
-    }
-
-    .cat-tab.active {
-      background: var(--accent);
-      color: var(--bg);
-      border-color: var(--accent);
-      font-weight: 600;
-    }
-
-
-    /* ── AI Philosophy ── */
-    .ai-section {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 4rem;
-      margin: 2rem auto;
-      max-width: 1300px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .ai-section::before {
-      content: '';
-      position: absolute;
-      top: -200px;
-      right: -200px;
-      width: 500px;
-      height: 500px;
-      background: radial-gradient(circle, var(--accent-dim) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    .ai-grid {
-      display: grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap: 4rem;
-      align-items: center;
-    }
-
-    .ai-text h2 {
-      font-family: var(--serif);
-      font-size: clamp(2rem, 3.5vw, 3rem);
-      line-height: 1.15;
-      margin-bottom: 1.5rem;
-      letter-spacing: -0.02em;
-    }
-
-    .ai-text h2 em {
-      color: var(--accent);
-      font-style: italic;
-    }
-
-    .ai-text p {
-      color: var(--text-muted);
-      font-size: 1.05rem;
-      line-height: 1.8;
-      margin-bottom: 1.25rem;
-    }
-
-    .ai-tools {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    .ai-tool {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 1.25rem 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      transition: all 0.3s;
-    }
-
-    .ai-tool:hover {
-      border-color: var(--accent-glow);
-      transform: translateX(4px);
-    }
-
-    .ai-tool-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      background: var(--accent-dim);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-      flex-shrink: 0;
-    }
-
-    .ai-tool-text h4 {
-      font-size: 0.95rem;
-      font-weight: 600;
-      margin-bottom: 0.15rem;
-    }
-
-    .ai-tool-text p {
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      margin: 0;
-    }
-
-    /* ── Experience Timeline ── */
-    .timeline {
-      position: relative;
-      padding-left: 2.5rem;
-    }
-
-    .timeline::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 1px;
-      background: linear-gradient(to bottom, var(--accent), var(--border), transparent);
-    }
-
-    .timeline-item {
-      position: relative;
-      margin-bottom: 3rem;
-      padding-left: 1rem;
-    }
-
-    .timeline-item::before {
-      content: '';
-      position: absolute;
-      left: -2.85rem;
-      top: 0.5rem;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 0 4px var(--bg), 0 0 0 5px var(--accent);
-    }
-
-    .timeline-date {
-      font-family: var(--mono);
-      font-size: 0.75rem;
-      color: var(--accent);
-      letter-spacing: 0.08em;
-      margin-bottom: 0.4rem;
-    }
-
-    .timeline-item h3 {
-      font-size: 1.15rem;
-      font-weight: 600;
-      margin-bottom: 0.2rem;
-    }
-
-    .timeline-item h4 {
-      color: var(--text-muted);
-      font-weight: 400;
-      font-size: 0.95rem;
-      font-style: italic;
-      margin-bottom: 0.6rem;
-    }
-
-    .timeline-item p {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      line-height: 1.7;
-    }
-
-    /* ── Contact ── */
-    .contact-section {
-      text-align: center;
-      padding: 8rem 2.5rem;
-      max-width: 700px;
-      margin: 0 auto;
-    }
-
-    .contact-section h2 {
-      font-family: var(--serif);
-      font-size: clamp(2.5rem, 5vw, 4rem);
-      margin-bottom: 1.25rem;
-      letter-spacing: -0.03em;
-      line-height: 1.1;
-    }
-
-    .contact-section h2 em {
-      color: var(--accent);
-      font-style: italic;
-    }
-
-    .contact-section p {
-      color: var(--text-muted);
-      font-size: 1.05rem;
-      line-height: 1.7;
-      margin-bottom: 2.5rem;
-    }
-
-    .contact-links {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .contact-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.75rem 1.5rem;
-      border-radius: 100px;
-      border: 1px solid var(--border);
-      color: var(--text);
-      text-decoration: none;
-      font-weight: 500;
-      font-size: 0.9rem;
-      transition: all 0.3s;
-    }
-
-    .contact-link:hover {
-      border-color: var(--accent);
-      background: var(--accent-dim);
-      color: var(--accent);
-      transform: translateY(-2px);
-    }
-
-    /* ── Support / Donate ── */
-    .support-section {
-      padding: 5rem 2.5rem;
-      max-width: 800px;
-      margin: 0 auto;
-      text-align: center;
-    }
-
-    .support-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 3rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .support-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, transparent, var(--accent), transparent);
-    }
-
-    .support-emoji {
-      font-size: 2.5rem;
-      margin-bottom: 1.25rem;
-      display: block;
-    }
-
-    .support-card h2 {
-      font-family: var(--serif);
-      font-size: clamp(1.8rem, 3vw, 2.5rem);
-      margin-bottom: 0.75rem;
-      letter-spacing: -0.02em;
-    }
-
-    .support-card h2 em {
-      color: var(--accent);
-      font-style: italic;
-    }
-
-    .support-card>p {
-      color: var(--text-muted);
-      font-size: 1rem;
-      line-height: 1.7;
-      max-width: 520px;
-      margin: 0 auto 2rem;
-    }
-
-    .support-options {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-
-    .support-option {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.6rem;
-      padding: 1.5rem 1rem;
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      text-decoration: none;
-      color: var(--text);
-      transition: all 0.3s ease;
-      cursor: pointer;
-    }
-
-    .support-option:hover {
-      border-color: var(--accent);
-      background: var(--accent-dim);
-      transform: translateY(-3px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    }
-
-    .support-option-icon {
-      font-size: 1.75rem;
-    }
-
-    .support-option-name {
-      font-weight: 600;
-      font-size: 0.95rem;
-    }
-
-    .support-option-desc {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      line-height: 1.4;
-    }
-
-    .support-note {
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      font-style: italic;
-      margin: 0;
-    }
-
-    .support-note span {
-      color: var(--accent);
-    }
-
-    /* UPI Modal */
-    .upi-modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 1000;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(8px);
-      align-items: center;
-      justify-content: center;
-      padding: 1.5rem;
-    }
-
-    .upi-modal-overlay.active {
-      display: flex;
-    }
-
-    .upi-modal {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 2.5rem;
-      max-width: 380px;
-      width: 100%;
-      text-align: center;
-      position: relative;
-      animation: fadeUp 0.3s ease;
-    }
-
-    .upi-modal h3 {
-      font-family: var(--serif);
-      font-size: 1.5rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .upi-modal p {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .upi-id-box {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: var(--surface);
-      border: 1px dashed var(--border);
-      border-radius: 12px;
-      padding: 0.85rem 1rem;
-      margin-bottom: 1.5rem;
-      justify-content: center;
-    }
-
-    .upi-id-box code {
-      font-family: var(--mono);
-      font-size: 0.95rem;
-      color: var(--accent);
-      letter-spacing: 0.02em;
-    }
-
-    .upi-copy-btn {
-      background: none;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.35rem 0.65rem;
-      color: var(--text-muted);
-      font-size: 0.75rem;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: var(--sans);
-    }
-
-    .upi-copy-btn:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    .upi-qr-placeholder {
-      width: 180px;
-      height: 180px;
-      margin: 0 auto 1.25rem;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.8rem;
-      color: #999;
-    }
-
-    .upi-close {
-      position: absolute;
-      top: 0.6rem;
-      right: 0.75rem;
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-size: 1.25rem;
-      cursor: pointer;
-      padding: 0.25rem;
-      line-height: 1;
-      transition: color 0.2s;
-    }
-
-    .upi-close:hover {
-      color: var(--text);
-    }
-
-    [data-theme="light"] .support-card {
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    }
-
-    /* ── Footer ── */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 2rem 2.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      max-width: 1300px;
-      margin: 0 auto;
-      color: var(--text-muted);
-      font-size: 0.85rem;
-    }
-
-    footer a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-
-    /* ── Animations ── */
-    @keyframes fadeUp {
-      from {
-        opacity: 0;
-        transform: translateY(24px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes pulse {
-
-      0%,
-      100% {
-        opacity: 1;
-      }
-
-      50% {
-        opacity: 0.4;
-      }
-    }
-
-    @keyframes scroll {
-      from {
-        transform: translateX(0);
-      }
-
-      to {
-        transform: translateX(-50%);
-      }
-    }
-
-    .reveal {
-      opacity: 1;
-      transform: translateY(0);
-      transition: opacity 0.7s ease, transform 0.7s ease;
-    }
-
-    .reveal.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* ── Responsive ── */
-    @media (max-width: 900px) {
-
-      .about-grid,
-      .ai-grid {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-      }
-
-      .ai-section {
-        padding: 2.5rem 1.25rem;
-        margin: 0 1.25rem;
-      }
-
-      nav {
-        padding: 0.85rem 1.25rem;
-      }
-
-      .nav-links {
-        display: none;
-      }
-
-      section {
-        padding: 3.5rem 1.25rem;
-      }
-
-      .hero {
-        padding: 6rem 1.25rem 3rem;
-        min-height: 100svh;
-      }
-
-      .hero h1 {
-        font-size: clamp(2.6rem, 10vw, 4.5rem);
-      }
-
-      .hero-sub {
-        font-size: 1rem;
-      }
-
-      footer {
-        flex-direction: column;
-        gap: 0.75rem;
-        text-align: center;
-      }
-
-      .category-layer-header {
-        padding: 1rem 1.25rem;
-      }
-
-      .cat-header-title {
-        font-size: 1.1rem;
-      }
-
-      .cat-header-count {
-        display: none;
-      }
-
-      .about-stats {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .certs-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .section-title {
-        font-size: clamp(1.9rem, 6vw, 3rem);
-      }
-
-      .ai-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 480px) {
-      nav {
-        padding: 0.75rem 1rem;
-      }
-
-      .nav-logo {
-        font-size: 1.25rem;
-      }
-
-      .hero {
-        padding: 5.5rem 1rem 2.5rem;
-      }
-
-      .hero h1 {
-        font-size: clamp(2.2rem, 11vw, 3.5rem);
-      }
-
-      section {
-        padding: 3rem 1rem;
-      }
-
-      .ai-section {
-        margin: 0 1rem;
-        padding: 2rem 1rem;
-      }
-
-      .about-stats {
-        grid-template-columns: 1fr 1fr;
-        gap: 0.75rem;
-      }
-
-      .stat-card {
-        padding: 1rem;
-      }
-
-      .stat-number {
-        font-size: 2rem;
-      }
-
-      .hero-actions {
-        flex-direction: column;
-        gap: 0.75rem;
-      }
-
-      .btn-primary, .btn-secondary {
-        width: 100%;
-        justify-content: center;
-      }
-
-      .portfolio-cat-title {
-        font-size: 1.1rem;
-      }
-
-      .timeline {
-        padding-left: 1.5rem;
-      }
-    }
-
-    /* ── Hamburger for mobile ── */
-    .menu-toggle {
-      display: none;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0.5rem;
-      z-index: 1000;
-      position: relative;
-    }
-
-    .menu-toggle span {
-      display: block;
-      width: 24px;
-      height: 2px;
-      background: var(--text);
-      border-radius: 2px;
-      transition: transform 0.3s ease, opacity 0.3s ease;
-    }
-
-    @media (max-width: 900px) {
-      .menu-toggle {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        gap: 5px;
-      }
-    }
-
-    /* ── Theme Toggle ── */
-    .theme-toggle {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 100px;
-      width: 52px;
-      height: 28px;
-      cursor: pointer;
-      position: relative;
-      transition: all 0.35s ease;
-      display: flex;
-      align-items: center;
-      padding: 0 4px;
-      justify-content: space-between;
-    }
-
-    .theme-toggle:hover {
-      border-color: var(--accent);
-    }
-
-    .theme-toggle .toggle-icon {
-      font-size: 0.7rem;
-      line-height: 1;
-      z-index: 1;
-      transition: opacity 0.3s;
-    }
-
-    .theme-toggle .toggle-knob {
-      position: absolute;
-      left: 3px;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: var(--accent);
-      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-    }
-
-    [data-theme="light"] .theme-toggle .toggle-knob {
-      transform: translateX(24px);
-    }
+    .nav-cta::after { display: none !important; }
+    .nav-cta:hover { opacity: 0.88; transform: translateY(-1px); }
 
     .nav-right {
       display: flex;
@@ -1335,395 +159,99 @@
       flex-shrink: 0;
     }
 
-
-
-    /* ═══════════════════════════════════════
-       APP PORTFOLIO — CATEGORY LAYERS
-    ═══════════════════════════════════════ */
-
-    .category-layer {
-      border-radius: 16px;
-      overflow: hidden;
+    /* ── Theme Toggle ── */
+    .theme-toggle {
+      background: var(--surface);
       border: 1px solid var(--border);
-    }
-
-    .category-layer[data-layer="finance"] { border-top: 3px solid #1a8c4e; }
-    .category-layer[data-layer="games"]   { border-top: 3px solid #7c3aed; }
-    .category-layer[data-layer="sports"]  { border-top: 3px solid #65a30d; }
-
-    .category-layer-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1.25rem 1.75rem;
-      background: var(--surface);
-      cursor: pointer;
-      user-select: none;
-      gap: 1rem;
-    }
-
-    .cat-header-left {
-      display: flex;
-      align-items: center;
-      gap: 0.9rem;
-    }
-
-    .cat-icon {
-      width: 42px;
-      height: 42px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
-      flex-shrink: 0;
-    }
-    .cat-icon.finance { background: linear-gradient(135deg,#0a1f0a,#143d14); }
-    .cat-icon.games   { background: linear-gradient(135deg,#1a0d2e,#3a0f4f); }
-    .cat-icon.sports  { background: linear-gradient(135deg,#142a06,#2a4f0a); }
-
-    .cat-header-title {
-      font-family: var(--serif);
-      font-size: 1.2rem;
-      color: var(--text);
-    }
-
-    .cat-header-right {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-    .category-layer[data-layer="games"]
-    .category-layer[data-layer="sports"]
-
-    .cat-arrow {
-      color: var(--text-muted);
-      font-size: 1rem;
-      transition: transform 0.3s ease;
-      line-height: 1;
-    }
-    .category-layer.open .cat-arrow { transform: rotate(180deg); }
-
-    .category-layer-body {
-      display: none;
-      background: var(--bg-card);
-    }
-    .category-layer.open .category-layer-body {
-      display: block;
-    }
-    [data-theme="light"]
-
-    @media (max-width: 900px) {
-    }
-
-
-    /* ══════════════════════════════
-       PORTFOLIO SECTION
-    ══════════════════════════════ */
-    #apps {
-      padding: 6rem 2.5rem;
-      max-width: 1300px;
-      margin: 0 auto;
-    }
-
-    .portfolio-category { margin-bottom: 3.5rem; }
-
-    .portfolio-cat-header {
-      display: flex;
-      align-items: center;
-      gap: 0.9rem;
-      margin-bottom: 1.5rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .portfolio-cat-icon {
-      font-size: 1.6rem;
-      width: 48px; height: 48px;
-      display: flex; align-items: center; justify-content: center;
-      border-radius: 12px;
-      background: var(--surface);
-      flex-shrink: 0;
-    }
-
-    .portfolio-cat-title {
-      font-family: var(--serif);
-      font-size: 1.8rem;
-      font-weight: 400;
-      letter-spacing: -0.02em;
-      color: var(--text);
-      flex: 1;
-    }
-
-    .portfolio-cat-badge {
-      font-family: var(--mono);
-      font-size: 0.72rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 0.25rem 0.8rem;
       border-radius: 100px;
-      background: var(--accent-dim);
-      color: var(--accent);
-      border: 1px solid var(--accent-mid);
+      width: 52px; height: 28px;
+      cursor: pointer;
+      position: relative;
+      display: flex; align-items: center;
+      padding: 0 4px;
+      justify-content: space-between;
+      transition: border-color 0.3s;
     }
-    .games-badge  { background: var(--accent-dim); color: var(--accent); border-color: var(--accent-mid); }
-    .sports-badge { background: var(--accent-dim); color: var(--accent); border-color: var(--accent-mid); }
-
-    .portfolio-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 1.25rem;
-    }
-
-    .pcard {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
-    }
-    .pcard:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-      border-color: var(--accent);
-    }
-
-    /* ── Neon icon banners (kept) ── */
-    .neon-top {
-      height: 120px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 3.2rem;
-      position: relative; overflow: hidden;
-    }
-    .neon-top::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: repeating-linear-gradient(
-        0deg, transparent, transparent 2px,
-        rgba(0,0,0,0.18) 2px, rgba(0,0,0,0.18) 4px
-      );
-      pointer-events: none; z-index: 1;
-    }
-    .neon-top::after {
-      content: '';
+    .theme-toggle:hover { border-color: var(--accent); }
+    .theme-toggle .toggle-icon { font-size: 0.7rem; line-height: 1; z-index: 1; }
+    .theme-toggle .toggle-knob {
       position: absolute;
-      width: 160px; height: 160px; border-radius: 50%;
-      top: 50%; left: 50%; transform: translate(-50%,-50%);
-      opacity: 0.35; pointer-events: none; z-index: 0;
-      transition: opacity 0.3s ease;
+      left: 3px;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: var(--accent);
+      transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
     }
-    .pcard:hover .neon-top::after { opacity: 0.65; }
-    .neon-top > * { position: relative; z-index: 2; }
-    .pcard:hover .neon-top { filter: brightness(1.15); }
+    [data-theme="light"] .theme-toggle .toggle-knob { transform: translateX(24px); }
 
-    .neon-green::after  { background: radial-gradient(circle, #00ff88, transparent 70%); }
-    .neon-cyan::after   { background: radial-gradient(circle, #00e5ff, transparent 70%); }
-    .neon-violet::after { background: radial-gradient(circle, #bf00ff, transparent 70%); }
-    .neon-orange::after { background: radial-gradient(circle, #ff6600, transparent 70%); }
-    .neon-lime::after   { background: radial-gradient(circle, #aaff00, transparent 70%); }
-    .neon-yellow::after { background: radial-gradient(circle, #ffe600, transparent 70%); }
-    .neon-red::after    { background: radial-gradient(circle, #ff003c, transparent 70%); }
-    .neon-blue::after   { background: radial-gradient(circle, #0066ff, transparent 70%); }
-    .neon-pink::after   { background: radial-gradient(circle, #ff00aa, transparent 70%); }
-    .neon-purple::after { background: radial-gradient(circle, #9900ff, transparent 70%); }
-    .neon-teal::after   { background: radial-gradient(circle, #00ffcc, transparent 70%); }
-
-    .neon-green  { box-shadow: inset 0 -2px 0 #00ff88; }
-    .neon-cyan   { box-shadow: inset 0 -2px 0 #00e5ff; }
-    .neon-violet { box-shadow: inset 0 -2px 0 #bf00ff; }
-    .neon-orange { box-shadow: inset 0 -2px 0 #ff6600; }
-    .neon-lime   { box-shadow: inset 0 -2px 0 #aaff00; }
-    .neon-yellow { box-shadow: inset 0 -2px 0 #ffe600; }
-    .neon-red    { box-shadow: inset 0 -2px 0 #ff003c; }
-    .neon-blue   { box-shadow: inset 0 -2px 0 #0066ff; }
-    .neon-pink   { box-shadow: inset 0 -2px 0 #ff00aa; }
-    .neon-purple { box-shadow: inset 0 -2px 0 #9900ff; }
-    .neon-teal   { box-shadow: inset 0 -2px 0 #00ffcc; }
-
-    .pcard:has(.neon-green):hover  { border-color: #00ff88; box-shadow: 0 20px 50px rgba(0,255,136,0.15); }
-    .pcard:has(.neon-cyan):hover   { border-color: #00e5ff; box-shadow: 0 20px 50px rgba(0,229,255,0.15); }
-    .pcard:has(.neon-violet):hover { border-color: #bf00ff; box-shadow: 0 20px 50px rgba(191,0,255,0.15); }
-    .pcard:has(.neon-orange):hover { border-color: #ff6600; box-shadow: 0 20px 50px rgba(255,102,0,0.15); }
-    .pcard:has(.neon-lime):hover   { border-color: #aaff00; box-shadow: 0 20px 50px rgba(170,255,0,0.15); }
-    .pcard:has(.neon-yellow):hover { border-color: #ffe600; box-shadow: 0 20px 50px rgba(255,230,0,0.15); }
-    .pcard:has(.neon-red):hover    { border-color: #ff003c; box-shadow: 0 20px 50px rgba(255,0,60,0.15); }
-    .pcard:has(.neon-blue):hover   { border-color: #0066ff; box-shadow: 0 20px 50px rgba(0,102,255,0.15); }
-    .pcard:has(.neon-pink):hover   { border-color: #ff00aa; box-shadow: 0 20px 50px rgba(255,0,170,0.15); }
-    .pcard:has(.neon-purple):hover { border-color: #9900ff; box-shadow: 0 20px 50px rgba(153,0,255,0.15); }
-    .pcard:has(.neon-teal):hover   { border-color: #00ffcc; box-shadow: 0 20px 50px rgba(0,255,204,0.15); }
-
-    .pcard-body {
-      padding: 1.25rem;
-      display: flex; flex-direction: column; flex: 1;
+    /* ── Hamburger ── */
+    .menu-toggle {
+      display: none;
+      background: none; border: none;
+      cursor: pointer; padding: 0.5rem;
+      z-index: 1000; position: relative;
     }
-    .pcard-body h3 {
-      font-size: 1rem; font-weight: 600;
-      margin-bottom: 0.5rem;
-      color: var(--text);
-      letter-spacing: -0.01em;
+    .menu-toggle span {
+      display: block;
+      width: 24px; height: 2px;
+      background: var(--text);
+      border-radius: 2px;
+      transition: transform 0.3s, opacity 0.3s;
     }
-    .pcard-body p {
-      font-size: 0.83rem;
-      color: var(--text-muted);
-      line-height: 1.6; flex: 1;
-    }
-    .pcard-link {
-      display: inline-flex; align-items: center; gap: 0.35rem;
-      margin-top: 1rem;
-      color: var(--accent);
-      font-size: 0.83rem; font-weight: 600;
-      text-decoration: none;
-      transition: gap 0.2s;
-    }
-    .pcard-link:hover { gap: 0.6rem; }
-
     @media (max-width: 900px) {
-      #apps { padding: 4rem 1.25rem; }
-      .portfolio-grid { grid-template-columns: 1fr 1fr; gap: 1rem; }
-      .portfolio-cat-title { font-size: 1.4rem; }
+      .menu-toggle { display: flex; flex-direction: column; justify-content: center; gap: 5px; }
+      .nav-links { display: none; }
     }
-    @media (max-width: 560px) {
-      .portfolio-grid { grid-template-columns: 1fr; }
-    }
+    .menu-toggle.active span:nth-child(1) { transform: rotate(45deg) translate(5px,5px); }
+    .menu-toggle.active span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .menu-toggle.active span:nth-child(3) { transform: rotate(-45deg) translate(5px,-5px); }
 
-    /* ── Card Body ── */
-    .pcard-body {
-      padding: 1.1rem 1.25rem 1.25rem;
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      background: #0e0e1a;
-    }
-
-    .pcard-body h3 {
-      font-size: 0.97rem;
-      font-weight: 600;
-      color: #e8e6ff;
-      margin-bottom: 0.5rem;
-      letter-spacing: -0.01em;
-    }
-
-    .pcard-body p {
-      font-size: 0.8rem;
-      color: #6666a0;
-      line-height: 1.6;
-      flex: 1;
-    }
-
-    .pcard-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      margin-top: 1rem;
-      font-size: 0.78rem;
-      font-weight: 600;
-      font-family: var(--mono);
-      text-decoration: none;
-      letter-spacing: 0.04em;
-      transition: gap 0.2s, opacity 0.2s;
-      opacity: 0.85;
-    }
-    .pcard:has(.neon-green)  .pcard-link { color: #00ff88; }
-    .pcard:has(.neon-cyan)   .pcard-link { color: #00e5ff; }
-    .pcard:has(.neon-violet) .pcard-link { color: #dd88ff; }
-    .pcard:has(.neon-orange) .pcard-link { color: #ff8833; }
-    .pcard:has(.neon-lime)   .pcard-link { color: #aaff00; }
-    .pcard:has(.neon-yellow) .pcard-link { color: #ffe600; }
-    .pcard:has(.neon-red)    .pcard-link { color: #ff5577; }
-    .pcard:has(.neon-blue)   .pcard-link { color: #4499ff; }
-    .pcard:has(.neon-pink)   .pcard-link { color: #ff55cc; }
-    .pcard:has(.neon-purple) .pcard-link { color: #cc55ff; }
-    .pcard:has(.neon-teal)   .pcard-link { color: #00ffcc; }
-    .pcard-link:hover { gap: 0.65rem; opacity: 1; }
-
-    @media (max-width: 900px) {
-      .portfolio-grid { grid-template-columns: 1fr 1fr; gap: 0.85rem; }
-      .portfolio-cat-title { font-size: 1.15rem; }
-    }
-    @media (max-width: 560px) {
-      .portfolio-grid { grid-template-columns: 1fr; }
-    }
-
-
-
-
-
-    /* ══════════════════════════════
-       MOBILE NAV MENU
-    ══════════════════════════════ */
+    /* ── Mobile Menu ── */
     .mobile-menu {
       display: flex;
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
       z-index: 9999;
       background: var(--bg);
-      backdrop-filter: blur(24px);
       flex-direction: column;
       justify-content: center;
       align-items: center;
       gap: 0;
       padding: 2rem;
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(-16px);
-      transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+      opacity: 0; visibility: hidden;
+      transform: translateY(-12px);
+      transition: opacity 0.3s, transform 0.3s, visibility 0.3s;
       pointer-events: none;
     }
+    .mobile-menu.open { opacity: 1; visibility: visible; transform: translateY(0); pointer-events: all; }
 
-    .mobile-menu.open {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0);
-      pointer-events: all;
+    .mobile-menu-close {
+      position: absolute; top: 1.5rem; right: 1.5rem;
+      background: none; border: none;
+      color: var(--text-muted); font-size: 1.8rem;
+      cursor: pointer; line-height: 1; padding: 0.25rem;
+      transition: color 0.2s;
     }
-
-    .mobile-menu a.mobile-cta {
-      margin-top: 2rem;
-      background: var(--accent);
-      color: var(--bg) !important;
-      border-radius: 100px;
-      border: none;
-      padding: 0.85rem 2.5rem;
-      font-family: var(--sans);
-      font-size: 1rem;
-      font-weight: 600;
-      width: auto;
-      letter-spacing: 0.01em;
-    }
-
-    .mobile-menu a.mobile-cta:hover {
-      box-shadow: 0 8px 30px var(--accent-glow);
-      color: var(--bg) !important;
-    }
-
+    .mobile-menu-close:hover { color: var(--text); }
 
     .mobile-menu-logo {
       font-family: var(--serif);
-      font-size: 2rem;
-      letter-spacing: -0.03em;
-      color: var(--text);
-      margin-bottom: 2.5rem;
+      font-size: 2rem; letter-spacing: -0.03em;
+      color: var(--text); margin-bottom: 2.5rem;
     }
     .mobile-menu-logo span { color: var(--accent); }
 
     .mobile-nav-links {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      margin-bottom: 2rem;
+      display: flex; flex-direction: column;
+      width: 100%; margin-bottom: 2rem;
     }
-
     .mobile-nav-links a {
       font-family: var(--serif);
-      font-size: clamp(2rem, 8vw, 2.8rem);
-      font-weight: 400;
-      color: var(--text);
-      text-decoration: none;
+      font-size: clamp(2rem,8vw,2.8rem);
+      color: var(--text); text-decoration: none;
       padding: 0.65rem 0;
       letter-spacing: -0.02em;
-      width: 100%;
       text-align: center;
       border-bottom: 1px solid var(--border);
       transition: color 0.2s;
@@ -1731,27 +259,812 @@
     .mobile-nav-links a:first-child { border-top: 1px solid var(--border); }
     .mobile-nav-links a:hover { color: var(--accent); }
 
-    .mobile-menu-close {
-      position: absolute;
-      top: 1.5rem;
-      right: 1.5rem;
-      background: none;
+    .mobile-cta {
+      margin-top: 2rem;
+      background: var(--accent);
+      color: #fff !important;
+      border-radius: 100px;
       border: none;
-      color: var(--text-muted);
-      font-size: 1.8rem;
+      padding: 0.85rem 2.5rem;
+      font-family: var(--sans);
+      font-size: 1rem; font-weight: 600;
+      text-decoration: none;
       cursor: pointer;
-      line-height: 1;
-      padding: 0.25rem;
-      transition: color 0.2s;
     }
-    .mobile-menu-close:hover { color: var(--text); }
 
-    /* hamburger open state — X */
-    .menu-toggle.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
-    .menu-toggle.active span:nth-child(2) { opacity: 0; transform: scaleX(0); }
-    .menu-toggle.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
-    .menu-toggle span { transition: transform 0.3s ease, opacity 0.3s ease; }
+    /* ── Hero ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      justify-content: center;
+      padding: 8rem 2.5rem 4rem;
+      max-width: 1300px; margin: 0 auto;
+      position: relative;
+    }
 
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-mid);
+      padding: 0.4rem 1rem; border-radius: 100px;
+      font-size: 0.8rem; font-weight: 500; color: var(--accent);
+      margin-bottom: 2rem; width: fit-content;
+      animation: fadeUp 0.8s ease both;
+    }
+    .hero-badge .dot {
+      width: 6px; height: 6px;
+      background: var(--accent); border-radius: 50%;
+      animation: blink 2s infinite;
+    }
+
+    .hero h1 {
+      font-family: var(--serif);
+      font-size: clamp(3.5rem,8vw,7rem);
+      line-height: 1.05; font-weight: 400;
+      letter-spacing: -0.03em; margin-bottom: 2rem;
+      animation: fadeUp 0.8s 0.1s ease both;
+    }
+    .hero h1 em { font-style: italic; color: var(--accent); }
+
+    .hero-sub {
+      font-size: 1.15rem; color: var(--text-muted);
+      max-width: 560px; line-height: 1.75;
+      margin-bottom: 3rem;
+      animation: fadeUp 0.8s 0.2s ease both;
+    }
+
+    .hero-actions {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      animation: fadeUp 0.8s 0.3s ease both;
+    }
+
+    .btn-primary {
+      background: var(--accent); color: #fff;
+      padding: 0.85rem 2rem; border-radius: 100px;
+      text-decoration: none; font-weight: 600;
+      font-size: 0.95rem; transition: all 0.25s;
+      border: none; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 0.5rem;
+    }
+    .btn-primary:hover { opacity: 0.88; transform: translateY(-2px); }
+
+    .btn-secondary {
+      background: transparent; color: var(--text);
+      padding: 0.85rem 2rem; border-radius: 100px;
+      text-decoration: none; font-weight: 500;
+      font-size: 0.95rem;
+      border: 1px solid var(--border);
+      transition: all 0.25s;
+      display: inline-flex; align-items: center; gap: 0.5rem;
+    }
+    .btn-secondary:hover { border-color: var(--border-strong); background: var(--surface); }
+
+    /* ── Ticker ── */
+    .ticker-wrap {
+      overflow: hidden;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 0; white-space: nowrap;
+    }
+    .ticker {
+      display: inline-flex;
+      animation: scroll 35s linear infinite;
+    }
+    .ticker span {
+      font-family: var(--serif);
+      font-size: 1.25rem; color: var(--text-muted);
+      margin-right: 3rem; font-style: italic;
+    }
+    .ticker span::before {
+      content: '◆'; color: var(--accent);
+      margin-right: 1.5rem; font-size: 0.45rem; vertical-align: middle;
+    }
+
+    /* ── Sections ── */
+    section {
+      padding: 6rem 2.5rem;
+      max-width: 1300px; margin: 0 auto;
+    }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 0.73rem; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 1rem;
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .section-label::before {
+      content: ''; width: 24px; height: 1px; background: var(--accent);
+    }
+
+    .section-title {
+      font-family: var(--serif);
+      font-size: clamp(2.2rem,4vw,3.5rem);
+      line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 1.5rem;
+    }
+
+    .section-desc {
+      color: var(--text-muted); font-size: 1.05rem;
+      max-width: 600px; line-height: 1.7; margin-bottom: 3.5rem;
+    }
+
+    /* ── About ── */
+    .about-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 4rem; align-items: start;
+    }
+    .about-text p {
+      color: var(--text-muted); font-size: 1.05rem;
+      line-height: 1.8; margin-bottom: 1.5rem;
+    }
+    .about-text p strong { color: var(--text); font-weight: 600; }
+
+    .about-stats {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1.25rem; margin-top: 2.5rem;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 1.5rem; transition: all 0.3s;
+    }
+    .stat-card:hover {
+      border-color: var(--border-strong);
+      background: var(--bg-card-hover);
+      transform: translateY(-2px);
+    }
+    .stat-number {
+      font-family: var(--serif);
+      font-size: 2.5rem; color: var(--accent);
+      line-height: 1; margin-bottom: 0.4rem;
+    }
+    .stat-label { color: var(--text-muted); font-size: 0.85rem; font-weight: 500; }
+
+    .about-details {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px; padding: 2.5rem;
+    }
+    .detail-group { margin-bottom: 2rem; }
+    .detail-group:last-child { margin-bottom: 0; }
+    .detail-group h4 {
+      font-family: var(--mono);
+      font-size: 0.7rem; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--accent); margin-bottom: 0.75rem;
+    }
+    .detail-group p, .detail-group li {
+      color: var(--text-muted); font-size: 0.95rem; line-height: 1.7;
+    }
+    .detail-group ul { list-style: none; }
+    .detail-group ul li {
+      padding: 0.3rem 0; padding-left: 1.25rem; position: relative;
+    }
+    .detail-group ul li::before {
+      content: '→'; position: absolute; left: 0;
+      color: var(--accent); font-size: 0.8rem;
+    }
+
+    /* ── Certifications ── */
+    .certs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px,1fr));
+      gap: 1.25rem;
+    }
+    .cert-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-card); padding: 1.75rem;
+      display: flex; gap: 1.25rem; align-items: flex-start;
+      transition: all 0.3s; text-decoration: none;
+      color: var(--text); position: relative;
+    }
+    .cert-card:hover {
+      border-color: var(--border-strong);
+      background: var(--bg-card-hover);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+    }
+    .cert-logo {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; flex-shrink: 0;
+    }
+    .cert-info h3 {
+      font-size: 1rem; font-weight: 600; margin-bottom: 0.3rem;
+      letter-spacing: -0.01em; line-height: 1.35;
+    }
+    .cert-info .cert-issuer {
+      font-size: 0.82rem; color: var(--accent); font-weight: 500; margin-bottom: 0.4rem;
+    }
+    .cert-info p { color: var(--text-muted); font-size: 0.84rem; line-height: 1.55; }
+    .cert-badge {
+      position: absolute; top: 0.6rem; right: 0.75rem;
+      font-family: var(--mono); font-size: 0.6rem;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 0.2rem 0.6rem; border-radius: 100px;
+      background: var(--accent-dim); color: var(--accent);
+      border: 1px solid var(--accent-mid);
+    }
+
+    /* ── AI Philosophy ── */
+    .ai-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 24px; padding: 4rem;
+      margin: 0 2.5rem; position: relative; overflow: hidden;
+    }
+    .ai-section::before {
+      content: '';
+      position: absolute; top: -200px; right: -200px;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, var(--accent-dim) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .ai-grid {
+      display: grid; grid-template-columns: 1.2fr 1fr;
+      gap: 4rem; align-items: center;
+    }
+    .ai-text h2 {
+      font-family: var(--serif);
+      font-size: clamp(2rem,3.5vw,3rem);
+      line-height: 1.15; margin-bottom: 1.5rem; letter-spacing: -0.02em;
+    }
+    .ai-text h2 em { color: var(--accent); font-style: italic; }
+    .ai-text p { color: var(--text-muted); font-size: 1.05rem; line-height: 1.8; margin-bottom: 1.25rem; }
+
+    .ai-tools { display: flex; flex-direction: column; gap: 1rem; }
+    .ai-tool {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 1.25rem 1.5rem;
+      display: flex; align-items: center; gap: 1rem; transition: all 0.3s;
+    }
+    .ai-tool:hover { border-color: var(--border-strong); transform: translateX(4px); }
+    .ai-tool-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: var(--accent-dim);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+    .ai-tool-text h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.15rem; }
+    .ai-tool-text p { font-size: 0.82rem; color: var(--text-muted); margin: 0; }
+
+    /* ════════════════════════════════
+       APP PORTFOLIO — PROFESSIONAL
+    ════════════════════════════════ */
+    #apps { padding: 6rem 2.5rem; max-width: 1300px; margin: 0 auto; }
+
+    /* Category filter tabs */
+    .category-tabs {
+      display: flex; gap: 0.5rem;
+      margin-bottom: 3rem; flex-wrap: wrap;
+    }
+    .cat-tab {
+      font-family: var(--sans);
+      font-size: 0.88rem; font-weight: 500;
+      padding: 0.5rem 1.2rem; border-radius: 100px;
+      border: 1px solid var(--border);
+      background: transparent; color: var(--text-muted);
+      cursor: pointer; transition: all 0.22s;
+    }
+    .cat-tab:hover { border-color: var(--border-strong); color: var(--text); }
+    .cat-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+
+    /* Category group */
+    .portfolio-category { margin-bottom: 4rem; }
+
+    .portfolio-cat-header {
+      display: flex; align-items: center; gap: 0.9rem;
+      margin-bottom: 1.75rem; padding-bottom: 1.1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .portfolio-cat-icon {
+      font-size: 1.5rem;
+      width: 48px; height: 48px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 12px;
+      flex-shrink: 0;
+    }
+    .cat-icon-finance { background: var(--cat-finance-bg); border: 1px solid var(--cat-finance-border); }
+    .cat-icon-games   { background: var(--cat-games-bg);   border: 1px solid var(--cat-games-border);   }
+    .cat-icon-utility { background: var(--cat-utility-bg); border: 1px solid var(--cat-utility-border); }
+
+    .portfolio-cat-title {
+      font-family: var(--serif);
+      font-size: 1.75rem; font-weight: 400;
+      letter-spacing: -0.02em; color: var(--text); flex: 1;
+    }
+
+    .portfolio-cat-badge {
+      font-family: var(--mono); font-size: 0.7rem;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 0.22rem 0.75rem; border-radius: 100px;
+      font-weight: 500;
+    }
+    .badge-finance { background: var(--cat-finance-bg); color: var(--cat-finance); border: 1px solid var(--cat-finance-border); }
+    .badge-games   { background: var(--cat-games-bg);   color: var(--cat-games);   border: 1px solid var(--cat-games-border);   }
+    .badge-utility { background: var(--cat-utility-bg); color: var(--cat-utility); border: 1px solid var(--cat-utility-border); }
+
+    .portfolio-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px,1fr));
+      gap: 1.25rem;
+    }
+
+    /* Professional App Card */
+    .pcard {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      overflow: hidden; display: flex;
+      flex-direction: column;
+      transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+    }
+    .pcard:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.18);
+      border-color: var(--border-strong);
+    }
+
+    /* App icon banner — no neon, clean gradient */
+    .pcard-banner {
+      height: 108px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.8rem;
+      position: relative;
+    }
+
+    /* Finance cards — deep emerald */
+    .banner-finance {
+      background: linear-gradient(135deg, #0d1f14 0%, #162e1e 100%);
+      border-bottom: 1px solid var(--cat-finance-border);
+    }
+    /* Games cards — deep indigo */
+    .banner-games {
+      background: linear-gradient(135deg, #0e0b1e 0%, #1a1438 100%);
+      border-bottom: 1px solid var(--cat-games-border);
+    }
+    /* Utility cards — deep amber */
+    .banner-utility {
+      background: linear-gradient(135deg, #1c1005 0%, #2a1c08 100%);
+      border-bottom: 1px solid var(--cat-utility-border);
+    }
+
+    .pcard-body {
+      padding: 1.25rem 1.35rem 1.35rem;
+      display: flex; flex-direction: column; flex: 1;
+    }
+    .pcard-body h3 {
+      font-size: 0.97rem; font-weight: 600;
+      color: var(--text); margin-bottom: 0.5rem;
+      letter-spacing: -0.01em; line-height: 1.35;
+    }
+    .pcard-body p {
+      font-size: 0.83rem; color: var(--text-muted);
+      line-height: 1.65; flex: 1;
+    }
+    .pcard-link {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      margin-top: 1rem; color: var(--accent);
+      font-size: 0.82rem; font-weight: 600;
+      text-decoration: none; transition: gap 0.2s, opacity 0.2s;
+      opacity: 0.9;
+    }
+    .pcard-link:hover { gap: 0.6rem; opacity: 1; }
+
+    /* ── Experience ── */
+    .timeline { position: relative; padding-left: 2.5rem; }
+    .timeline::before {
+      content: ''; position: absolute;
+      left: 0; top: 0; bottom: 0; width: 1px;
+      background: linear-gradient(to bottom, var(--accent), var(--border), transparent);
+    }
+    .timeline-item { position: relative; margin-bottom: 3rem; padding-left: 1rem; }
+    .timeline-item::before {
+      content: ''; position: absolute;
+      left: -2.85rem; top: 0.5rem;
+      width: 10px; height: 10px;
+      border-radius: 50%; background: var(--accent);
+      box-shadow: 0 0 0 4px var(--bg), 0 0 0 5px var(--accent);
+    }
+    .timeline-date {
+      font-family: var(--mono); font-size: 0.74rem;
+      color: var(--accent); letter-spacing: 0.08em; margin-bottom: 0.4rem;
+    }
+    .timeline-item h3 { font-size: 1.15rem; font-weight: 600; margin-bottom: 0.2rem; }
+    .timeline-item h4 {
+      color: var(--text-muted); font-weight: 400;
+      font-size: 0.95rem; font-style: italic; margin-bottom: 0.6rem;
+    }
+    .timeline-item p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; }
+
+    /* ── Support ── */
+    .support-section {
+      padding: 5rem 2.5rem;
+      max-width: 800px; margin: 0 auto; text-align: center;
+    }
+    .support-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 24px; padding: 3rem;
+      position: relative; overflow: hidden;
+    }
+    .support-card::before {
+      content: ''; position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    }
+    .support-emoji { font-size: 2.5rem; margin-bottom: 1.25rem; display: block; }
+    .support-card h2 {
+      font-family: var(--serif);
+      font-size: clamp(1.8rem,3vw,2.5rem);
+      margin-bottom: 0.75rem; letter-spacing: -0.02em;
+    }
+    .support-card h2 em { color: var(--accent); font-style: italic; }
+    .support-card > p {
+      color: var(--text-muted); font-size: 1rem; line-height: 1.7;
+      max-width: 520px; margin: 0 auto 2rem;
+    }
+
+    .support-option {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 0.6rem;
+      padding: 1.5rem 1rem; border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      text-decoration: none; color: var(--text);
+      transition: all 0.28s; cursor: pointer;
+      max-width: 280px; margin: 0 auto 2rem;
+    }
+    .support-option:hover {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+      transform: translateY(-3px);
+    }
+    .support-option-icon { font-size: 1.75rem; }
+    .support-option-name { font-weight: 600; font-size: 0.95rem; }
+    .support-option-desc { font-size: 0.78rem; color: var(--text-muted); line-height: 1.4; }
+    .support-note { font-size: 0.82rem; color: var(--text-muted); font-style: italic; margin: 0; }
+    .support-note span { color: var(--accent); }
+
+    /* ── UPI Modal ── */
+    .upi-modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,0.55); backdrop-filter: blur(8px);
+      align-items: center; justify-content: center; padding: 1.5rem;
+    }
+    .upi-modal-overlay.active { display: flex; }
+    .upi-modal {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 20px; padding: 2.5rem;
+      max-width: 380px; width: 100%;
+      text-align: center; position: relative;
+      animation: fadeUp 0.3s ease;
+    }
+    .upi-modal h3 { font-family: var(--serif); font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .upi-modal p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .upi-id-box {
+      display: flex; align-items: center; gap: 0.5rem;
+      background: var(--surface); border: 1px dashed var(--border);
+      border-radius: 12px; padding: 0.85rem 1rem;
+      margin-bottom: 1.5rem; justify-content: center;
+    }
+    .upi-id-box code {
+      font-family: var(--mono); font-size: 0.95rem;
+      color: var(--accent); letter-spacing: 0.02em;
+    }
+    .upi-copy-btn {
+      background: none; border: 1px solid var(--border);
+      border-radius: 8px; padding: 0.35rem 0.65rem;
+      color: var(--text-muted); font-size: 0.75rem;
+      cursor: pointer; transition: all 0.2s; font-family: var(--sans);
+    }
+    .upi-copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .upi-qr-placeholder {
+      width: 180px; height: 180px; margin: 0 auto 1.25rem;
+      border-radius: 12px; border: 1px solid var(--border);
+      background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; color: #999;
+    }
+    .upi-close {
+      position: absolute; top: 0.6rem; right: 0.75rem;
+      background: none; border: none;
+      color: var(--text-muted); font-size: 1.25rem;
+      cursor: pointer; padding: 0.25rem; line-height: 1; transition: color 0.2s;
+    }
+    .upi-close:hover { color: var(--text); }
+
+    /* ── Contact ── */
+    .contact-section {
+      text-align: center; padding: 8rem 2.5rem;
+      max-width: 700px; margin: 0 auto;
+    }
+    .contact-section h2 {
+      font-family: var(--serif);
+      font-size: clamp(2.5rem,5vw,4rem);
+      margin-bottom: 1.25rem; letter-spacing: -0.03em; line-height: 1.1;
+    }
+    .contact-section h2 em { color: var(--accent); font-style: italic; }
+    .contact-section p {
+      color: var(--text-muted); font-size: 1.05rem;
+      line-height: 1.7; margin-bottom: 2.5rem;
+    }
+    .contact-links {
+      display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
+    }
+    .contact-link {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.75rem 1.5rem; border-radius: 100px;
+      border: 1px solid var(--border);
+      color: var(--text); text-decoration: none;
+      font-weight: 500; font-size: 0.9rem; transition: all 0.3s;
+    }
+    .contact-link:hover {
+      border-color: var(--accent);
+      background: var(--accent-dim); color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem 2.5rem;
+      display: flex; justify-content: space-between; align-items: center;
+      max-width: 1300px; margin: 0 auto;
+      color: var(--text-muted); font-size: 0.85rem;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    /* ── Animations ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes blink {
+      0%,100% { opacity: 1; }
+      50%      { opacity: 0.3; }
+    }
+    @keyframes scroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    .reveal {
+      opacity: 1; transform: translateY(0);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .about-grid, .ai-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .ai-section { padding: 2.5rem 1.5rem; margin: 0 1.25rem; }
+      nav { padding: 0.85rem 1.25rem; }
+      section { padding: 3.5rem 1.25rem; }
+      .hero { padding: 6rem 1.25rem 3rem; min-height: 100svh; }
+      .hero h1 { font-size: clamp(2.6rem,10vw,4.5rem); }
+      .hero-sub { font-size: 1rem; }
+      footer { flex-direction: column; gap: 0.75rem; text-align: center; }
+      .certs-grid { grid-template-columns: 1fr; }
+      .section-title { font-size: clamp(1.9rem,6vw,3rem); }
+      #apps { padding: 4rem 1.25rem; }
+      .portfolio-grid { grid-template-columns: 1fr 1fr; gap: 1rem; }
+      .portfolio-cat-title { font-size: 1.4rem; }
+    }
+
+    @media (max-width: 560px) {
+      nav { padding: 0.75rem 1rem; }
+      .nav-logo { font-size: 1.25rem; }
+      .hero { padding: 5.5rem 1rem 2.5rem; }
+      .hero h1 { font-size: clamp(2.2rem,11vw,3.5rem); }
+      section { padding: 3rem 1rem; }
+      .ai-section { margin: 0 1rem; padding: 2rem 1rem; }
+      .about-stats { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+      .stat-card { padding: 1rem; }
+      .stat-number { font-size: 2rem; }
+      .hero-actions { flex-direction: column; gap: 0.75rem; }
+      .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+      .portfolio-grid { grid-template-columns: 1fr; }
+      .portfolio-cat-title { font-size: 1.2rem; }
+      .timeline { padding-left: 1.5rem; }
+    }
+
+    /* ══════════════════════════════
+       APP FRAME OVERLAY
+    ══════════════════════════════ */
+    .app-frame-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9000;
+      background: var(--bg);
+      flex-direction: column;
+      animation: fadeIn 0.3s ease;
+    }
+    .app-frame-overlay.open { display: flex; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .app-frame-topbar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 1.5rem;
+      background: color-mix(in srgb, var(--bg) 92%, transparent);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .app-frame-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 100px;
+      padding: 0.45rem 1.1rem;
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.22s;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+    .app-frame-back:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      transform: translateX(-2px);
+    }
+    .app-frame-back svg {
+      width: 14px; height: 14px;
+      stroke: currentColor; fill: none;
+      stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+      transition: inherit;
+      flex-shrink: 0;
+    }
+
+    .app-frame-title {
+      font-family: var(--serif);
+      font-size: 1.05rem;
+      letter-spacing: -0.01em;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+    .app-frame-title span { color: var(--accent); }
+
+    .app-frame-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    .app-frame-open {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 100px;
+      padding: 0.45rem 1rem;
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .app-frame-open:hover { opacity: 0.85; }
+
+    .app-frame-iframe {
+      flex: 1;
+      width: 100%;
+      border: none;
+      background: #fff;
+    }
+
+    .app-frame-loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      background: var(--bg);
+      pointer-events: none;
+      transition: opacity 0.4s;
+    }
+    .app-frame-loading.hidden { opacity: 0; pointer-events: none; }
+    .app-frame-spinner {
+      width: 36px; height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .app-frame-loading p { color: var(--text-muted); font-size: 0.85rem; }
+
+    /* ══════════════════════════════
+       SPECIAL CARD ENHANCEMENTS
+    ══════════════════════════════ */
+    /* Hover shimmer effect on banner */
+    .pcard-banner::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0) 100%);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    .pcard:hover .pcard-banner::after { opacity: 1; }
+
+    /* App category color accent on left side */
+    .pcard { border-left: 3px solid transparent; }
+    .banner-finance ~ .pcard-body { /* handled via JS */ }
+
+    /* Category-based left border */
+    .pcard.cat-finance { border-left-color: var(--cat-finance); }
+    .pcard.cat-games   { border-left-color: var(--cat-games); }
+    .pcard.cat-utility { border-left-color: var(--cat-utility); }
+
+    /* Tag badge */
+    .pcard-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-family: var(--mono);
+      font-size: 0.66rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.18rem 0.55rem;
+      border-radius: 100px;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      width: fit-content;
+    }
+    .pcard-tag.tag-finance { background: var(--cat-finance-bg); color: var(--cat-finance); border: 1px solid var(--cat-finance-border); }
+    .pcard-tag.tag-games   { background: var(--cat-games-bg);   color: var(--cat-games);   border: 1px solid var(--cat-games-border); }
+    .pcard-tag.tag-utility { background: var(--cat-utility-bg); color: var(--cat-utility); border: 1px solid var(--cat-utility-border); }
+
+    /* Pulse dot for "live" apps */
+    .pcard-live {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: auto;
+      padding-top: 0.6rem;
+      font-weight: 500;
+    }
+    .pcard-live::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: #22c55e;
+      border-radius: 50%;
+      box-shadow: 0 0 0 0 rgba(34,197,94,0.5);
+      animation: livepulse 2s ease infinite;
+      flex-shrink: 0;
+    }
+    @keyframes livepulse {
+      0%   { box-shadow: 0 0 0 0 rgba(34,197,94,0.5); }
+      70%  { box-shadow: 0 0 0 6px rgba(34,197,94,0); }
+      100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+    }
   </style>
 </head>
 
@@ -1773,17 +1086,15 @@
         <span class="toggle-icon">☀️</span>
         <span class="toggle-knob"></span>
       </button>
-      <button class="menu-toggle" aria-label="Menu" onclick="openMobileMenu()">
-        <span></span>
-        <span></span>
-        <span></span>
+      <button class="menu-toggle" aria-label="Menu">
+        <span></span><span></span><span></span>
       </button>
     </div>
   </nav>
 
   <!-- ─── Mobile Menu ─── -->
   <div class="mobile-menu" id="mobileMenu">
-    <button class="mobile-menu-close" id="mobileClose" aria-label="Close menu" onclick="closeMobileMenu()">✕</button>
+    <button class="mobile-menu-close" id="mobileClose" aria-label="Close menu">✕</button>
     <div class="mobile-menu-logo">nitish<span>.</span></div>
     <nav class="mobile-nav-links">
       <a href="#about"      onclick="closeMobileMenu()">About</a>
@@ -1796,7 +1107,6 @@
 
   <!-- ─── Hero ─── -->
   <section class="hero">
-    <div class="hero-glow"></div>
     <div class="hero-badge">
       <span class="dot"></span>
       Available for projects · Final year B.Com student
@@ -1804,7 +1114,7 @@
     <h1>I build apps<br>with <em>AI superpowers</em></h1>
     <p class="hero-sub">
       Final-year B.Com (Hons) student at VIT, building AI-powered apps across
-      finance, games, and sports. 10 apps shipped in my first month —
+      finance, games, and sports. 20+ apps shipped in two months —
       and I'm just getting warmed up.
     </p>
     <div class="hero-actions">
@@ -1836,22 +1146,21 @@
             I'm <strong>M G Nitish</strong>, a final-semester <strong>B.Com (Hons) student at VIT</strong> who
             discovered a passion for building software at the intersection of
             <strong>finance, design, and artificial intelligence</strong>. My commerce background
-            isn't a detour — it's my edge. I understand the money side <em>and</em> the tech side.
+            isn't a detour — it's my edge.
           </p>
           <p>
             While my peers went into accounting and audit, I taught myself to code and started
             building <strong>applications</strong> — financial tools, games, sports apps, and more.
-            In just one month, I've shipped 14 apps and I'm only getting started.
+            In just two months, I've shipped 20+ apps and I'm only getting started.
           </p>
           <p>
             I don't just use AI as a feature — I build <em>with</em> AI as a core development partner,
             using tools like <strong>Claude</strong> and other LLMs to accelerate every stage of the
-            development lifecycle, from ideation to deployment. My B.Com (Hons) training at VIT gives me
-            the domain expertise to build apps that actually make sense.
+            development lifecycle.
           </p>
           <div class="about-stats">
             <div class="stat-card">
-              <div class="stat-number">15+</div>
+              <div class="stat-number">20+</div>
               <div class="stat-label">Apps Built</div>
             </div>
             <div class="stat-card">
@@ -1890,6 +1199,7 @@
             <ul>
               <li>Google Digital Marketing & E-Commerce</li>
               <li>Generative AI & Prompt Engineering — Google</li>
+              <li>Google AI Professional Certificate</li>
             </ul>
           </div>
           <div class="detail-group">
@@ -1897,7 +1207,6 @@
             <ul>
               <li>Finance, games & sports apps</li>
               <li>AI-augmented development workflows</li>
-              <li>Generative AI & prompt engineering</li>
               <li>Rapid prototyping & product design</li>
             </ul>
           </div>
@@ -1911,38 +1220,35 @@
     <div class="reveal">
       <div class="section-label">Certifications</div>
       <div class="section-title">Credentials I've earned.</div>
-      <div class="section-desc">Industry-recognized certifications from Google that back up what I build every day.
-      </div>
+      <div class="section-desc">Industry-recognized certifications from Google that back up what I build every day.</div>
       <div class="certs-grid">
 
         <a href="https://coursera.org/share/0a86791a4b6141b5d69ed21550017e58" target="_blank" class="cert-card">
-          <div class="cert-logo" style="background: linear-gradient(135deg, #4285F4, #34A853);">🎓</div>
+          <div class="cert-logo" style="background: linear-gradient(135deg,#4285F4,#34A853);">🎓</div>
           <div class="cert-info">
             <h3>Google Digital Marketing & E-Commerce</h3>
             <div class="cert-issuer">Google · Coursera</div>
-            <p>Professional certificate covering digital marketing strategy, e-commerce analytics, customer engagement,
-              and data-driven marketing across Google platforms.</p>
+            <p>Professional certificate covering digital marketing strategy, e-commerce analytics, customer engagement, and data-driven marketing across Google platforms.</p>
           </div>
           <span class="cert-badge">Verified</span>
         </a>
 
         <div class="cert-card">
-          <div class="cert-logo" style="background: linear-gradient(135deg, #FBBC04, #EA4335);">🤖</div>
+          <div class="cert-logo" style="background: linear-gradient(135deg,#FBBC04,#EA4335);">🎓</div>
           <div class="cert-info">
             <h3>Generative AI & Prompt Engineering</h3>
             <div class="cert-issuer">Google Skills</div>
-            <p>Certification in generative AI fundamentals, prompt design, and practical applications of large language
-              models for productivity and development.</p>
+            <p>Certification in generative AI fundamentals, prompt design, and practical applications of large language models for productivity and development.</p>
           </div>
           <span class="cert-badge">Verified</span>
         </div>
 
         <a href="https://coursera.org/verify/professional-cert/9Y4JCPMDWUSM" target="_blank" class="cert-card">
-          <div class="cert-logo" style="background: linear-gradient(135deg, #4285F4, #EA4335, #FBBC04, #34A853);">🤖</div>
+          <div class="cert-logo" style="background: linear-gradient(135deg,#4285F4,#EA4335,#FBBC04,#34A853);">🎓</div>
           <div class="cert-info">
             <h3>Google AI Professional Certificate</h3>
             <div class="cert-issuer">Google · Coursera — Mar 2026</div>
-            <p>7-course professional certificate covering AI fundamentals, brainstorming, research, writing, content creation, data analysis, and app building. Built 20+ AI artifacts and vibe coded a custom AI solution.</p>
+            <p>7-course professional certificate covering AI fundamentals, brainstorming, research, writing, content creation, data analysis, and app building. Built 20+ AI artifacts.</p>
           </div>
           <span class="cert-badge">Verified</span>
         </a>
@@ -1952,7 +1258,7 @@
   </section>
 
   <!-- ─── AI Philosophy ─── -->
-  <div class="ai-section reveal" style="margin: 0 2.5rem;">
+  <div class="ai-section reveal">
     <div class="ai-grid">
       <div class="ai-text">
         <div class="section-label">My AI Approach</div>
@@ -1960,13 +1266,12 @@
         <p>
           I've embraced AI as a fundamental development partner. From brainstorming
           architecture to writing tests, from debugging complex issues to generating
-          documentation — AI accelerates every step of my development workflow.
+          documentation — AI accelerates every step of my workflow.
         </p>
         <p>
           My commerce studies give me the <em>why</em> behind financial software,
           while my curiosity drives me to build across every domain I'm passionate about.
-          AI helps me execute the <em>how</em> — faster, with fewer bugs, and with more polish
-          than traditional development alone could achieve.
+          AI helps me execute the <em>how</em> — faster, with fewer bugs, and with more polish.
         </p>
       </div>
       <div class="ai-tools">
@@ -2006,55 +1311,63 @@
   <section id="apps">
     <div class="section-label">App Portfolio</div>
     <div class="section-title">Things I've built.</div>
-    <div class="section-desc">AI-powered apps across finance, games, and sports — all built with Claude and hosted on GitHub.</div>
+    <div class="section-desc">AI-powered apps across finance, games, and utilities — all built with Claude and hosted on GitHub.</div>
+
+    <!-- Filter Tabs -->
+    <div class="category-tabs">
+      <button class="cat-tab active" data-cat="all">All Apps</button>
+      <button class="cat-tab" data-cat="finance">Finance</button>
+      <button class="cat-tab" data-cat="games">Games</button>
+      <button class="cat-tab" data-cat="utility">Utility</button>
+    </div>
 
     <!-- ── FINANCE ── -->
-    <div class="portfolio-category">
+    <div class="portfolio-category" data-category="finance">
       <div class="portfolio-cat-header">
-        <span class="portfolio-cat-icon">💰</span>
+        <span class="portfolio-cat-icon cat-icon-finance">💰</span>
         <h2 class="portfolio-cat-title">Finance Apps</h2>
-        <span class="portfolio-cat-badge">10 apps</span>
+        <span class="portfolio-cat-badge badge-finance">10 apps</span>
       </div>
       <div class="portfolio-grid">
 
         <div class="pcard">
-          <div class="pcard-top neon-top neon-green" style="background:#030d06">🏦</div>
+          <div class="pcard-banner banner-finance">🏦</div>
           <div class="pcard-body">
             <h3>PPF Calculator</h3>
-            <p>Plan long-term savings — customize yearly investment, interest rate &amp; tenure to estimate maturity value and year-by-year growth.</p>
+            <p>Plan long-term savings — customize yearly investment, interest rate & tenure to estimate maturity value and year-by-year growth.</p>
             <a href="https://mgnitish.github.io/apps/finance/ppf calculator/" target="_blank" class="pcard-link">Open App →</a>
           </div>
         </div>
 
         <div class="pcard">
-          <div class="pcard-top neon-top neon-cyan" style="background:#020a10">🏠</div>
+          <div class="pcard-banner banner-finance">🏠</div>
           <div class="pcard-body">
             <h3>EMI Calculator</h3>
-            <p>Compute monthly loan payments with doughnut &amp; bar charts for principal vs. interest, plus a full amortization schedule.</p>
+            <p>Compute monthly loan payments with doughnut & bar charts for principal vs. interest, plus a full amortization schedule.</p>
             <a href="https://mgnitish.github.io/apps/finance/emi calculator/" target="_blank" class="pcard-link">Open App →</a>
           </div>
         </div>
 
         <div class="pcard">
-          <div class="pcard-top neon-top neon-violet" style="background:#080312">📈</div>
+          <div class="pcard-banner banner-finance">📈</div>
           <div class="pcard-body">
             <h3>FD/RD Calculator</h3>
-            <p>Project Fixed &amp; Recurring Deposit growth with real-time interest breakdowns and interactive compounding visualizations.</p>
+            <p>Project Fixed & Recurring Deposit growth with real-time interest breakdowns and interactive compounding visualizations.</p>
             <a href="https://mgnitish.github.io/apps/finance/fdrd calculator/" target="_blank" class="pcard-link">Open App →</a>
           </div>
         </div>
 
         <div class="pcard">
-          <div class="pcard-top neon-top neon-orange" style="background:#0d0400">🇮🇳</div>
+          <div class="pcard-banner banner-finance">🇮🇳</div>
           <div class="pcard-body">
             <h3>Indian Financial Dashboard</h3>
-            <p>Live Nifty, Sensex, gold, forex &amp; Bitcoin on one page. Compare FD rates, savings schemes &amp; RBI policy rates — no login needed.</p>
+            <p>Live Nifty, Sensex, gold, forex & Bitcoin on one page. Compare FD rates, savings schemes & RBI policy rates — no login needed.</p>
             <a href="https://mgnitish.github.io/apps/finance/indian findb/" target="_blank" class="pcard-link">Open App →</a>
           </div>
         </div>
 
         <div class="pcard">
-          <div class="pcard-top neon-top neon-lime" style="background:#030d00">🌱</div>
+          <div class="pcard-banner banner-finance">💹</div>
           <div class="pcard-body">
             <h3>Wealth Path</h3>
             <p>See nominal returns vs. real purchasing power side-by-side. Input SIP details to watch inflation eat into your wealth over time.</p>
@@ -2063,34 +1376,34 @@
         </div>
 
         <div class="pcard">
-          <div class="pcard-top neon-top neon-yellow" style="background:#0a0a00">💳</div>
+          <div class="pcard-banner banner-finance">💳</div>
           <div class="pcard-body">
             <h3>Credit Calculator</h3>
-            <p>Estimate your credit score (300–850) and check eligibility for personal, home &amp; auto loans — with interactive charts.</p>
+            <p>Estimate your credit score (300–850) and check eligibility for personal, home & auto loans — with interactive charts.</p>
             <a href="https://mgnitish.github.io/apps/finance/credit calculator/" target="_blank" class="pcard-link">Open App →</a>
           </div>
         </div>
 
         <div class="pcard">
-          <div class="pcard-top neon-top neon-red" style="background:#0d0000">⚠️</div>
+          <div class="pcard-banner banner-finance">⚠️</div>
           <div class="pcard-body">
             <h3>Fin-Risk Analyzer</h3>
-            <p>Diagnose your fiscal health — weighs income &amp; assets against liabilities, identifies vulnerabilities, and suggests investments.</p>
+            <p>Diagnose your fiscal health — weighs income & assets against liabilities, identifies vulnerabilities, and suggests investments.</p>
             <a href="https://mgnitish.github.io/apps/finance/finrisk analyzer/" target="_blank" class="pcard-link">Open App →</a>
           </div>
         </div>
 
         <div class="pcard">
-          <div class="pcard-top neon-top neon-blue" style="background:#000a14">🛡️</div>
+          <div class="pcard-banner banner-finance">🛡️</div>
           <div class="pcard-body">
             <h3>Insure IQ</h3>
-            <p>Analyse life, health &amp; accident insurance against your income and family profile — scores your coverage and shows the gaps.</p>
+            <p>Analyse life, health & accident insurance against your income and family profile — scores your coverage and shows the gaps.</p>
             <a href="https://mgnitish.github.io/apps/finance/insure iq/" target="_blank" class="pcard-link">Open App →</a>
           </div>
         </div>
 
         <div class="pcard">
-          <div class="pcard-top neon-top neon-green" style="background:#001a08">🧭</div>
+          <div class="pcard-banner banner-finance">🧭</div>
           <div class="pcard-body">
             <h3>SIP Compass</h3>
             <p>Stay the course with your SIP investments — tracks your SIP journey, projects future value, and helps you navigate market volatility with confidence.</p>
@@ -2099,7 +1412,7 @@
         </div>
 
         <div class="pcard">
-          <div class="pcard-top neon-top neon-cyan" style="background:#000d1a">📊</div>
+          <div class="pcard-banner banner-finance">📊</div>
           <div class="pcard-body">
             <h3>Smart MFD</h3>
             <p>A smart mutual fund asset allocator — builds a personalised allocation report based on your risk profile, investment goals, and time horizon.</p>
@@ -2111,34 +1424,34 @@
     </div>
 
     <!-- ── GAMES ── -->
-    <div class="portfolio-category">
+    <div class="portfolio-category" data-category="games">
       <div class="portfolio-cat-header">
-        <span class="portfolio-cat-icon">🎮</span>
+        <span class="portfolio-cat-icon cat-icon-games">🎮</span>
         <h2 class="portfolio-cat-title">Games</h2>
-        <span class="portfolio-cat-badge games-badge">7 apps</span>
+        <span class="portfolio-cat-badge badge-games">8 games</span>
       </div>
       <div class="portfolio-grid">
 
         <div class="pcard">
-          <div class="pcard-top neon-top neon-pink" style="background:#0d0010">⭕</div>
+          <div class="pcard-banner banner-games">⭕</div>
           <div class="pcard-body">
             <h3>Tic Tac Toe</h3>
-            <p>Single-player AI mode and two-player mode. Play against an unbeatable computer or a friend, with score tracking and a glassmorphism interface.</p>
+            <p>Single-player AI mode and two-player mode. Play against an unbeatable computer or a friend, with score tracking and a clean interface.</p>
             <a href="https://mgnitish.github.io/apps/games/tic-tac-toe/" target="_blank" class="pcard-link">Open App →</a>
           </div>
         </div>
 
         <div class="pcard">
-          <div class="pcard-top neon-top neon-purple" style="background:#04000f">🧠</div>
+          <div class="pcard-banner banner-games">🧠</div>
           <div class="pcard-body">
             <h3>Memory Matching</h3>
-            <p>NEON MATCH — cyberpunk memory game across 8 categories &amp; 3 difficulty levels. Neon glow, 3D card flips, move counter &amp; best-score tracking.</p>
+            <p>Memory game across 8 categories & 3 difficulty levels. 3D card flips, move counter & best-score tracking.</p>
             <a href="https://mgnitish.github.io/apps/games/memory matching/" target="_blank" class="pcard-link">Open App →</a>
           </div>
         </div>
 
         <div class="pcard">
-          <div class="pcard-top neon-top neon-pink" style="background:#0d0008">🎈</div>
+          <div class="pcard-banner banner-games">🎈</div>
           <div class="pcard-body">
             <h3>Balloon Pop!</h3>
             <p>Fast-paced balloon shooting game — pop as many balloons as you can before they escape. Features score tracking, lives system, and progressively harder waves.</p>
@@ -2147,78 +1460,78 @@
         </div>
 
         <div class="pcard">
-          <div class="pcard-top neon-top neon-red" style="background:#0d0000">💀</div>
+          <div class="pcard-banner banner-games">💀</div>
           <div class="pcard-body">
             <h3>Cursed Rows</h3>
-            <p>A dark horror-themed puzzle game — clear cursed rows before they consume you. Features eerie scanline effects, glowing gore atmosphere, and progressively darker waves. Not for the faint-hearted.</p>
+            <p>A horror-themed puzzle game — clear cursed rows before they consume you. Eerie atmosphere with progressively darker waves.</p>
             <a href="https://mgnitish.github.io/apps/games/cursed rows/" target="_blank" class="pcard-link">Open App →</a>
           </div>
         </div>
 
         <div class="pcard">
-          <div class="pcard-top neon-top neon-orange" style="background:#0d0600">🃏</div>
+          <div class="pcard-banner banner-games">🃏</div>
           <div class="pcard-body">
             <h3>ALLAL — The Card Game</h3>
-            <p>The Ancient Game of Matching Fortune — a mystical card matching experience with beautiful fortune-themed cards, multiple game modes, and an enchanting atmosphere.</p>
+            <p>The Ancient Game of Matching Fortune — a mystical card matching experience with fortune-themed cards, multiple game modes, and an enchanting atmosphere.</p>
             <a href="https://mgnitish.github.io/apps/games/allal/" target="_blank" class="pcard-link">Open App →</a>
           </div>
         </div>
 
         <div class="pcard">
-          <div class="pcard-top neon-top neon-yellow" style="background:#0d0a00">🧩</div>
+          <div class="pcard-banner banner-games">🧩</div>
           <div class="pcard-body">
             <h3>15 Puzzle</h3>
-            <p>Slide tiles to arrange numbers 1–15 in order. Features move counter, timer, hint system, keyboard support, and a clean dark/light theme. Fully mobile optimised.</p>
+            <p>Slide tiles to arrange numbers 1–15 in order. Features move counter, timer, hint system, keyboard support, and a clean theme. Fully mobile optimised.</p>
             <a href="https://mgnitish.github.io/apps/games/puzzle 15/" target="_blank" class="pcard-link">Open App →</a>
           </div>
         </div>
 
         <div class="pcard">
-		          <div class="pcard-top neon-top  neon-lime" style="background:#000a14">🐍</div>
-		          <div class="pcard-body">
-		            <h3>Snake & Ladders</h3>
-		            <p>A beautifully themed ancient-era Snake & Ladders game you can play solo against an AI Oracle or with a friend locally. Roll the dice, climb ladders, dodge serpents across 100 squares — complete with sounds, animations, and win tracking. Just open in any browser and play!</p>
-		            <a href="https://mgnitish.github.io/apps/games/snake & ladders/" target="_blank" class="pcard-link">Open App →</a>
-		          </div>
+          <div class="pcard-banner banner-games">🐍</div>
+          <div class="pcard-body">
+            <h3>Snake & Ladders</h3>
+            <p>Ancient-era Snake & Ladders — play solo against an AI Oracle or with a friend locally. Roll the dice, climb ladders, dodge serpents across 100 squares with sounds & animations.</p>
+            <a href="https://mgnitish.github.io/apps/games/snake & ladders/" target="_blank" class="pcard-link">Open App →</a>
+          </div>
+        </div>
 
-	<div class="pcard">
-	    <div class="pcard-top neon-top neon-blue" style="background:#030d00">🔗</div>
-	       <div class="pcard-body">
-	          <h3>GRID WAR</h3>
-	             <p>Avengers Grid War is a Marvel-themed strategy board game built as a single HTML file. It's a modern take on the classic Dots and Boxes game, where two players (or one player vs. AI) take turns drawing lines between dots on a grid — completing a box earns you that cell and another turn.</p>
-	                 <a href="https://mgnitish.github.io/apps/games/grid war/" target="_blank" class="pcard-link">Open App →</a>
-	           </div>
-         </div>
+        <div class="pcard">
+          <div class="pcard-banner banner-games">⚡</div>
+          <div class="pcard-body">
+            <h3>Avengers Grid War</h3>
+            <p>A Marvel-themed strategy board game — a modern take on Dots and Boxes. Choose Classic, Blitz, Power War or Survival mode. Play 2P or vs Ultron AI.</p>
+            <a href="#" class="pcard-link avengers-launch">Play Now →</a>
+          </div>
+        </div>
 
       </div>
-
     </div>
 
-    <!-- ──  UTILITY APPS ── -->
-    <div class="portfolio-category">
+    <!-- ── UTILITY ── -->
+    <div class="portfolio-category" data-category="utility">
       <div class="portfolio-cat-header">
-        <span class="portfolio-cat-icon">🛠</span>
+        <span class="portfolio-cat-icon cat-icon-utility">🛠️</span>
         <h2 class="portfolio-cat-title">Utility Apps</h2>
-        <span class="portfolio-cat-badge sports-badge">2 app</span>
+        <span class="portfolio-cat-badge badge-utility">2 apps</span>
       </div>
       <div class="portfolio-grid">
 
         <div class="pcard">
-          <div class="pcard-top neon-top neon-teal " style="background:#001208">🏏</div>
+          <div class="pcard-banner banner-utility">🏏</div>
           <div class="pcard-body">
             <h3>Cricket Scorer</h3>
-            <p>Score any match live — track every ball, wicket, extra and free hit with full batting &amp; bowling scorecards. DLS calculator included.</p>
+            <p>Score any match live — track every ball, wicket, extra and free hit with full batting & bowling scorecards. DLS calculator included.</p>
             <a href="https://mgnitish.github.io/apps/Utility/cricket scorer" target="_blank" class="pcard-link">Open App →</a>
           </div>
         </div>
 
         <div class="pcard">
-		          <div class="pcard-top neon-top neon-green" style="background:#39FF14"> 🗺️ </div>
-		          <div class="pcard-body">
-		            <h3>NexStep </h3>
-		            <p>NexStep helps fresh Indian graduates discover the right job field in minutes — matching your degree, skills, and work style with real, entry-level career paths. Take a smart quiz or browse 12+ fields with salary ranges, roles, and skills to build.</p>
-		            <a href="https://mgnitish.github.io/apps/Utility/nexstep " target="_blank" class="pcard-link">Open App →</a>
-		          </div>
+          <div class="pcard-banner banner-utility">🎯</div>
+          <div class="pcard-body">
+            <h3>NexStep</h3>
+            <p>Helps fresh Indian graduates discover the right job field in minutes — matching your degree, skills, and work style with real entry-level career paths. Take a smart quiz or browse 12+ fields.</p>
+            <a href="https://mgnitish.github.io/apps/Utility/nexstep" target="_blank" class="pcard-link">Open App →</a>
+          </div>
         </div>
 
       </div>
@@ -2226,58 +1539,50 @@
 
   </section>
 
-    <!-- ─── Experience ─── -->
+  <!-- ─── Experience ─── -->
   <section id="experience">
     <div class="reveal">
       <div class="section-label">Experience</div>
-      <div class="section-title" style="margin-bottom: 3rem;">Where I've been.</div>
+      <div class="section-title" style="margin-bottom:3rem;">Where I've been.</div>
       <div class="timeline">
         <div class="timeline-item">
           <div class="timeline-date">Jan 2026 — Present</div>
           <h3>AI App Developer</h3>
           <h4>Self-Taught · Building in Public</h4>
-          <p>Started building AI-powered apps with Claude just a month ago — and already shipped 14 projects across
-            finance, games, and sports. Learning by building, shipping fast, and improving with every app.</p>
+          <p>Started building AI-powered apps with Claude just a few months ago — and already shipped 20+ projects across finance, games, and utilities. Learning by building, shipping fast, and improving with every app.</p>
         </div>
         <div class="timeline-item">
           <div class="timeline-date">2023 — 2026</div>
           <h3>B.Com (Honours)</h3>
           <h4>Vellore Institute of Technology (VIT)</h4>
-          <p>Final semester, graduating summer 2026. Studied accounting, finance, taxation, economics, and business law.
-            Picked up coding and AI development alongside the degree — merging commerce knowledge with tech.</p>
+          <p>Final semester, graduating summer 2026. Studied accounting, finance, taxation, economics, and business law. Picked up coding and AI development alongside the degree — merging commerce knowledge with tech.</p>
         </div>
         <div class="timeline-item">
           <div class="timeline-date">2021 — 2023</div>
           <h3>Higher Secondary Education</h3>
           <h4>Zion Matriculation Higher Secondary School</h4>
-          <p>Completed schooling with a strong academic foundation. Developed early interests in technology, finance,
-            and sports that would later converge into building AI-powered applications.</p>
+          <p>Completed schooling with a strong academic foundation. Developed early interests in technology, finance, and sports that would later converge into building AI-powered applications.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ─── Support My Work ─── -->
+  <!-- ─── Support ─── -->
   <section class="support-section" id="support">
     <div class="reveal">
       <div class="support-card">
         <span class="support-emoji">☕</span>
         <h2>Like what I build? <em>Support my work.</em></h2>
-        <p>Every app in my portfolio is built with passion and late nights. If my work has helped or inspired you, a
-          small contribution keeps the code flowing and the coffee brewing.</p>
+        <p>Every app in my portfolio is built with passion and late nights. If my work has helped or inspired you, a small contribution keeps the code flowing and the coffee brewing.</p>
 
-        <div class="support-options" style="grid-template-columns: 1fr; max-width: 300px; margin: 0 auto 2rem;">
-          <a href="#" class="support-option" id="upiTrigger"
-            onclick="document.getElementById('upiModal').classList.add('active'); return false;">
-            <span class="support-option-icon">🇮🇳</span>
-            <span class="support-option-name">Fuel me via UPI</span>
-            <span class="support-option-desc">Google Pay, PhonePe, Paytm & more</span>
-          </a>
-        </div>
+        <a href="#" class="support-option" id="upiTrigger"
+          onclick="document.getElementById('upiModal').classList.add('active'); return false;">
+          <span class="support-option-icon">🇮🇳</span>
+          <span class="support-option-name">Fuel me via UPI</span>
+          <span class="support-option-desc">Google Pay, PhonePe, Paytm & more</span>
+        </a>
 
-        <p class="support-note"><span>✦</span> No pressure at all — starring my <a href="https://github.com/mgnitish"
-            target="_blank" style="color:var(--accent);text-decoration:none;">repos on GitHub</a> or sharing my work
-          helps just as much!</p>
+        <p class="support-note"><span>✦</span> No pressure at all — starring my <a href="https://github.com/mgnitish" target="_blank" style="color:var(--accent);text-decoration:none;">repos on GitHub</a> or sharing my work helps just as much!</p>
       </div>
     </div>
   </section>
@@ -2285,8 +1590,7 @@
   <!-- UPI Modal -->
   <div class="upi-modal-overlay" id="upiModal" onclick="if(event.target===this)this.classList.remove('active')">
     <div class="upi-modal">
-      <button class="upi-close"
-        onclick="document.getElementById('upiModal').classList.remove('active')">&times;</button>
+      <button class="upi-close" onclick="document.getElementById('upiModal').classList.remove('active')">&times;</button>
       <h3>Pay via UPI</h3>
       <p>Scan the QR code or copy my UPI ID below</p>
       <div class="upi-qr-placeholder">
@@ -2294,11 +1598,9 @@
       </div>
       <div class="upi-id-box">
         <code id="upiId">nitishmg7@okhdfcbank</code>
-        <button class="upi-copy-btn"
-          onclick="navigator.clipboard.writeText(document.getElementById('upiId').textContent).then(()=>this.textContent='Copied!')">Copy</button>
+        <button class="upi-copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('upiId').textContent).then(()=>this.textContent='Copied!')">Copy</button>
       </div>
-      <a href="upi://pay?pa=nitishmg7@okhdfcbank&pn=M%20G%20Nitish&cu=INR" class="btn-primary"
-        style="font-size:0.88rem; padding:0.7rem 1.75rem;">Open UPI App</a>
+      <a href="upi://pay?pa=nitishmg7@okhdfcbank&pn=M%20G%20Nitish&cu=INR" class="btn-primary" style="font-size:0.88rem;padding:0.7rem 1.75rem;">Open UPI App</a>
     </div>
   </div>
 
@@ -2306,12 +1608,11 @@
   <section id="contact" class="contact-section">
     <div class="reveal">
       <h2>Let's build<br>something <em>great.</em></h2>
-      <p>Whether you have an app idea, want to collaborate on an AI-powered project, or just want to chat about building
-        with AI — I'd love to hear from you.</p>
+      <p>Whether you have an app idea, want to collaborate on an AI-powered project, or just want to chat about building with AI — I'd love to hear from you.</p>
       <div class="contact-links">
         <a href="https://github.com/mgnitish" class="contact-link" target="_blank">🐙 GitHub</a>
         <a href="https://twitter.com/mgnitish_builds" class="contact-link" target="_blank">𝕏 Twitter</a>
-        <a href="/cdn-cgi/l/email-protection#29444e47405d405a414b5c40454d5a694e44484045074a4644" class="contact-link">✉️ Email</a>
+        <a href="/cdn-cgi/l/email-protection#26484f524f554e66435e474b564a430845494b" class="contact-link">✉️ Email</a>
       </div>
     </div>
   </section>
@@ -2322,96 +1623,71 @@
     <span>Made with <a href="https://claude.ai">Claude</a> ✦</span>
   </footer>
 
-  <!-- ─── Scroll Reveal ─── -->
+  <!-- ─── App Frame Overlay ─── -->
+  <div class="app-frame-overlay" id="appFrameOverlay">
+    <div class="app-frame-topbar">
+      <button class="app-frame-back" id="appFrameBack" onclick="closeAppFrame()">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        Back
+      </button>
+      <div class="app-frame-title" id="appFrameTitle">nitish<span>.</span></div>
+      <div class="app-frame-actions">
+        <a class="app-frame-open" id="appFrameExternal" href="#" target="_blank">↗ Open Full</a>
+      </div>
+    </div>
+    <div style="position:relative;flex:1;display:flex;flex-direction:column;">
+      <div class="app-frame-loading" id="appFrameLoading">
+        <div class="app-frame-spinner"></div>
+        <p>Loading app…</p>
+      </div>
+      <iframe class="app-frame-iframe" id="appFrameIframe" src="" title="App Preview" onload="document.getElementById('appFrameLoading').classList.add('hidden')"></iframe>
+    </div>
+  </div>
+
   <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    // ── Scroll Reveal
     const reveals = document.querySelectorAll('.reveal');
     const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-        }
-      });
-    }, { threshold: 0, rootMargin: '0px 0px 0px 0px' });
-
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0 });
     reveals.forEach(el => observer.observe(el));
-
-    // Also trigger any already-visible reveals on page load
     window.addEventListener('load', () => {
       reveals.forEach(el => {
-        const rect = el.getBoundingClientRect();
-        if (rect.top < window.innerHeight) {
-          el.classList.add('visible');
-        }
+        if (el.getBoundingClientRect().top < window.innerHeight) el.classList.add('visible');
       });
     });
 
-    // ── Category layer tabs ──
+    // ── Category filter
     document.querySelectorAll('.cat-tab').forEach(tab => {
       tab.addEventListener('click', () => {
         document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         const cat = tab.dataset.cat;
-        document.querySelectorAll('.category-layer').forEach(layer => {
-          layer.style.display = (cat === 'all' || layer.dataset.layer === cat) ? '' : 'none';
+        document.querySelectorAll('.portfolio-category').forEach(group => {
+          group.style.display = (cat === 'all' || group.dataset.category === cat) ? '' : 'none';
         });
       });
     });
 
-    // ── Toggle a layer open/closed ──
-    function toggleLayer(layer) {
-      layer.classList.toggle('open');
-    }
-
-    // ── Expand / Collapse all ──
-    function toggleAllLayers(expand) {
-      document.querySelectorAll('.category-layer').forEach(layer => {
-        if (layer.style.display === 'none') return;
-        layer.classList.toggle('open', expand);
-      });
-    }
-
-        // Theme toggle
+    // ── Theme toggle
     const toggle = document.getElementById('themeToggle');
     const html = document.documentElement;
-
-    // Check saved preference or system preference
     const saved = localStorage.getItem('theme');
-    if (saved) {
-      html.setAttribute('data-theme', saved);
-    } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
-      html.setAttribute('data-theme', 'light');
-    }
-
+    if (saved) { html.setAttribute('data-theme', saved); }
+    else if (window.matchMedia('(prefers-color-scheme: light)').matches) { html.setAttribute('data-theme', 'light'); }
     toggle.addEventListener('click', () => {
-      const current = html.getAttribute('data-theme');
-      const next = current === 'light' ? 'dark' : 'light';
+      const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
       html.setAttribute('data-theme', next);
       localStorage.setItem('theme', next);
     });
 
-    // Mobile menu handled in separate script below
-
-    // ── Smooth nav background on scroll
+    // ── Nav scroll effect
     window.addEventListener('scroll', () => {
-      const nav = document.querySelector('nav');
-      nav.style.borderBottom      nav.style.borderBottom = window.scrollY > 10
-        ? '1px solid color-mix(in srgb, var(--border) 80%, transparent)'
-        : '1px solid color-mix(in srgb, var(--border) 50%, transparent)';
+      document.querySelector('nav').style.borderBottomColor =
+        window.scrollY > 10 ? 'var(--border-strong)' : 'var(--border)';
     });
 
-    // Also trigger any already-visible reveals on page load
-    window.addEventListener('load', () => {
-      reveals.forEach(el => {
-        const rect = el.getBoundingClientRect();
-        if (rect.top < window.innerHeight) {
-          el.classList.add('visible');
-        }
-      });
-    });
-
-  </script>
-
-  <script>
+    // ── Mobile menu
     function openMobileMenu() {
       document.getElementById('mobileMenu').classList.add('open');
       document.querySelector('.menu-toggle').classList.add('active');
@@ -2424,10 +1700,1354 @@
     }
     document.querySelector('.menu-toggle').addEventListener('click', openMobileMenu);
     document.getElementById('mobileClose').addEventListener('click', closeMobileMenu);
-    document.getElementById('mobileMenu').addEventListener('click', function(e) {
-      if (e.target === this) closeMobileMenu();
+    document.getElementsByClassName('mobile-nav-links')[0].querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', closeMobileMenu);
     });
+
+    // ── App Frame
+    function openAppFrame(url, title) {
+      const overlay = document.getElementById('appFrameOverlay');
+      const iframe  = document.getElementById('appFrameIframe');
+      const loading = document.getElementById('appFrameLoading');
+      const titleEl = document.getElementById('appFrameTitle');
+      const extLink = document.getElementById('appFrameExternal');
+
+      iframe.src = '';
+      loading.classList.remove('hidden');
+      titleEl.innerHTML = title + ' <span>·</span> nitish<span style="color:var(--accent)">.</span>';
+      extLink.href = url;
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      // small delay to let overlay paint, then load
+      requestAnimationFrame(() => { iframe.src = url; });
+    }
+
+    function closeAppFrame() {
+      const overlay = document.getElementById('appFrameOverlay');
+      const iframe  = document.getElementById('appFrameIframe');
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+      setTimeout(() => { iframe.src = ''; }, 300);
+    }
+
+    // Esc key closes frame
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeAppFrame();
+    });
+
+    // ── Intercept all pcard-link clicks → open in frame
+    document.querySelectorAll('.pcard-link').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const url   = this.getAttribute('href');
+        const title = this.closest('.pcard-body').querySelector('h3').textContent;
+        openAppFrame(url, title);
+      });
+    });
+
+    // ── Assign category classes to pcards for left border color
+    document.querySelectorAll('.portfolio-category').forEach(section => {
+      const cat = section.dataset.category;
+      section.querySelectorAll('.pcard').forEach(card => {
+        card.classList.add('cat-' + cat);
+      });
+    });
+
+    // ── Inject tag badge + live dot into each pcard
+    const tagLabels = { finance: 'Finance', games: 'Game', utility: 'Utility' };
+    document.querySelectorAll('.portfolio-category').forEach(section => {
+      const cat = section.dataset.category;
+      section.querySelectorAll('.pcard').forEach(card => {
+        const body = card.querySelector('.pcard-body');
+        const h3   = body.querySelector('h3');
+
+        // Tag badge before h3
+        const tag = document.createElement('div');
+        tag.className = 'pcard-tag tag-' + cat;
+        tag.textContent = tagLabels[cat] || cat;
+        body.insertBefore(tag, h3);
+
+        // Live dot after description (before link)
+        const liveEl = document.createElement('div');
+        liveEl.className = 'pcard-live';
+        liveEl.textContent = 'Live App';
+        const link = body.querySelector('.pcard-link');
+        body.insertBefore(liveEl, link);
+      });
+    });
+
   </script>
 
+  <!-- ─── Avengers Grid War — Inline Game ─── -->
+  <script id="avengers-game-html" type="text/html-template">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AVENGERS GRID WAR</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Bebas+Neue&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;
+  --surface:#0f0f18;
+  --card:#141420;
+  --border:#2a1a1a;
+  --blue:#e62429;
+  --pink:#4a90d9;
+  --gold:#f0b429;
+  --green:#00c94a;
+  --blue-d:rgba(230,36,41,0.12);
+  --pink-d:rgba(74,144,217,0.12);
+  --text:#f0e8d8;
+  --muted:#5a4a3a;
+}
+html,body{height:100%;overflow:hidden}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Rajdhani',sans-serif;
+  font-weight:500;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background-image: radial-gradient(ellipse at 20% 50%, rgba(230,36,41,0.06) 0%, transparent 60%),
+                    radial-gradient(ellipse at 80% 20%, rgba(74,144,217,0.06) 0%, transparent 60%);
+}
+
+/* hex grid overlay */
+body::after{
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='48'%3E%3Cpolygon points='14,1 27,8 27,22 14,29 1,22 1,8' fill='none' stroke='rgba(230,36,41,0.04)' stroke-width='0.8'/%3E%3C/svg%3E");
+  pointer-events:none;
+  z-index:999;
+}
+
+/* animated bg */
+#bg-canvas{position:fixed;inset:0;z-index:0;opacity:.4}
+
+/* ── PAGES ── */
+.page{
+  position:fixed;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  z-index:1;
+  transition:opacity .35s,transform .35s;
+  overflow-y:auto;
+  padding:16px;
+}
+.page.hidden{opacity:0;pointer-events:none;transform:scale(.97)}
+
+/* ══════════════════ HOME PAGE ══════════════════ */
+#home{gap:0}
+
+.logo-wrap{text-align:center;margin-bottom:32px}
+.logo{
+  font-family:'Bebas Neue',cursive;
+  font-weight:400;
+  font-size:clamp(48px,12vw,90px);
+  letter-spacing:.22em;
+  line-height:1;
+  position:relative;
+  display:inline-block;
+}
+.logo .g1{color:#e62429;text-shadow:0 0 30px #e62429,0 0 60px rgba(230,36,41,.3)}
+.logo .g2{color:#4a90d9;text-shadow:0 0 30px #4a90d9,0 0 60px rgba(74,144,217,.3)}
+.logo-sub{
+  font-size:13px;
+  letter-spacing:.4em;
+  color:var(--muted);
+  text-transform:uppercase;
+  margin-top:6px;
+}
+
+/* Avengers "A" accent bar under logo */
+.logo-wrap::after {
+  content: '— ⚡ —';
+  display: block;
+  text-align: center;
+  color: #e62429;
+  font-size: 14px;
+  margin-top: 8px;
+  letter-spacing: .3em;
+  opacity: .7;
+}
+
+/* Marvel red top-bar accent on menu cards */
+.menu-card.blue-card { border-top: 2px solid #e62429; }
+.menu-card.pink-card { border-top: 2px solid #4a90d9; }
+.menu-card.gold-card { border-top: 2px solid #f0b429; }
+.menu-card.green-card { border-top: 2px solid #00c94a; }
+
+.menu-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+  width:100%;
+  max-width:480px;
+  margin-bottom:16px;
+}
+
+.menu-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:20px 16px;
+  cursor:pointer;
+  transition:all .2s;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+.menu-card::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  opacity:0;
+  transition:opacity .2s;
+}
+.menu-card:hover{transform:translateY(-3px);}
+.menu-card.blue-card:hover{border-color:#e62429;box-shadow:0 0 24px rgba(230,36,41,.3)}
+.menu-card.blue-card:hover::before{background:radial-gradient(circle at 50% 0%,rgba(230,36,41,.1),transparent 70%);opacity:1}
+.menu-card.pink-card:hover{border-color:#4a90d9;box-shadow:0 0 24px rgba(74,144,217,.3)}
+.menu-card.pink-card:hover::before{background:radial-gradient(circle at 50% 0%,rgba(74,144,217,.1),transparent 70%);opacity:1}
+.menu-card.gold-card:hover{border-color:var(--gold);box-shadow:0 0 24px rgba(240,180,41,.3)}
+.menu-card.gold-card:hover::before{background:radial-gradient(circle at 50% 0%,rgba(240,180,41,.08),transparent 70%);opacity:1}
+.menu-card.green-card:hover{border-color:var(--green);box-shadow:0 0 24px rgba(0,201,74,.25)}
+.menu-card.green-card:hover::before{background:radial-gradient(circle at 50% 0%,rgba(0,201,74,.08),transparent 70%);opacity:1}
+
+.card-icon{font-size:32px;margin-bottom:8px;display:block}
+.card-title{font-family:'Bebas Neue',cursive;font-size:16px;font-weight:400;letter-spacing:.12em;margin-bottom:4px}
+.card-desc{font-size:11px;color:var(--muted);letter-spacing:.04em;line-height:1.5}
+.card-badge{
+  position:absolute;
+  top:8px;right:8px;
+  font-size:9px;
+  font-family:'Bebas Neue',cursive;
+  letter-spacing:.08em;
+  padding:2px 7px;
+  border-radius:3px;
+}
+.badge-hot{background:rgba(255,26,110,.2);color:var(--pink);border:1px solid rgba(255,26,110,.4)}
+.badge-new{background:rgba(0,255,136,.2);color:var(--green);border:1px solid rgba(0,255,136,.4)}
+.badge-ai{background:rgba(0,240,255,.2);color:var(--blue);border:1px solid rgba(0,240,255,.4)}
+
+.home-footer{font-size:11px;color:var(--muted);letter-spacing:.1em;text-align:center}
+
+/* ══════════════════ MODE SELECT ══════════════════ */
+#mode-select{gap:20px}
+
+.back-btn{
+  position:absolute;
+  top:16px;left:16px;
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--muted);
+  font-family:'Rajdhani',sans-serif;
+  font-size:12px;
+  letter-spacing:.12em;
+  padding:6px 14px;
+  border-radius:6px;
+  cursor:pointer;
+  transition:all .2s;
+}
+.back-btn:hover{border-color:var(--text);color:var(--text)}
+
+.section-title{
+  font-family:'Bebas Neue',cursive;
+  font-size:clamp(22px,5vw,34px);
+  letter-spacing:.2em;
+  text-align:center;
+}
+
+.mode-cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:10px;
+  width:100%;
+  max-width:520px;
+}
+
+.mode-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:18px 14px;
+  cursor:pointer;
+  transition:all .2s;
+  text-align:center;
+}
+.mode-card:hover{transform:translateY(-2px)}
+.mode-card.sel{border-width:2px}
+.mode-card.sel.blue-c{border-color:#e62429;box-shadow:0 0 16px rgba(230,36,41,.3)}
+.mode-card.sel.pink-c{border-color:#4a90d9;box-shadow:0 0 16px rgba(74,144,217,.3)}
+.mode-card.sel.gold-c{border-color:var(--gold);box-shadow:0 0 16px rgba(240,180,41,.3)}
+.mode-card .mi{font-size:26px;margin-bottom:6px}
+.mode-card .mn{font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:.1em;margin-bottom:3px}
+.mode-card .md{font-size:11px;color:var(--muted)}
+
+.grid-sizes{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.sz-btn{
+  background:var(--card);
+  border:1px solid var(--border);
+  color:var(--muted);
+  font-family:'Bebas Neue',cursive;
+  font-size:13px;
+  padding:8px 18px;
+  border-radius:4px;
+  cursor:pointer;
+  transition:all .2s;
+  letter-spacing:.1em;
+}
+.sz-btn:hover{border-color:#555;color:var(--text)}
+.sz-btn.active{border-color:var(--blue);color:var(--blue);box-shadow:0 0 10px rgba(230,36,41,.3)}
+
+.start-btn{
+  background:linear-gradient(135deg,#e62429,#a01015);
+  border:none;
+  color:#fff;
+  font-family:'Bebas Neue',cursive;
+  font-weight:400;
+  font-size:17px;
+  letter-spacing:.25em;
+  padding:14px 48px;
+  border-radius:4px;
+  cursor:pointer;
+  transition:all .2s;
+  box-shadow:0 0 30px rgba(230,36,41,.4);
+}
+.start-btn:hover{transform:scale(1.04);box-shadow:0 0 40px rgba(230,36,41,.6)}
+
+/* ══════════════════ GAME PAGE ══════════════════ */
+#game{
+  justify-content:flex-start;
+  padding-top:10px;
+  gap:8px;
+}
+
+/* HUD */
+.hud{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  gap:8px;
+  width:100%;
+  max-width:580px;
+  align-items:center;
+}
+
+.hud-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:10px 14px;
+  transition:border-color .25s,box-shadow .25s;
+  border-top: 2px solid var(--border);
+}
+.hud-card.act-blue{border-color:#e62429;box-shadow:0 0 16px rgba(230,36,41,.3)}
+.hud-card.act-pink{border-color:#4a90d9;box-shadow:0 0 16px rgba(74,144,217,.3)}
+
+.hud-name{font-size:10px;letter-spacing:.18em;text-transform:uppercase;opacity:.6;margin-bottom:2px}
+.hud-score{font-family:'Bebas Neue',cursive;font-size:32px;font-weight:400;line-height:1}
+.hud-card.p1 .hud-score{color:#e62429}
+.hud-card.p2 .hud-score{color:#4a90d9}
+.hud-card.p1{text-align:left}
+.hud-card.p2{text-align:right}
+.hud-combo{font-size:10px;color:var(--gold);min-height:14px;letter-spacing:.08em}
+
+.hud-mid{display:flex;flex-direction:column;align-items:center;gap:4px}
+.turn-pill{
+  font-family:'Bebas Neue',cursive;
+  font-size:12px;
+  letter-spacing:.12em;
+  padding:5px 12px;
+  border-radius:3px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  transition:all .2s;
+  white-space:nowrap;
+}
+.timer-bar-wrap{width:60px;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.timer-bar{height:100%;border-radius:2px;transition:width .1s linear}
+
+/* CANVAS */
+#game-canvas{
+  display:block;
+  cursor:crosshair;
+  touch-action:none;
+  border-radius:10px;
+  max-width:100%;
+}
+
+/* bottom bar */
+.game-bar{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.g-btn{
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--muted);
+  font-family:'Rajdhani',sans-serif;
+  font-size:12px;
+  letter-spacing:.1em;
+  padding:6px 14px;
+  border-radius:6px;
+  cursor:pointer;
+  transition:all .2s;
+}
+.g-btn:hover{border-color:#444;color:var(--text)}
+
+/* WIN OVERLAY */
+#win-overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(8,4,4,.92);
+  backdrop-filter:blur(8px);
+  z-index:100;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  animation:pop .4s cubic-bezier(.17,.67,.35,1.2);
+  border-top: 3px solid #e62429;
+}
+#win-overlay.show{display:flex}
+@keyframes pop{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+
+.win-banner{
+  font-family:'Bebas Neue',cursive;
+  font-size:clamp(40px,9vw,80px);
+  font-weight:400;
+  letter-spacing:.15em;
+  animation:flicker 1.5s infinite;
+}
+@keyframes flicker{0%,100%{opacity:1}92%{opacity:1}93%{opacity:.7}94%{opacity:1}}
+.win-score-disp{font-family:'Bebas Neue',cursive;font-size:32px;letter-spacing:.14em}
+.win-stats{font-size:12px;color:var(--muted);letter-spacing:.1em;text-align:center;line-height:2}
+.win-btns{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;justify-content:center}
+.wb{
+  font-family:'Bebas Neue',cursive;
+  font-size:14px;
+  letter-spacing:.18em;
+  padding:10px 24px;
+  border-radius:4px;
+  cursor:pointer;
+  transition:all .2s;
+  border:1px solid;
+}
+.wb.primary{background:#e62429;color:#fff;border-color:#e62429;font-weight:400}
+.wb.primary:hover{box-shadow:0 0 24px rgba(230,36,41,.5)}
+.wb.secondary{background:transparent;color:var(--text);border-color:var(--border)}
+.wb.secondary:hover{border-color:var(--text)}
+
+/* TOAST */
+#toast{
+  position:fixed;
+  bottom:24px;
+  left:50%;
+  transform:translateX(-50%) translateY(60px);
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:8px 20px;
+  font-family:'Bebas Neue',cursive;
+  font-size:14px;
+  letter-spacing:.14em;
+  z-index:200;
+  transition:transform .3s,opacity .3s;
+  opacity:0;
+  pointer-events:none;
+  white-space:nowrap;
+}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* POWER-UP BAR */
+.pu-bar{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  justify-content:center;
+  min-height:32px;
+}
+.pu-chip{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:4px 10px;
+  font-size:11px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:5px;
+  transition:all .2s;
+  letter-spacing:.06em;
+}
+.pu-chip:hover{border-color:#444;transform:translateY(-1px)}
+.pu-chip.used{opacity:.3;pointer-events:none}
+.pu-chip.blue-pu{color:var(--blue)}
+.pu-chip.pink-pu{color:var(--pink)}
+
+@media(max-width:480px){
+  .hud-score{font-size:24px}
+  .hud-card{padding:8px 10px}
+}
+
+/* ── SOCIAL LINKS ── */
+.social-row{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  margin-top:14px;
+  flex-wrap:wrap;
+}
+.soc-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:6px 14px;
+  border-radius:4px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--muted);
+  font-family:'Rajdhani',sans-serif;
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:.1em;
+  text-decoration:none;
+  cursor:pointer;
+  transition:all .2s;
+  text-transform:uppercase;
+}
+.soc-btn svg{width:13px;height:13px;fill:currentColor;flex-shrink:0}
+.soc-btn:hover{color:var(--text);border-color:#555;transform:translateY(-1px)}
+.soc-btn.soc-gh:hover{border-color:#e62429;color:#e62429;box-shadow:0 0 12px rgba(230,36,41,.25)}
+.soc-btn.soc-x:hover{border-color:#4a90d9;color:#4a90d9;box-shadow:0 0 12px rgba(74,144,217,.25)}
+.soc-btn.soc-share:hover{border-color:var(--gold);color:var(--gold);box-shadow:0 0 12px rgba(240,180,41,.25)}
+.soc-btn.soc-copy:hover{border-color:var(--green);color:var(--green);box-shadow:0 0 12px rgba(0,201,74,.2)}
+.soc-btn.copied{border-color:var(--green)!important;color:var(--green)!important}
+.soc-divider{width:1px;height:16px;background:var(--border);flex-shrink:0}
+
+/* win overlay social row */
+#win-overlay .social-row{margin-top:4px}
+#win-overlay .soc-btn{font-size:11px;padding:5px 12px}
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<!-- ═══ HOME ═══ -->
+<div class="page" id="home">
+  <div class="logo-wrap">
+    <div class="logo"><span class="g1">AVENGERS</span><span class="g2"> GRID</span></div>
+    <div class="logo-sub">⚡ assemble · conquer · dominate ⚡</div>
+  </div>
+
+  <div class="menu-grid">
+    <div class="menu-card blue-card" onclick="goModeSelect('classic')">
+      <span class="card-badge badge-hot">HOT</span>
+      <span class="card-icon">🛡️</span>
+      <div class="card-title" style="color:#e62429">CLASSIC</div>
+      <div class="card-desc">Pure strategy. Draw lines, claim territory like a true Avenger.</div>
+    </div>
+    <div class="menu-card pink-card" onclick="goModeSelect('blitz')">
+      <span class="card-badge badge-new">NEW</span>
+      <span class="card-icon">⚡</span>
+      <div class="card-title" style="color:#4a90d9">BLITZ</div>
+      <div class="card-desc">Thor speed — 3 seconds per move. Lightning reflexes required.</div>
+    </div>
+    <div class="menu-card gold-card" onclick="goModeSelect('powerup')">
+      <span class="card-badge badge-ai">PWR</span>
+      <span class="card-icon">💥</span>
+      <div class="card-title" style="color:var(--gold)">POWER WAR</div>
+      <div class="card-desc">Iron Man tech: Bomb &amp; Shield. Outwit your enemy.</div>
+    </div>
+    <div class="menu-card green-card" onclick="goModeSelect('survival')">
+      <span class="card-icon">☢️</span>
+      <div class="card-title" style="color:var(--green)">SURVIVAL</div>
+      <div class="card-desc">Hulk mode. Fill 60% first to win. A.I. gets stronger each round.</div>
+    </div>
+  </div>
+
+  <div class="home-footer">MARVEL · AVENGERS GRID · ASSEMBLE YOUR STRATEGY</div>
+
+  <div class="social-row">
+    <a href="https://github.com/mgnitish" target="_blank" class="soc-btn soc-gh">
+      <svg viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+      GitHub
+    </a>
+    <div class="soc-divider"></div>
+    <a href="https://twitter.com/mgnitish_builds" target="_blank" class="soc-btn soc-x">
+      <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      @mgnitish_builds
+    </a>
+    <div class="soc-divider"></div>
+    <button class="soc-btn soc-copy" id="home-copy-btn" onclick="(function(btn){navigator.clipboard.writeText(location.href).then(function(){btn.textContent='\u2713 COPIED';btn.classList.add('copied');setTimeout(function(){btn.innerHTML='<svg viewBox=\'0 0 24 24\' style=\'width:13px;height:13px;fill:currentColor;\'><path d=\'M13.19 8.688a4.5 4.5 0 011.243 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244\'/></svg> COPY LINK';btn.classList.remove('copied')},2000)})})(this)">
+      <svg viewBox="0 0 24 24"><path d="M13.19 8.688a4.5 4.5 0 011.243 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>
+      Copy Link
+    </button>
+  </div>
+</div>
+
+<!-- ═══ MODE SELECT ═══ -->
+<div class="page hidden" id="mode-select">
+  <button class="back-btn" onclick="goPage('home')">← BACK</button>
+  <div class="section-title" id="ms-title">SELECT MODE</div>
+
+  <div style="font-size:12px;color:var(--muted);letter-spacing:.12em;text-align:center" id="ms-desc"></div>
+
+  <div class="mode-cards">
+    <div class="mode-card blue-c sel" id="mc-pvp" onclick="selectGameMode('pvp')">
+      <div class="mi">🦸</div>
+      <div class="mn" style="color:#e62429">2 HEROES</div>
+      <div class="md">Local co-op<br>same screen</div>
+    </div>
+    <div class="mode-card pink-c" id="mc-ai" onclick="selectGameMode('ai')">
+      <div class="mi">🤖</div>
+      <div class="mn" style="color:#4a90d9">VS ULTRON</div>
+      <div class="md">A.I. enemy<br>instant tactics</div>
+    </div>
+  </div>
+
+  <div style="font-size:11px;color:var(--muted);letter-spacing:.15em">GRID SIZE</div>
+  <div class="grid-sizes">
+    <button class="sz-btn active" data-g="4" onclick="setGrid(4)">4 × 4</button>
+    <button class="sz-btn" data-g="5" onclick="setGrid(5)">5 × 5</button>
+    <button class="sz-btn" data-g="6" onclick="setGrid(6)">6 × 6</button>
+    <button class="sz-btn" data-g="7" onclick="setGrid(7)">7 × 7</button>
+  </div>
+
+  <button class="start-btn" onclick="startGame()">⚡ ASSEMBLE</button>
+</div>
+
+<!-- ═══ GAME ═══ -->
+<div class="page hidden" id="game">
+  <div class="hud" id="hud">
+    <div class="hud-card p1 act-blue" id="p1card">
+      <div class="hud-name" id="p1name">IRON MAN</div>
+      <div class="hud-score" id="s1">0</div>
+      <div class="hud-combo" id="combo1"></div>
+    </div>
+    <div class="hud-mid">
+      <div class="turn-pill" id="turn-pill">P1 TURN</div>
+      <div class="timer-bar-wrap" id="timer-wrap" style="display:none">
+        <div class="timer-bar" id="timer-bar" style="background:#e62429;width:100%"></div>
+      </div>
+    </div>
+    <div class="hud-card p2" id="p2card">
+      <div class="hud-name" id="p2name">CAP. AMERICA</div>
+      <div class="hud-score" id="s2">0</div>
+      <div class="hud-combo" id="combo2"></div>
+    </div>
+  </div>
+
+  <div class="pu-bar" id="pu-bar"></div>
+
+  <canvas id="game-canvas"></canvas>
+
+  <div class="game-bar">
+    <button class="g-btn" onclick="goPage('mode-select')">⟵ MENU</button>
+    <button class="g-btn" onclick="restartGame()">↺ RESTART</button>
+    <span style="font-size:11px;color:var(--muted);letter-spacing:.1em" id="game-cat-label"></span>
+  </div>
+</div>
+
+<!-- ═══ WIN ═══ -->
+<div id="win-overlay">
+  <div class="win-banner" id="win-banner">P1 WINS</div>
+  <div class="win-score-disp" id="win-score-disp"></div>
+  <div class="win-stats" id="win-stats"></div>
+  <div class="win-btns">
+    <button class="wb primary" onclick="restartGame()">PLAY AGAIN</button>
+    <button class="wb secondary" onclick="goPage('home');document.getElementById('win-overlay').classList.remove('show')">HOME</button>
+  </div>
+
+  <div class="social-row">
+    <a id="win-tweet-btn" href="#" target="_blank" class="soc-btn soc-x">
+      <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      Share on X
+    </a>
+    <div class="soc-divider"></div>
+    <a href="https://github.com/mgnitish" target="_blank" class="soc-btn soc-gh">
+      <svg viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+      GitHub
+    </a>
+    <div class="soc-divider"></div>
+    <button class="soc-btn soc-copy" id="win-copy-btn" onclick="(function(btn){navigator.clipboard.writeText(location.href).then(function(){btn.textContent='\u2713 COPIED';btn.classList.add('copied');setTimeout(function(){btn.innerHTML='<svg viewBox=\'0 0 24 24\' style=\'width:13px;height:13px;fill:currentColor;\'><path d=\'M13.19 8.688a4.5 4.5 0 011.243 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244\'/></svg> COPY LINK';btn.classList.remove('copied')},2000)})})(this)">
+      <svg viewBox="0 0 24 24"><path d="M13.19 8.688a4.5 4.5 0 011.243 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>
+      Copy Link
+    </button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ══════════ BG ANIMATION ══════════
+(function(){
+  const c=document.getElementById('bg-canvas');
+  const x=c.getContext('2d');
+  function resize(){c.width=innerWidth;c.height=innerHeight}
+  resize();window.addEventListener('resize',resize);
+  const pts=[];
+  for(let i=0;i<28;i++)pts.push({
+    x:Math.random()*innerWidth,y:Math.random()*innerHeight,
+    vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4,
+    col:Math.random()>.5?'230,36,41':'74,144,217'
+  });
+  function frame(){
+    x.clearRect(0,0,c.width,c.height);
+    pts.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0||p.x>c.width)p.vx*=-1;
+      if(p.y<0||p.y>c.height)p.vy*=-1;
+      x.beginPath();x.arc(p.x,p.y,1.5,0,Math.PI*2);
+      x.fillStyle=`rgba(${p.col},.5)`;x.fill();
+    });
+    for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
+      const d=Math.hypot(pts[i].x-pts[j].x,pts[i].y-pts[j].y);
+      if(d<120){
+        x.beginPath();x.moveTo(pts[i].x,pts[i].y);x.lineTo(pts[j].x,pts[j].y);
+        x.strokeStyle=`rgba(${pts[i].col},${.12*(1-d/120)})`;
+        x.lineWidth=.5;x.stroke();
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+  frame();
+})();
+
+// ══════════ GLOBAL STATE ══════════
+let currentCat='classic', gameMode='pvp';
+let COLS=4, ROWS=4;
+let hLines,vLines,boxes,turn,gameOver,aiPending=false;
+let combo1=0,combo2=0;
+// Power War
+let powerUps,shielded;
+// Blitz
+let timerInterval=null,timerLeft=3;
+const TIMER_SEC=3;
+// Survival
+let survivalRound=0, aiLevel=0; // aiLevel 0=easy 1=medium 2=hard
+let totalMoves=0,startTime=0;
+
+// ══════════ NAVIGATION ══════════
+function goPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
+}
+
+function goModeSelect(cat){
+  currentCat=cat;
+  const titles={classic:'🛡 CLASSIC BATTLE',blitz:'⚡ THOR BLITZ',powerup:'💥 STARK POWER WAR',survival:'☢️ HULK SURVIVAL'};
+  const descs={
+    classic:'Pure strategy. Draw lines, claim boxes, dominate the grid.',
+    blitz:'3 seconds per move — run out and a random line is drawn for you.',
+    powerup:'Each player gets 1 Bomb (destroy an opponent box) and 1 Shield (block a bomb). Use wisely.',
+    survival:'First to claim 60% of boxes wins the round. AI gets harder every round.'
+  };
+  // survival forces AI mode
+  if(cat==='survival'){
+    gameMode='ai';
+    document.getElementById('mc-pvp').classList.remove('sel');
+    document.getElementById('mc-ai').classList.add('sel');
+    document.getElementById('mc-pvp').style.opacity='.35';
+    document.getElementById('mc-pvp').style.pointerEvents='none';
+  }else{
+    document.getElementById('mc-pvp').style.opacity='';
+    document.getElementById('mc-pvp').style.pointerEvents='';
+  }
+  document.getElementById('ms-title').textContent=titles[cat]||cat.toUpperCase();
+  document.getElementById('ms-desc').textContent=descs[cat]||'';
+  goPage('mode-select');
+}
+
+function selectGameMode(m){
+  if(currentCat==='survival')return;
+  gameMode=m;
+  document.getElementById('mc-pvp').classList.toggle('sel',m==='pvp');
+  document.getElementById('mc-ai').classList.toggle('sel',m==='ai');
+}
+
+function setGrid(n){
+  COLS=ROWS=n;
+  document.querySelectorAll('.sz-btn').forEach(b=>b.classList.toggle('active',+b.dataset.g===n));
+}
+
+function startGame(){
+  survivalRound=0; aiLevel=0;
+  document.getElementById('p1name').textContent='IRON MAN';
+  document.getElementById('p2name').textContent=gameMode==='ai'?'ULTRON':'CAP. AMERICA';
+  document.getElementById('win-overlay').classList.remove('show');
+  goPage('game');
+  restartGame();
+}
+
+// ══════════ GAME CORE ══════════
+const canvas=document.getElementById('game-canvas');
+const ctx=canvas.getContext('2d');
+let GAP,PAD,DOT_R,hoverLine=null;
+const BLUE='#e62429',PINK='#4a90d9',GOLD='#f0b429';
+
+function calcLayout(){
+  const maxW=Math.min(window.innerWidth-32,580);
+  const maxH=window.innerHeight-230;
+  const byW=Math.floor((maxW-56)/COLS);
+  const byH=Math.floor((maxH-56)/ROWS);
+  GAP=Math.max(44,Math.min(byW,byH,90));
+  PAD=24;DOT_R=5;
+  canvas.width=PAD*2+GAP*COLS;
+  canvas.height=PAD*2+GAP*ROWS;
+}
+
+function restartGame(){
+  if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
+  calcLayout();
+  hLines=Array.from({length:ROWS+1},()=>Array(COLS).fill(0));
+  vLines=Array.from({length:ROWS},()=>Array(COLS+1).fill(0));
+  boxes=Array.from({length:ROWS},()=>Array(COLS).fill(0));
+  turn=1; gameOver=false; aiPending=false;
+  combo1=combo2=0; totalMoves=0; startTime=Date.now();
+
+  // Power War: reset power-ups & shields
+  powerUps={1:{bomb:1,shield:1},2:{bomb:1,shield:1}};
+  shielded={1:false,2:false};
+
+  // UI toggles per category
+  const hasPU=currentCat==='powerup';
+  const hasTimer=currentCat==='blitz'||currentCat==='survival';
+  document.getElementById('pu-bar').style.display=hasPU?'flex':'none';
+  document.getElementById('timer-wrap').style.display=hasTimer?'block':'none';
+
+  const catLabel={classic:'CLASSIC BATTLE',blitz:'THOR BLITZ ⚡',powerup:'STARK POWER WAR 💥',survival:'HULK SURVIVAL ☢️'}[currentCat];
+  const roundLabel=currentCat==='survival'?` · ROUND ${survivalRound+1} · AI LVL ${aiLevel+1}`:'';
+  document.getElementById('game-cat-label').textContent=catLabel+(gameMode==='ai'?' · VS AI':' · 2P')+roundLabel;
+
+  document.getElementById('win-overlay').classList.remove('show');
+  buildPUBar();
+  updateHUD();
+  draw();
+
+  // Blitz: start timer on P1 immediately
+  if(currentCat==='blitz') startBlitzTimer();
+  // Survival: fixed 5s timer; AI always plays
+  if(currentCat==='survival') startBlitzTimer();
+}
+
+function dotXY(r,c){return[PAD+c*GAP,PAD+r*GAP]}
+
+function checkBoxes(player){
+  let gained=0;
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    if(!boxes[r][c]&&hLines[r][c]&&hLines[r+1][c]&&vLines[r][c]&&vLines[r][c+1]){
+      boxes[r][c]=player; gained++;
+    }
+  }
+  return gained;
+}
+
+function countBoxes(){
+  let b1=0,b2=0;
+  boxes.forEach(row=>row.forEach(v=>{if(v===1)b1++;else if(v===2)b2++;}));
+  return{b1,b2};
+}
+
+function updateHUD(){
+  const{b1,b2}=countBoxes();
+  document.getElementById('s1').textContent=b1;
+  document.getElementById('s2').textContent=b2;
+  document.getElementById('p1card').className='hud-card p1'+(turn===1&&!gameOver?' act-blue':'');
+  document.getElementById('p2card').className='hud-card p2'+(turn===2&&!gameOver?' act-pink':'');
+  const pill=document.getElementById('turn-pill');
+  if(gameOver){
+    pill.textContent='BATTLE OVER';pill.style.borderColor='var(--muted)';pill.style.color='var(--muted)';
+  }else if(aiPending){
+    pill.textContent='ULTRON MOVES';pill.style.borderColor='#4a90d9';pill.style.color='#4a90d9';
+  }else{
+    const n=turn===1?'IRON MAN':(gameMode==='ai'?'ULTRON':'CAP. AMERICA');
+    pill.textContent=n+' TURN';
+    pill.style.borderColor=turn===1?'var(--blue)':'var(--pink)';
+    pill.style.color=turn===1?'var(--blue)':'var(--pink)';
+  }
+  document.getElementById('combo1').textContent=combo1>1?`× ${combo1} COMBO`:'';
+  document.getElementById('combo2').textContent=combo2>1?`× ${combo2} COMBO`:'';
+
+  // Survival: show progress toward 60%
+  if(currentCat==='survival'){
+    const total=ROWS*COLS, need=Math.ceil(total*.6);
+    document.getElementById('combo1').textContent=`${b1}/${need} to win`;
+    document.getElementById('combo2').textContent=`${b2}/${need} to win`;
+  }
+}
+
+// ══════════ DRAW ══════════
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  // box fills
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    if(boxes[r][c]){
+      const[x,y]=dotXY(r,c);
+      ctx.fillStyle=boxes[r][c]===1?'rgba(230,36,41,.18)':'rgba(74,144,217,.18)';
+      ctx.fillRect(x+1,y+1,GAP-2,GAP-2);
+      // shield indicator
+      if(currentCat==='powerup'&&shielded[boxes[r][c]]){
+        ctx.strokeStyle=GOLD;ctx.lineWidth=1.5;ctx.setLineDash([4,3]);
+        ctx.strokeRect(x+3,y+3,GAP-6,GAP-6);ctx.setLineDash([]);
+      }
+    }
+  }
+
+  // hover hint — only when it's the human player's turn
+  const humanTurn=!(gameMode==='ai'&&turn===2);
+  if(hoverLine&&!gameOver&&!aiPending&&humanTurn){
+    const col=turn===1?'rgba(230,36,41,.18)':'rgba(74,144,217,.18)';
+    const{type,r,c}=hoverLine;
+    if(type==='h'&&!hLines[r][c]){const[x,y]=dotXY(r,c);ctx.fillStyle=col;ctx.fillRect(x,y-GAP/2,GAP,GAP);}
+    if(type==='v'&&!vLines[r][c]){const[x,y]=dotXY(r,c);ctx.fillStyle=col;ctx.fillRect(x-GAP/2,y,GAP,GAP);}
+  }
+
+  // lines
+  const drawLine=(x1,y1,x2,y2,state,isHov)=>{
+    ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
+    ctx.lineCap='round';
+    if(state===1){ctx.strokeStyle=BLUE;ctx.lineWidth=3.5;ctx.shadowColor=BLUE;ctx.shadowBlur=10;}
+    else if(state===2){ctx.strokeStyle=PINK;ctx.lineWidth=3.5;ctx.shadowColor=PINK;ctx.shadowBlur=10;}
+    else if(isHov){ctx.strokeStyle=turn===1?'rgba(230,36,41,.7)':'rgba(74,144,217,.7)';ctx.lineWidth=2.5;ctx.shadowBlur=0;}
+    else{ctx.strokeStyle='rgba(255,255,255,.06)';ctx.lineWidth=1.5;ctx.shadowBlur=0;}
+    ctx.stroke();ctx.shadowBlur=0;
+  };
+  for(let r=0;r<=ROWS;r++)for(let c=0;c<COLS;c++){
+    const[x,y]=dotXY(r,c);
+    const isH=hoverLine?.type==='h'&&hoverLine.r===r&&hoverLine.c===c&&!hLines[r][c]&&humanTurn&&!aiPending&&!gameOver;
+    drawLine(x,y,x+GAP,y,hLines[r][c],isH);
+  }
+  for(let r=0;r<ROWS;r++)for(let c=0;c<=COLS;c++){
+    const[x,y]=dotXY(r,c);
+    const isV=hoverLine?.type==='v'&&hoverLine.r===r&&hoverLine.c===c&&!vLines[r][c]&&humanTurn&&!aiPending&&!gameOver;
+    drawLine(x,y,x,y+GAP,vLines[r][c],isV);
+  }
+
+  // dots
+  for(let r=0;r<=ROWS;r++)for(let c=0;c<=COLS;c++){
+    const[x,y]=dotXY(r,c);
+    ctx.beginPath();ctx.arc(x,y,DOT_R,0,Math.PI*2);
+    ctx.fillStyle='#e8d8c8';ctx.shadowColor='rgba(230,36,41,.4)';ctx.shadowBlur=6;
+    ctx.fill();ctx.shadowBlur=0;
+  }
+}
+
+// ══════════ PLAY LINE ══════════
+function playLine(line,player){
+  if(!line)return false;
+  const arr=line.type==='h'?hLines[line.r]:vLines[line.r];
+  if(arr[line.c])return false;
+  arr[line.c]=player;
+  totalMoves++;
+
+  const gained=checkBoxes(player);
+  const{b1,b2}=countBoxes();
+  const total=ROWS*COLS;
+
+  if(gained>0){
+    if(player===1){combo1++;combo2=0;}else{combo2++;combo1=0;}
+    if(gained>=2)toast(gained===2?'DOUBLE CLAIM! +2':'MEGA CLAIM! +'+gained,player===1?BLUE:PINK);
+    if((player===1?combo1:combo2)>=3)toast('🔥 COMBO ×'+(player===1?combo1:combo2)+'!',GOLD);
+  }else{
+    if(player===1)combo1=0;else combo2=0;
+  }
+
+  // ── WIN CONDITIONS ──
+
+  // Survival: first to 60%
+  if(currentCat==='survival'){
+    const need=Math.ceil(total*.6);
+    if(b1>=need){gameOver=true;endSurvivalRound(1,b1,b2);return true;}
+    if(b2>=need){gameOver=true;endSurvivalRound(2,b1,b2);return true;}
+    if(b1+b2===total){gameOver=true;endSurvivalRound(b1>b2?1:2,b1,b2);return true;}
+  }else{
+    if(b1+b2===total){gameOver=true;showWin(b1,b2);updateHUD();draw();return true;}
+  }
+
+  if(gained===0)turn=player===1?2:1;
+  updateHUD();draw();
+
+  // Blitz timer reset on successful move
+  if((currentCat==='blitz'||currentCat==='survival')&&!gameOver){
+    // reset timer — but if AI's turn, don't start timer for AI
+    if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
+    if(!(gameMode==='ai'&&turn===2))startBlitzTimer();
+  }
+  return true;
+}
+
+// ══════════ SURVIVAL ROUND END ══════════
+function endSurvivalRound(winner,b1,b2){
+  if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
+  updateHUD();draw();
+  if(winner===2){
+    // AI won the round
+    showWin(b1,b2,true,'ULTRON WINS ROUND '+(survivalRound+1)+'!');
+  }else{
+    // Player won round — next round, harder AI
+    survivalRound++;
+    aiLevel=Math.min(survivalRound,2); // 0=easy,1=medium,2=hard
+    const ov=document.getElementById('win-overlay');
+    const wb=document.getElementById('win-banner');
+    const ws=document.getElementById('win-score-disp');
+    const wst=document.getElementById('win-stats');
+    wb.textContent='ROUND '+survivalRound+' CLEAR!';
+    wb.style.color='#00ff88';wb.style.textShadow='0 0 40px #00ff88';
+    ws.innerHTML=`<span style="color:${BLUE}">${b1}</span> <span style="color:#333">—</span> <span style="color:${PINK}">${b2}</span>`;
+    const lvlName=['HYDRA GRUNT','THANOS SOLDIER','ULTRON PRIME'][aiLevel]||'ULTRON PRIME';
+    wst.innerHTML=`ROUND ${survivalRound} CLEARED<br>NEXT: AI LEVEL ${aiLevel+1} — ${lvlName}<br>GRID: ${COLS}×${ROWS}`;
+    // Replace Play Again with Next Round
+    ov.querySelector('.win-btns').innerHTML=`
+      <button class="wb primary" onclick="nextSurvivalRound()">NEXT ROUND ▶</button>
+      <button class="wb secondary" onclick="goPage('home');document.getElementById('win-overlay').classList.remove('show')">HOME</button>`;
+    ov.classList.add('show');
+  }
+}
+
+function nextSurvivalRound(){
+  document.getElementById('win-overlay').classList.remove('show');
+  // restore normal win buttons
+  document.querySelector('#win-overlay .win-btns').innerHTML=`
+    <button class="wb primary" onclick="restartGame()">PLAY AGAIN</button>
+    <button class="wb secondary" onclick="goPage('home');document.getElementById('win-overlay').classList.remove('show')">HOME</button>`;
+  restartGame();
+}
+
+// ══════════ WIN SCREEN ══════════
+function showWin(b1,b2,skipButtons,customTitle){
+  if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
+  const elapsed=Math.round((Date.now()-startTime)/1000);
+  const wb=document.getElementById('win-banner');
+  const ws=document.getElementById('win-score-disp');
+  const wst=document.getElementById('win-stats');
+  if(customTitle){
+    wb.textContent=customTitle;wb.style.color=PINK;wb.style.textShadow=`0 0 40px ${PINK}`;
+  }else if(b1>b2){
+    wb.textContent=gameMode==='ai'?'AVENGERS WIN!':'IRON MAN WINS!';
+    wb.style.color=BLUE;wb.style.textShadow=`0 0 40px ${BLUE}`;
+  }else if(b2>b1){
+    wb.textContent=gameMode==='ai'?'ULTRON WINS!':'CAP. WINS!';
+    wb.style.color=PINK;wb.style.textShadow=`0 0 40px ${PINK}`;
+  }else{
+    wb.textContent='DRAW!';wb.style.color='#fff';wb.style.textShadow='none';
+  }
+  ws.innerHTML=`<span style="color:${BLUE}">${b1}</span> <span style="color:#333">—</span> <span style="color:${PINK}">${b2}</span>`;
+  wst.innerHTML=`TOTAL MOVES: ${totalMoves}<br>TIME: ${elapsed}s<br>GRID: ${COLS}×${ROWS}`;
+  if(!skipButtons){
+    document.querySelector('#win-overlay .win-btns').innerHTML=`
+      <button class="wb primary" onclick="restartGame()">PLAY AGAIN</button>
+      <button class="wb secondary" onclick="goPage('home');document.getElementById('win-overlay').classList.remove('show')">HOME</button>`;
+  }
+  // Update tweet link with dynamic result
+  const winnerText = wb.textContent;
+  const tweetText = encodeURIComponent(winnerText + ' ⚡ ' + b1 + ' — ' + b2 + ' on Avengers Grid War! Can you beat me? #AvengersGridWar');
+  const tweetUrl = encodeURIComponent(location.href);
+  const tweetBtn = document.getElementById('win-tweet-btn');
+  if(tweetBtn) tweetBtn.href = 'https://twitter.com/intent/tweet?text=' + tweetText + '&url=' + tweetUrl + '&via=mgnitish_builds';
+  document.getElementById('win-overlay').classList.add('show');
+}
+
+// ══════════ AI ENGINE ══════════
+function getAllMoves(){
+  const m=[];
+  for(let r=0;r<=ROWS;r++)for(let c=0;c<COLS;c++)if(!hLines[r][c])m.push({type:'h',r,c});
+  for(let r=0;r<ROWS;r++)for(let c=0;c<=COLS;c++)if(!vLines[r][c])m.push({type:'v',r,c});
+  return m;
+}
+
+function simGain(line){
+  const hc=hLines.map(r=>[...r]),vc=vLines.map(r=>[...r]);
+  if(line.type==='h')hc[line.r][line.c]=1;else vc[line.r][line.c]=1;
+  let g=0;
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)
+    if(!boxes[r][c]&&hc[r][c]&&hc[r+1][c]&&vc[r][c]&&vc[r][c+1])g++;
+  return g;
+}
+
+function givesFree(line){
+  const hc=hLines.map(r=>[...r]),vc=vLines.map(r=>[...r]);
+  if(line.type==='h')hc[line.r][line.c]=1;else vc[line.r][line.c]=1;
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    if(!boxes[r][c]){
+      const s=(hc[r][c]||0)+(hc[r+1][c]||0)+(vc[r][c]||0)+(vc[r][c+1]||0);
+      if(s===3)return true;
+    }
+  }
+  return false;
+}
+
+function countSides(r,c,hc,vc){
+  return (hc[r][c]||0)+(hc[r+1][c]||0)+(vc[r][c]||0)+(vc[r][c+1]||0);
+}
+
+function runAI(){
+  if(gameOver){aiPending=false;return;}
+  const moves=getAllMoves();
+  if(!moves.length){aiPending=false;return;}
+
+  let chosen;
+  const level=currentCat==='survival'?aiLevel:1; // classic/blitz/powerup use medium AI
+
+  // ── LEVEL 0: Easy — random, occasionally takes free boxes ──
+  if(level===0){
+    const winning=moves.filter(m=>simGain(m)>0);
+    chosen=winning.length&&Math.random()>.4
+      ? winning[Math.floor(Math.random()*winning.length)]
+      : moves[Math.floor(Math.random()*moves.length)];
+  }
+  // ── LEVEL 1: Medium — always takes free boxes, avoids giving them ──
+  else if(level===1){
+    const winning=moves.filter(m=>simGain(m)>0);
+    if(winning.length){winning.sort((a,b)=>simGain(b)-simGain(a));chosen=winning[0];}
+    else{
+      const safe=moves.filter(m=>!givesFree(m));
+      const pool=safe.length?safe:moves;
+      chosen=pool[Math.floor(Math.random()*pool.length)];
+    }
+  }
+  // ── LEVEL 2: Hard — lookahead, sacrifices least chains ──
+  else{
+    const winning=moves.filter(m=>simGain(m)>0);
+    if(winning.length){winning.sort((a,b)=>simGain(b)-simGain(a));chosen=winning[0];}
+    else{
+      // score each move: prefer moves that give opponent fewest free boxes after
+      const scored=moves.map(m=>{
+        const hc=hLines.map(r=>[...r]),vc=vLines.map(r=>[...r]);
+        if(m.type==='h')hc[m.r][m.c]=1;else vc[m.r][m.c]=1;
+        let freeAfter=0;
+        for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)
+          if(!boxes[r][c]&&countSides(r,c,hc,vc)===3)freeAfter++;
+        return{m,freeAfter};
+      });
+      scored.sort((a,b)=>a.freeAfter-b.freeAfter);
+      const best=scored[0].freeAfter;
+      const pool=scored.filter(s=>s.freeAfter===best).map(s=>s.m);
+      chosen=pool[Math.floor(Math.random()*pool.length)];
+    }
+    // Hard AI also uses Power-up (Bomb) when behind
+    if(currentCat==='powerup'&&powerUps[2].bomb){
+      const{b1,b2}=countBoxes();
+      if(b1>b2+1){
+        // AI is losing — use bomb
+        aiUsePowerUp('bomb');
+      }
+    }
+  }
+
+  playLine(chosen,2);
+
+  if(!gameOver&&turn===2){
+    // AI claimed a box — keep going immediately
+    aiPending=true;
+    setTimeout(runAI,100);
+  }else{
+    aiPending=false;
+    // Blitz/Survival: start player's timer after AI finishes
+    if((currentCat==='blitz'||currentCat==='survival')&&!gameOver&&turn===1){
+      startBlitzTimer();
+    }
+  }
+}
+
+// ══════════ POWER WAR ══════════
+function buildPUBar(){
+  const bar=document.getElementById('pu-bar');
+  bar.innerHTML='';
+  if(currentCat!=='powerup')return;
+  // Only show current player's power-ups, or both if 2P
+  const mk=(player,type,label,icon)=>{
+    const d=document.createElement('div');
+    d.className=`pu-chip ${player===1?'blue-pu':'pink-pu'}`;
+    d.id=`pu-${player}-${type}`;
+    d.innerHTML=`${icon} <span>${label}</span>`;
+    d.onclick=()=>usePowerUp(player,type);
+    // In AI mode, don't show AI's chips to player
+    if(gameMode==='ai'&&player===2)return;
+    bar.appendChild(d);
+  };
+  mk(1,'bomb','STARK BOMB','💥');
+  mk(1,'shield','VIBRANIUM','🛡');
+  if(gameMode==='pvp'){
+    mk(2,'bomb','BOMB P2','💥');
+    mk(2,'shield','SHIELD P2','🛡');
+  }
+}
+
+function usePowerUp(player,type){
+  if(turn!==player||gameOver||aiPending)return;
+  if(!powerUps[player][type]){toast('ALREADY USED!','#888');return;}
+  powerUps[player][type]=0;
+  const chip=document.getElementById(`pu-${player}-${type}`);
+  if(chip)chip.classList.add('used');
+  applyPowerUp(player,type);
+}
+
+function aiUsePowerUp(type){
+  if(!powerUps[2][type])return;
+  powerUps[2][type]=0;
+  applyPowerUp(2,type);
+}
+
+function applyPowerUp(player,type){
+  const opp=player===1?2:1;
+  if(type==='bomb'){
+    const oppBoxes=[];
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(boxes[r][c]===opp)oppBoxes.push([r,c]);
+    if(oppBoxes.length){
+      if(shielded[opp]){
+        shielded[opp]=false;
+        toast('🛡 VIBRANIUM SHIELD BLOCKED THE ATTACK!',GOLD);
+      }else{
+        const[r,c]=oppBoxes[Math.floor(Math.random()*oppBoxes.length)];
+        boxes[r][c]=0;
+        toast(player===1?'💥 STARK BOMB! ULTRОН BOX GONE!':'💥 ULTRON BOMBED YOUR SECTOR!',GOLD);
+      }
+    }else{
+      toast('BOMB — NO TARGET!','#888');
+    }
+  }
+  if(type==='shield'){
+    shielded[player]=true;
+    toast(player===1?'🛡 VIBRANIUM SHIELD ACTIVE!':'🛡 ULTRON ERECTED BARRIER!',player===1?BLUE:PINK);
+  }
+  updateHUD();draw();
+}
+
+// ══════════ BLITZ / SURVIVAL TIMER ══════════
+// Survival uses a 5s timer per move; Blitz uses 3s
+function timerSecs(){return currentCat==='survival'?5:TIMER_SEC;}
+
+function startBlitzTimer(){
+  if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
+  timerLeft=timerSecs();
+  const bar=document.getElementById('timer-bar');
+  bar.style.background=turn===1?BLUE:PINK;
+  bar.style.width='100%';
+  timerInterval=setInterval(()=>{
+    timerLeft-=.1;
+    bar.style.width=Math.max(0,timerLeft/timerSecs()*100)+'%';
+    if(timerLeft<=1.0)bar.style.background='#ff4444';
+    if(timerLeft<=0){
+      clearInterval(timerInterval);timerInterval=null;
+      onTimerExpire();
+    }
+  },100);
+}
+
+function onTimerExpire(){
+  if(gameOver)return;
+  const moves=getAllMoves();
+  if(!moves.length)return;
+  toast('⏰ TIME OUT!',turn===1?BLUE:PINK);
+  const m=moves[Math.floor(Math.random()*moves.length)];
+  playLine(m,turn);
+  // if it's now AI's turn, trigger AI; else restart timer for player
+  if(gameMode==='ai'&&turn===2&&!gameOver){
+    aiPending=true;updateHUD();setTimeout(runAI,80);
+  }else if(!gameOver&&!(gameMode==='ai'&&turn===2)){
+    startBlitzTimer();
+  }
+}
+
+// ══════════ INPUT ══════════
+function getNearestLine(mx,my){
+  const HIT=GAP*.44;
+  let best=null,bestD=HIT;
+  for(let r=0;r<=ROWS;r++)for(let c=0;c<COLS;c++){
+    const[x,y]=dotXY(r,c);
+    const d=Math.hypot(mx-(x+GAP/2),my-y);
+    if(d<bestD){bestD=d;best={type:'h',r,c};}
+  }
+  for(let r=0;r<ROWS;r++)for(let c=0;c<=COLS;c++){
+    const[x,y]=dotXY(r,c);
+    const d=Math.hypot(mx-x,my-(y+GAP/2));
+    if(d<bestD){bestD=d;best={type:'v',r,c};}
+  }
+  return best;
+}
+
+function handleClick(mx,my){
+  if(gameOver||aiPending)return;
+  if(gameMode==='ai'&&turn===2)return;
+  const line=getNearestLine(mx,my);
+  if(!line)return;
+  const played=playLine(line,turn);
+  if(played&&gameMode==='ai'&&!gameOver&&turn===2){
+    aiPending=true;updateHUD();
+    setTimeout(runAI,80);
+  }
+}
+
+canvas.addEventListener('mousemove',e=>{
+  const r=canvas.getBoundingClientRect();
+  hoverLine=getNearestLine(e.clientX-r.left,e.clientY-r.top);
+  draw();
+});
+canvas.addEventListener('mouseleave',()=>{hoverLine=null;draw();});
+canvas.addEventListener('click',e=>{
+  const r=canvas.getBoundingClientRect();
+  handleClick(e.clientX-r.left,e.clientY-r.top);
+});
+canvas.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  const t=e.touches[0];
+  const r=canvas.getBoundingClientRect();
+  handleClick(t.clientX-r.left,t.clientY-r.top);
+},{passive:false});
+
+window.addEventListener('resize',()=>{
+  if(!document.getElementById('game').classList.contains('hidden')){calcLayout();draw();}
+});
+
+// ══════════ TOAST ══════════
+let toastT=null;
+function toast(msg,color='#fff'){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.style.color=color;el.style.borderColor=color+'44';
+  el.classList.add('show');
+  if(toastT)clearTimeout(toastT);
+  toastT=setTimeout(()=>el.classList.remove('show'),1800);
+}
+
+// init
+goPage('home');
+</script>
+</body>
+</html>
+
+  </script>
+  <script>
+    // Launch Avengers Grid War from inline embedded HTML
+    document.querySelectorAll('.avengers-launch').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        var gameHtml = document.getElementById('avengers-game-html').textContent;
+        var blob = new Blob([gameHtml], { type: 'text/html' });
+        var blobUrl = URL.createObjectURL(blob);
+        openAppFrame(blobUrl, 'Avengers Grid War');
+        // Clean up blob URL after iframe loads
+        var iframe = document.getElementById('appFrameIframe');
+        iframe.addEventListener('load', function onLoad() {
+          setTimeout(function() { URL.revokeObjectURL(blobUrl); }, 5000);
+          iframe.removeEventListener('load', onLoad);
+        });
+      });
+    });
+  </script>
 </body>
 </html>
